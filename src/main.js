@@ -11467,7 +11467,7 @@ function longLoop(){
             global.tech['plague'] = 5;
         }
 
-        if(global.tech['dish'] >= 1 && global.portal['dish_soul_steeper'].on && global.portal['spire'] && global.portal['spire'].count){
+        if(global.tech['dish'] >= 2 && global.portal['dish_soul_steeper'].on && global.portal['spire'] && global.portal['spire'].count){
             let progress = 0.00002 * global.portal['dish_soul_steeper'].on;
             let hunger = 0.5;
             if (global.race['angry']){

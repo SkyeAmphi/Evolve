@@ -4319,15 +4319,37 @@ const techs = {
             return false;
         }
     },
+    infernal_flavors: {
+        id: 'tech-infernal_flavors',
+        title: loc('tech-infernal_flavors'),
+        desc: loc('tech-infernal_flavors'),
+        category: 'fasting',
+        era: 'dimensional',
+        reqs: { hell_lake: 3 },
+        trait: ['fasting'],
+        grant: ['dish',1],
+        cost: {
+            Knowledge(){ return 36000000; }
+        },
+        effect(){return loc('tech_infernal_flavors_effect');},
+        action(){
+            if (payCosts($(this)[0])){
+                global.portal['dish_oven'] = {count:0, on:0};
+                messageQueue(loc('tech_infernal_flavors_msg'),'info',false,['progress','hell']);
+                return true;
+            }
+            return false;
+        }
+    },
     devilish_dish: {
         id: 'tech-devilish_dish',
         title: loc('tech_devilish_dish'),
         desc: loc('tech_devilish_dish'),
         category: 'fasting',
         era: 'dimensional',
-        reqs: { science: 21},
+        reqs: { science: 21, dish: 3},
         trait: ['fasting'],
-        grant: ['dish',1],
+        grant: ['dish',4],
         cost: {
             Knowledge(){ return 63000000; }
         },
@@ -4335,8 +4357,29 @@ const techs = {
         action(){
             if (payCosts($(this)[0])){
                 global.portal['dish_soul_steeper'] = {count:0, on:0};
-                global.portal['dish_life_infuser'] = {count:0, on:0};
                 global.portal['devilish_dish'] = {done:0};
+                return true;
+            }
+            return false;
+        }
+    },
+    life_infuser: {
+        id: 'tech_life_infuser',
+        title: loc('tech_life_infuser'),
+        desc: loc('tech_life_infuser'),
+        category: 'fasting',
+        era: 'dimensional',
+        reqs: { dish: 4},
+        trait: ['fasting'],
+        grant: ['dish',5],
+        cost: {
+            Species(){ return popCost(10); },
+            Knowledge(){ return 65000000; }
+        },
+        effect(){return loc('tech_life_infuser_effect');},
+        action(){
+            if (payCosts($(this)[0])){
+                global.portal['dish_life_infuser'] = {count:0, on:0};
                 return true;
             }
             return false;
@@ -4348,8 +4391,8 @@ const techs = {
         desc: loc('tech_final_ingredient'),
         category: 'fasting',
         era: 'dimensional',
-        reqs: { dish: 2},
-        grant: ['dish',3],
+        reqs: { dish: 5},
+        grant: ['dish',6],
         cost: {
             Bolognium(){ return 50000000; },
             Demonic_Essence(){ return 1; }
@@ -5343,6 +5386,9 @@ const techs = {
         effect(){ return loc('tech_lake_analysis_effect'); },
         action(){
             if (payCosts($(this)[0])){
+                if(global.race['fasting']){
+                    messageQueue(loc('tech_dish_craving_msg'),'info',false,['progress','hell']);
+                }
                 return true;
             }
             return false;

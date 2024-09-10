@@ -1308,11 +1308,57 @@ const fortressModules = {
                 return false;
             }
         },
+        dish_oven: {
+            id: 'portal-dish_oven',
+            title: loc('portal-dish_oven'),
+            desc(wiki){
+                if (!global.portal.hasOwnProperty('dish_oven') || global.portal.dish_oven.count < 10 || wiki){
+                    return `<div>${loc('portal_dish_oven_title')}</div><div class="has-text-special">${loc('requires_segments',[10])}</div>`;
+                }
+                else {
+                    return `<div>${loc('portal_dish_oven_title')}</div>`;
+                }
+            },
+            reqs: { dish: 1 },
+            queue_size: 1,
+            queue_complete(){ return 10 - global.portal.dish_oven.count; },
+            cost: {
+                Money(offset){ return ((offset || 0) + (global.portal.hasOwnProperty('dish_oven') ? global.portal.dish_oven.count : 0)) < 10 ? 500000000 : 0; },
+                Supply(offset){ return ((offset || 0) + (global.portal.hasOwnProperty('dish_oven') ? global.portal.dish_oven.count : 0)) < 10 ? 100000 : 0; },
+            },
+            effect(wiki){
+                let size = 10;
+                let count = (wiki?.count ?? 0) + (global.portal.hasOwnProperty('dish_oven') ? global.portal.dish_oven.count : 0);
+                if (count < size){
+                    let remain = size - count;
+                    return `<div>${loc('portal_dish_oven_effect')}</div><div class="has-text-special">${loc('space_dwarf_collider_effect2',[remain])}</div><div class="has-text-caution">${loc('portal_dish_oven_effect2')}</div>`;
+                }
+                else if (global.tech['dish'] >= 4){
+                    return loc('portal_dish_oven_complete');
+                }
+                else {
+                    return loc('portal_dish_oven_standby');
+                }
+            },
+            action(){
+                if (global.portal.dish_oven.count < 10 && payCosts($(this)[0])){
+                    incrementStruct('dish_oven','portal');
+                    if (global.portal.dish_oven.count >= 10){
+                        messageQueue(loc('portal_dish_oven_complete_msg'),'info',false,['progress','hell']);
+                        global.portal['devilish_dish'] = {done:0};
+                        global.tech.dish = 2;
+                        renderFortress();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        },
         dish_soul_steeper: {
             id: 'portal-dish_soul_steeper',
             title: loc('portal_dish_soul_steeper_title'),
             desc: loc('portal_dish_soul_steeper_desc'),
-            reqs: { dish: 1 },
+            reqs: { dish: 4 },
             cost: {
                 Money(offset){ return spaceCostMultiplier('dish_soul_steeper', offset, 750000000, spireCreep(1.3), 'portal'); },
                 Bolognium(offset){ return spaceCostMultiplier('dish_soul_steeper', offset, 5800000, spireCreep(1.3), 'portal'); },
@@ -1337,8 +1383,9 @@ const fortressModules = {
             id: 'portal-dish_life_infuser',
             title: loc('portal_dish_life_infuser_title'),
             desc: loc('portal_dish_life_infuser_desc'),
-            reqs: { dish: 1 },
+            reqs: { dish: 5 },
             cost: {
+                Species(){ return popCost(10); },
                 Money(offset){ return spaceCostMultiplier('dish_life_infuser', offset, 280000000, spireCreep(1.2), 'portal'); },
                 Bolognium(offset){ return spaceCostMultiplier('dish_life_infuser', offset, 2000000, spireCreep(1.2), 'portal'); },
                 Scarletite(offset){ return spaceCostMultiplier('dish_life_infuser', offset, 250000, spireCreep(1.2), 'portal'); },
@@ -1362,7 +1409,7 @@ const fortressModules = {
             id: 'portal-devilish_dish',
             title: loc('portal_devilish_dish_title'),
             desc: loc('portal_devilish_dish_title'),
-            reqs: { dish: 1 },
+            reqs: { dish: 2 },
             queue_complete(){ return 0; },
             cost: {},
             effect(){
