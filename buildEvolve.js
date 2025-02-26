@@ -1,9 +1,10 @@
 require("esbuild")
   .build({
-    logLevel: "info",
+    logLevel: "debug",
     entryPoints: ["./src/main.js"],
     bundle: true,
-    minify: true,
+    minify: false,
+    sourcemap : true,
     outfile: "evolve/main.js",
   })
   .catch(() => process.exit(1));
