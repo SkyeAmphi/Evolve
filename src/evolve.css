@@ -10027,25 +10027,6 @@ div.bigbang.burn.c::before {
 .celestialLab .sequence .trait_selection > div {
   width: 11.5rem;
 }
-.celestialLab .sequence .trait_selection .field {
-  transition: all 0.3s ease;
-}
-.celestialLab .sequence .trait_selection .field.available-rank {
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
-  border: 0px solid rgba(0, 123, 255, 0.4);
-  background-color: rgba(0, 123, 255, 0.1);
-}
-.celestialLab .sequence .trait_selection .field.unavailable-rank {
-  box-shadow: 0 0 8px rgba(255, 165, 0, 0.6);
-  border: 0px solid rgba(255, 165, 0, 0.4);
-  background-color: rgba(255, 165, 0, 0.1);
-}
-.celestialLab .sequence .trait_selection .field.selected-trait.available-rank,
-.celestialLab .sequence .trait_selection .field.selected-trait.unavailable-rank {
-  box-shadow: none;
-  border: none;
-  background-color: transparent;
-}
 .celestialLab .sequence .trait_selection.summary > div {
   width: 23rem;
 }
@@ -10058,21 +10039,6 @@ div.bigbang.burn.c::before {
   display: inline-block;
   min-width: 7rem;
   text-align: center;
-}
-.celestialLab .sequence .targetRank {
-  transition: all 0.2s ease;
-}
-.celestialLab .sequence .sub,
-.celestialLab .sequence .add {
-  -ms-user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
-  cursor: pointer;
-}
-.celestialLab .sequence .sub:hover,
-.celestialLab .sequence .add:hover {
-  background-color: rgba(255, 255, 255, 0.1);
 }
 .celestialLab .sequence .planet_selection {
   margin-left: 2rem;
@@ -10116,17 +10082,6 @@ div.bigbang.burn.c::before {
 .celestialLab .resetLab > button {
   margin-top: 0.25rem;
   width: 8.5rem;
-}
-@keyframes pulse {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
-  100% {
-    opacity: 1;
-  }
 }
 .listqueuestyle.bldQueue li,
 .listqueuestyle.bldQueue.right li,

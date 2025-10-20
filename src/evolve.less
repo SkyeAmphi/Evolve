@@ -5163,6 +5163,55 @@ div.bigbang {
             >div {
                 width: 11.5rem;
             }
+
+            // Reactive auras for traits based on rank availability
+            .field {
+                // Prevent layout shifts from cost changes
+                min-height: 1.5rem;
+
+                .b-checkbox {
+                    // Ensure consistent spacing
+                    min-height: 1.25rem;
+                    
+                    .control-label {
+                        // Prevent text wrapping in trait names/costs
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        max-width: 11rem; // Adjust based on your layout
+                    }
+                }
+                
+                // Prevent cost display from causing wrapping
+                .has-text-advanced,
+                .has-text-caution {
+                    display: inline-block;
+                    min-width: 2rem;
+                    text-align: right;
+                }
+
+                &.available-rank {
+                    box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
+                    border: 0px solid rgba(0, 123, 255, 0.4);
+                    background-color: rgba(0, 123, 255, 0.1);
+                }
+
+                &.unavailable-rank {
+                    box-shadow: 0 0 8px rgba(255, 165, 0, 0.6);
+                    border: 0px solid rgba(255, 165, 0, 0.4);
+                    background-color: rgba(255, 165, 0, 0.1);
+                }
+
+                &.selected-trait {
+                    // Don't apply rank-based auras to selected traits
+                    &.available-rank,
+                    &.unavailable-rank {
+                        box-shadow: none;
+                        border: none;
+                        background-color: transparent;
+                    }
+                }
+            }
         }
         .trait_selection.summary {
             >div {
@@ -5179,6 +5228,22 @@ div.bigbang {
                     min-width: 7rem;
                     text-align: center;
                 }
+            }
+        }
+
+        .targetRank {
+            transition: all 0.2s ease;
+        }
+
+        .sub, .add {
+            -ms-user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+            cursor: pointer;
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.1);
             }
         }
 
@@ -5231,6 +5296,12 @@ div.bigbang {
             width: 8.5rem;
         }
     }
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
 }
 
 .listqueuestyle.bldQueue,

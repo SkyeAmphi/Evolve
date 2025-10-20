@@ -7493,7 +7493,10 @@ export function setUniverse(){
 }
 
 export function ascendLab(hybrid,wiki){
+    // Wiki-only toggle for normal custom lab build restrictions based on save file
     let isWiki = !!wiki;
+    let sandboxMode = isWiki; // Sandbox mode is the unrestricted default wiki behavior
+
     if (!isWiki && !global.race['noexport']){
         if (webWorker.w){
             webWorker.w.terminate();
@@ -7596,6 +7599,18 @@ export function ascendLab(hybrid,wiki){
         `);
     }
 
+    if (isWiki) {
+        // Add a button to the wiki custom lab for toggling vanilla restrictions
+        lab.append(`
+            <div class="has-text-caution" style="margin-bottom: 1rem;">
+                <label class="checkbox">
+                    <input type="checkbox" v-model="restrictWiki" @change="toggleRestrictions">
+                    Disable Sandbox Mode (Match in-game restrictions, limit to only unlocked traits and ranks)
+                </label>
+            </div>
+        `);
+    }
+
     let name = $(`<div class="fields"><div class="name">${loc('genelab_name')} <b-input v-model="g.name" maxlength="20"></b-input></div><div class="entity">${loc('genelab_entity')} <b-input v-model="g.entity" maxlength="40"></b-input></div><div class="name">${loc('genelab_home')} <b-input v-model="g.home" maxlength="20"></b-input></div> <div>${loc('genelab_desc')} <b-input v-model="g.desc" maxlength="255"></b-input></div></div>`);
     lab.append(name);
 
@@ -7693,7 +7708,7 @@ export function ascendLab(hybrid,wiki){
     Object.keys(races).forEach(function (race){
         let type = races[race].type;
         if (
-            isWiki
+            sandboxMode
                 ||
             (global.stats.achieve[`extinct_${race}`] && global.stats.achieve[`extinct_${race}`].l > 0)
                 ||
@@ -7725,13 +7740,12 @@ export function ascendLab(hybrid,wiki){
         let negative = '';
         let trait_list_header = `<b-tab-item><template slot="header"><h2 class="is-sr-only">${loc(`genelab_traits_${tax}`)}}</h2><span aria-hidden="true">${loc(`genelab_traits_${tax}`)}</span></template>`;
         let trait_list = ``;
-        Object.keys(taxomized[tax]).sort().forEach(function (trait){
-            if (traits.hasOwnProperty(trait) && traits[trait].type === 'major'){
-                if (traits[trait].val >= 0){
-                    trait_list += `<div class="field t${trait}"><b-checkbox :disabled="allowed('${trait}')" @input="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-success">${loc(`trait_${trait}_name`)}</span> (<span class="has-text-advanced">{{ '${trait}' | cost }}</span><span v-html="$options.filters.empower(g.traitlist,'${trait}')"></span>)</b-checkbox></div>`;
-                }
-                else {
-                    negative += `<div class="field t${trait}"><b-checkbox :disabled="allowed('${trait}')" @input="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-danger">${loc(`trait_${trait}_name`)}</span> (<span class="has-text-caution">{{ '${trait}' | cost }}</span><span v-html="$options.filters.empower(g.traitlist,'${trait}')"></span>)</b-checkbox></div>`;
+        Object.keys(taxomized[tax]).sort().forEach(function (trait) {
+            if (traits.hasOwnProperty(trait) && traits[trait].type === 'major') {
+                if (traits[trait].val >= 0) {
+                    trait_list += `<div class="field t${trait}" @click="traitClick($event, '${trait}')"><b-checkbox :disabled="allowed('${trait}')" v-model="g.traitlist" native-value="${trait}"><span class="has-text-success">${loc(`trait_${trait}_name`)}</span> (<span class="has-text-advanced">{{ getTraitCost('${trait}') }}</span><span v-html="$options.filters.empower(g.traitlist,'${trait}')"></span>)</b-checkbox></div>`;
+                } else {
+                    negative += `<div class="field t${trait}" @click="traitClick($event, '${trait}')"><b-checkbox :disabled="allowed('${trait}')" v-model="g.traitlist" native-value="${trait}"><span class="has-text-danger">${loc(`trait_${trait}_name`)}</span> (<span class="has-text-caution">{{ getTraitCost('${trait}') }}</span><span v-html="$options.filters.empower(g.traitlist,'${trait}')"></span>)</b-checkbox></div>`;
                 }
             }
         });
@@ -7748,6 +7762,30 @@ export function ascendLab(hybrid,wiki){
     trait_listing.append(allListing);
 
     genes.append(trait_listing);
+
+    let targetRankUI = `
+        <div class="targetRank" style="text-align: center; margin: 1rem 0; background: rgba(0,0,0,0.1); padding: 0.5rem; border-radius: 0.25rem;">
+            <div class="has-text-caution" style="font-size: 1.1rem; font-weight: bold;">
+                Target Rank: {{ tempTargetRank !== null ? (displayRank(tempTargetRank) + ' (Active Override)') : displayRank(targetRank) + ' (Base)' }}
+            </div>
+            <div class="has-text-info" style="font-size: 0.875rem;">
+                Cost Modifier: {{ (tempTargetRank !== null ? tempTargetRank : targetRank) | costModifier }}
+            </div>
+            <div class="has-text-warning" style="font-size: 0.75rem; margin-top: 0.25rem;">
+                <strong>Primary Controls:</strong> Hold Ctrl for Min (0.1) or Shift for Max (4) when clicking traits
+            </div>
+            <div v-if="tempTargetRank !== null" class="has-text-success" style="font-size: 0.75rem; animation: pulse 1s infinite;">
+                ⚡ Modifier Override Active - Release key to return to base setting
+            </div>
+            <div style="margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.8;">
+                <span class="has-text-fade">Alternative controls:</span>
+                <button class="button is-small" @click="updateTargetRank(0.1)">Min (0.1)</button>
+                <button class="button is-small" @click="updateTargetRank(1)">Base (1)</button>
+                <button class="button is-small" @click="updateTargetRank(4)">Max (4)</button>
+            </div>
+        </div>
+    `;
+    genes.append($(targetRankUI));
 
     let buttons = `
         <hr>
@@ -7785,8 +7823,54 @@ export function ascendLab(hybrid,wiki){
             g: genome,
             w: wikiVars,
             err: error,
-            tt: activeTab
+            tt: activeTab,
+            targetRank: 1,
+            tempTargetRank: null,
+            restrictWiki: false,
         },
+
+        computed: {
+            effectiveTargetRank() {
+                return this.tempTargetRank !== null ? this.tempTargetRank : this.targetRank;
+            },
+
+            traitRankStatus() {
+                const status = {};
+                Object.keys(unlockedTraits).forEach(trait => {
+                    if (traits.hasOwnProperty(trait) && traits[trait].type === 'major') {
+                        const canAssignAtTargetRank = this.canAssignTraitAtRank(trait, this.effectiveTargetRank);
+                        const isSelected = this.g.traitlist.includes(trait);
+                        const effectiveRank = this.getEffectiveTraitRank(trait);
+
+                        status[trait] = {
+                            canAssign: canAssignAtTargetRank,
+                            isSelected: isSelected,
+                            cost: geneCost(genome, trait, { ...tRanks, [trait]: effectiveRank }),
+                        };
+                    }
+                });
+                return status;
+            },
+        },
+
+        watch: {
+            effectiveTargetRank: {
+                handler() {
+                    this.updateTraitClasses();
+                },
+                immediate: true
+            },
+
+            'g.traitlist': {
+                handler() {
+                    this.$nextTick(() => {
+                        this.updateTraitClasses();
+                    });
+                },
+                deep: true
+            }
+        },
+
         methods: {
             val(type){
                 if (type === 'technophobe'){
@@ -7806,6 +7890,59 @@ export function ascendLab(hybrid,wiki){
                     }
                 }
             },
+
+            toggleRestrictions() {
+                // Update the module-level sandboxMode based on checkbox
+                sandboxMode = isWiki && !this.restrictWiki;
+                
+                // Force update of trait status and classes
+                this.$forceUpdate();
+                this.$nextTick(() => {
+                    this.updateTraitClasses();
+                });
+            },
+
+            updateTraitClasses() {
+                if (!this.traitRankStatus) {
+                    return; // exit early if traitRankStatus isn't ready yet
+                }
+
+                // only show auras when target rank is not base rank
+                const showAuras = this.effectiveTargetRank !== 1;
+
+                // Update main trait lists
+                ['cool', 'lame'].forEach(className => {
+                    Object.keys(unlockedTraits).forEach(trait => {
+                        if (traits.hasOwnProperty(trait) && traits[trait].type === 'major') {
+                            const element = document.querySelector(`#celestialLab .${className}.trait_selection .t${trait}`);
+                            if (element) {
+                                const status = this.traitRankStatus[trait];
+
+                                // extra safety check for the status object
+                                if (!status) {
+                                    return; // Skip this trait if status isn't available
+                                }
+
+                                // Remove existing classes
+                                element.classList.remove('available-rank', 'unavailable-rank', 'selected-trait');
+
+                                // Only add aura classes if we should show them
+                                if (showAuras) {
+                                    if (status.isSelected) {
+                                        element.classList.add('selected-trait');
+                                    } else if (status.canAssign) {
+                                        element.classList.add('available-rank');
+                                    } else {
+                                        element.classList.add('unavailable-rank');
+                                    }
+                                }
+                                // If not showing auras, traits will have no special classes (default appearance)
+                            }
+                        }
+                    });
+                });
+            },
+
             geneEdit(){
                 let newRanks = genome.traitlist.map(x => tRanks[x] ? { [x]: tRanks[x] } : { [x]: 1 });
                 let ranks = {};
@@ -8068,12 +8205,166 @@ export function ascendLab(hybrid,wiki){
                     URL.revokeObjectURL(a.href);
                 };
                 downloadToFile(JSON.stringify(exportGenome, null, 4), `evolve-${hybrid ? 'hybrid' : 'custom'}-${exportGenome.name}.txt`, 'text/plain');
-            }
-        },
-        filters: {
-            cost(trait){
-                return geneCost(genome,trait,tRanks);
             },
+
+            handleKeyDown(event) {
+                let changed = false;
+                if (event.ctrlKey && this.tempTargetRank !== 0.1) { // hold control key for minimum possible rank
+                    this.tempTargetRank = 0.1; // we'll handle actual rank availability individually later
+                    changed = true;
+                } else if (event.shiftKey && this.tempTargetRank !== 4) { // hold shift key for maximum possible rank
+                    this.tempTargetRank = 4; // we'll also account for any Empowered boosts individually later
+                    changed = true;
+                }
+
+                if (changed) {
+                    this.$forceUpdate(); // Force reactivity update for trait costs
+                }
+            },
+
+            handleKeyUp(event) {
+                let changed = false;
+                if (!event.ctrlKey && !event.shiftKey && this.tempTargetRank !== null) {
+                    this.tempTargetRank = null;
+                    changed = true;
+                }
+
+                if (changed) {
+                    this.$forceUpdate(); // Force reactivity update for trait costs
+                }
+            },
+
+            displayRank(rank) {
+                return rank;
+            },
+
+            updateTargetRank(newRank) {
+                this.targetRank = newRank;
+                this.tempTargetRank = null; // Clear any temporary override
+            },
+
+            getAvailableRanks(trait) {
+                const traitOrigin = traits[trait].origin;
+                const extinctLevel = sandboxMode ? 5 : (global.stats.achieve[`extinct_${traitOrigin}`]?.l || 0);
+
+                const availableRanks = [1]; // Base rank always available
+                if (extinctLevel >= 3) availableRanks.push(0.5, 2);
+                if (extinctLevel >= 4) availableRanks.push(0.25, 3);
+                if (extinctLevel >= 5) availableRanks.push(0.1, 4);
+
+                return availableRanks;
+            },
+
+            getMaxUsefulRank(trait) {
+                // Traits cannot go beyond rank 4, even with Empowered
+                // So, we should limit traits to rank 3 if they'll be empowered to 4
+                const hasEmpowered = genome.traitlist.includes('empowered');
+                const empoweredRank = tRanks['empowered'] || 1;
+                const traitVal = traits[trait].val;
+
+                if (hasEmpowered) {
+                    const empoweredRange = traits.empowered.vars(empoweredRank);
+                    const isEmpowerable = traitVal >= empoweredRange[0] && traitVal <= empoweredRange[1] &&
+                        !['empowered', 'catnip', 'anise'].includes(trait);
+
+                    if (isEmpowerable) {
+                        return 3; // Empowered traits only need to be rank 3 to reach max
+                    }
+                }
+
+                return 4; // Default max rank
+            },
+
+            // Single source of truth for effective trait rank
+            getEffectiveTraitRank(trait, desiredRank = null) {
+                const targetRank = desiredRank !== null ? desiredRank : this.effectiveTargetRank;
+                const availableRanks = this.getAvailableRanks(trait);
+                const maxUsefulRank = this.getMaxUsefulRank(trait);
+
+                // If target rank is available, use it
+                if (availableRanks.includes(targetRank)) {
+                    // Account for if Empowered would add a rank
+                    return targetRank === 4 ? maxUsefulRank : targetRank;
+                }
+
+                // If not available, find closest valid rank
+                let closestRank = 1;
+                let minDifference = Math.abs(targetRank - 1);
+
+                for (const rank of availableRanks) {
+                    const difference = Math.abs(targetRank - rank);
+                    if (difference < minDifference) {
+                        minDifference = difference;
+                        closestRank = rank;
+                    }
+                }
+                return closestRank;
+            },
+
+            canAssignTraitAtRank(trait, rank, extinctLevel) {
+                // Simple validation check using our shared helper
+                const availableRanks = this.getAvailableRanks(trait);
+                return availableRanks.includes(rank);
+            },
+
+            getTraitCost(trait) {
+                const isTraitSelected = this.g.traitlist.includes(trait);
+
+                if (isTraitSelected) {
+                    // For selected traits, show cost at their actual assigned rank
+                    const actualRank = tRanks[trait] || 1;
+                    return geneCost(genome, trait, { ...tRanks, [trait]: actualRank });
+                } else {
+                    // For unselected traits, show cost at effective target rank
+                    const effectiveRank = this.getEffectiveTraitRank(trait);
+                    return geneCost(genome, trait, { ...tRanks, [trait]: effectiveRank });
+                }
+            },
+
+            traitClick(event, trait) {
+                // Prevent the checkbox default behavior
+                event.preventDefault();
+                event.stopPropagation();
+
+                const isTraitSelected = this.g.traitlist.includes(trait);
+
+                if (isTraitSelected) {
+                    // Remove trait
+                    const traitIndex = this.g.traitlist.indexOf(trait);
+                    this.g.traitlist.splice(traitIndex, 1);
+
+                    // Remove from both rank systems
+                    if (tRanks.hasOwnProperty(trait)) {
+                        delete tRanks[trait];
+                    }
+                    if (this.g.ranks && this.g.ranks.hasOwnProperty(trait)) {
+                        delete this.g.ranks[trait];
+                    }
+                } else {
+                    // Add trait at effective rank
+                    const effectiveRank = this.getEffectiveTraitRank(trait);
+                    this.g.traitlist.push(trait);
+
+                    // Set rank in both systems (always set for consistency)
+                    if (!this.g.ranks) {
+                        this.g.ranks = {};
+                    }
+                    this.g.ranks[trait] = effectiveRank;
+                    tRanks[trait] = effectiveRank;
+                }
+
+                // Recalculate genes and update UI
+                this.g.genes = calcGenomeScore(this.g, (isWiki ? this.w : false), tRanks);
+
+                if (this.tt.t === 4 || this.tt.t === 5) {
+                    this.$nextTick(() => {
+                        summaryTab(this.tt.t);
+                    });
+                }
+            },
+        },
+
+        filters: {
             untapped(genes){
                 if (!genome.traitlist.includes(genome.fanaticism)){ genome.fanaticism = false; }
                 let num = genes > 0 ? +((genes / (genes + 20) / 10 + 0.00024) * 100).toFixed(3) : 0;
@@ -8088,8 +8379,38 @@ export function ascendLab(hybrid,wiki){
             empower(e,t){
                 let valid_empower = traits[t].val >= traits.empowered.vars(tRanks['empowered'] || 1)[0] && traits[t].val <= traits.empowered.vars(tRanks['empowered'] || 1)[1] && !['empowered','catnip','anise'].includes(t) && genome.traitlist.includes('empowered');
                 return valid_empower ? `, <span class="has-text-caution">E</span>` : ``;
+            },
+            costModifier(rank) {
+                if (rank === 0.1) return "-3";
+                if (rank === 0.25) return "-2";
+                if (rank === 0.5) return "-1";
+                if (rank === 1) return "Default";
+                if (rank === 2) return "×1.5";
+                if (rank === 3) return "×2";
+                if (rank === 4) return "×2.5";
+                return "×" + rank;
             }
-        }
+        },
+
+        mounted() {
+            // Initialize trait classes after component is mounted with slight delay
+            this.$nextTick(() => {
+                // small timeout to make sure all computed properties are ready
+                setTimeout(() => {
+                    this.updateTraitClasses();
+                }, 10);
+            });
+
+            // Add global keydown/keyup listeners for modifier keys
+            window.addEventListener('keydown', this.handleKeyDown);
+            window.addEventListener('keyup', this.handleKeyUp);
+        },
+
+        // clean up event listeners
+        beforeDestroy() {
+            window.removeEventListener('keydown', this.handleKeyDown);
+            window.removeEventListener('keyup', this.handleKeyUp);
+        },
     });
 
     let genus_trank = (global.stats.achieve['pathfinder'] && global.stats.achieve.pathfinder.l >= 4) ? 2 : 1;
