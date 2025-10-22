@@ -449,7 +449,7 @@ export function buildQueue(){
     clearDragQueue();
     clearElement($('#buildQueue'));
     $('#buildQueue').append($(`
-        <h2 class="has-text-success">${loc('building_queue')} ({{ | used_q }}/{{ max }})</h2>
+        <h2 class="has-text-success">${loc('building_queue')} ({{ used_q() }}/{{ max }})</h2>
         <span id="pausequeue" class="${global.queue.pause ? 'pause' : 'play'}" role="button" @click="pauseQueue()" :aria-label="pausedesc()"></span>
     `));
 
@@ -461,7 +461,7 @@ export function buildQueue(){
     let queue = $(`<ul class="buildList"></ul>`);
     $('#buildQueue').append(queue);
 
-    queue.append($(`<li v-for="(item, index) in queue"><a v-bind:id="setID(index)" class="has-text-warning queued" v-bind:class="{ 'qany': item.qa }" @click="remove(index)" role="link"><span v-bind:class="setData(index,'res')" v-bind="setData(index,'data')">{{ item.label }}{{ item.q | count }}</span> [<span v-bind:class="{ 'has-text-danger': item.cna, 'has-text-success': !item.cna }">{{ item.time | time }}{{ item.t_max | max_t(item.time) }}</span>]</a></li>`));
+    queue.append($(`<li v-for="(item, index) in queue"><a v-bind:id="setID(index)" class="has-text-warning queued" v-bind:class="{ 'qany': item.qa }" @click="remove(index)" role="link"><span v-bind:class="setData(index,'res')" v-bind="setData(index,'data')">{{ item.label }}{{ count(item.q) }}</span> [<span v-bind:class="{ 'has-text-danger': item.cna, 'has-text-success': !item.cna }">{{ time(item.time) }}{{ max_t(item.t_max, item.time) }}</span>]</a></li>`));
 
     try {
         vBind({
@@ -541,9 +541,7 @@ export function buildQueue(){
                 },
                 pausedesc(){
                     return global.queue.pause ? loc('queue_play') : loc('queue_pause');
-                }
-            },
-            filters: {
+                },
                 time(time){
                     return timeFormat(time);
                 },
@@ -1112,13 +1110,19 @@ export function arpaTimeCheck(project, remain, track, detailed){
 export function clearElement(elm,remove){
     elm.find('.vb').each(function(){
         try {
-            $(this)[0].__vue__.$destroy();
+            if ($(this)[0].__vue_app__) {
+                $(this)[0].__vue_app__.unmount();
+                delete $(this)[0].__vue_app__;
+            }
         }
         catch(e){}
     });
     if (remove){
         try {
-            elm[0].__vue__.$destroy();
+            if (elm[0].__vue_app__) {
+                elm[0].__vue_app__.unmount();
+                delete elm[0].__vue_app__;
+            }
         }
         catch(e){}
         elm.remove();
@@ -1130,20 +1134,117 @@ export function clearElement(elm,remove){
 
 export function vBind(bind,action){
     action = action || 'create';
-    if ($(bind.el).length > 0 && typeof $(bind.el)[0].__vue__ !== "undefined"){
+    if ($(bind.el).length > 0 && typeof $(bind.el)[0].__vue_app__ !== "undefined"){
         try {
             if (action === 'update'){
-                $(bind.el)[0].__vue__.$forceUpdate();
+                $(bind.el)[0].__vue_app__._instance.proxy.$forceUpdate();
             }
             else {
-                $(bind.el)[0].__vue__.$destroy();
+                $(bind.el)[0].__vue_app__.unmount();
+                delete $(bind.el)[0].__vue_app__;
             }
         }
         catch(e){}
     }
     if (action === 'create'){
-        new Vue(bind);
-        $(bind.el).addClass('vb');
+        if ($(bind.el).length > 0) {
+            const vueOptions = { ...bind };
+
+            if (vueOptions.data && typeof vueOptions.data === 'object') {
+                const originalData = vueOptions.data;
+                
+                // Create a deep reactive copy for Vue
+                function createReactiveData(obj) {
+                    if (obj === null || typeof obj !== 'object') {
+                        return obj;
+                    }
+                    
+                    const result = Array.isArray(obj) ? [] : {};
+                    for (const key in obj) {
+                        if (obj.hasOwnProperty(key)) {
+                            result[key] = createReactiveData(obj[key]);
+                        }
+                    }
+                    return result;
+                }
+                
+                vueOptions.data = function() {
+                    return createReactiveData(originalData);
+                };
+                
+                // Set up watchers to sync changes back to original objects
+                const originalMounted = vueOptions.mounted;
+                vueOptions.mounted = function() {
+                    const vueInstance = this;
+                    
+                    // Function to sync changes from Vue back to original data
+                    function syncToOriginal(vueObj, originalObj, path = '') {
+                        for (const key in vueObj) {
+                            if (vueObj.hasOwnProperty(key)) {
+                                if (typeof vueObj[key] === 'object' && vueObj[key] !== null && 
+                                    typeof originalObj[key] === 'object' && originalObj[key] !== null) {
+                                    syncToOriginal(vueObj[key], originalObj[key], path ? `${path}.${key}` : key);
+                                } else if (originalObj[key] !== vueObj[key]) {
+                                    originalObj[key] = vueObj[key];
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Function to sync changes from original data to Vue
+                    function syncFromOriginal(originalObj, vueObj, path = '') {
+                        for (const key in originalObj) {
+                            if (originalObj.hasOwnProperty(key)) {
+                                if (typeof originalObj[key] === 'object' && originalObj[key] !== null && 
+                                    typeof vueObj[key] === 'object' && vueObj[key] !== null) {
+                                    syncFromOriginal(originalObj[key], vueObj[key], path ? `${path}.${key}` : key);
+                                } else if (vueObj[key] !== originalObj[key]) {
+                                    vueObj[key] = originalObj[key];
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Set up periodic sync from original to Vue (for external changes)
+                    this._syncInterval = setInterval(() => {
+                        syncFromOriginal(originalData, vueInstance.$data);
+                    }, 100);
+                    
+                    // Set up watchers for Vue to original sync
+                    this.$watch(
+                        () => JSON.stringify(this.$data),
+                        () => {
+                            syncToOriginal(vueInstance.$data, originalData);
+                        },
+                        { deep: true }
+                    );
+                    
+                    if (originalMounted) {
+                        originalMounted.call(this);
+                    }
+                };
+                
+                // Clean up interval on unmount
+                const originalBeforeUnmount = vueOptions.beforeUnmount;
+                vueOptions.beforeUnmount = function() {
+                    if (this._syncInterval) {
+                        clearInterval(this._syncInterval);
+                    }
+                    if (originalBeforeUnmount) {
+                        originalBeforeUnmount.call(this);
+                    }
+                };
+            }
+
+            const app = Vue.createApp(vueOptions);
+            if (!bind.hasOwnProperty('buefy') || bind.buefy) {
+                app.use(Buefy.default);
+            }
+            
+            app.mount(bind.el);
+            $(bind.el)[0].__vue_app__ = app;
+            $(bind.el).addClass('vb');
+        }
     }
 }
 

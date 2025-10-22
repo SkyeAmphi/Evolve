@@ -430,7 +430,7 @@ export function drawnGovernOffice(){
     governorTitle.append($(`<div><span class="has-text-warning">${loc(`governor_background`)}:</span> <span class="bg">${gmen[global.race.governor.g.bg].name}</span></div>`));
 
     govHeader.append(governorTitle);
-    govHeader.append($(`<div class="fire"><b-button v-on:click="fire" v-html="fireText()">${loc(`governor_fire`)}</b-button></div>`));
+    govHeader.append($(`<div class="fire"><b-button @click="fire" v-html="fireText()"></b-button></div>`));
 
     let cnt = [0,1,2];
     if (global.genes['governor'] && global.genes.governor >= 2){
@@ -439,18 +439,19 @@ export function drawnGovernOffice(){
     }
     if (govActive('organizer',0)){ cnt.push(cnt.length); }
     cnt.forEach(function(num){
-        let options = `<b-dropdown-item v-on:click="setTask('none',${num})">{{ 'none' | label }}</b-dropdown-item>`;
+        let options = `<b-dropdown-item @click="setTask('none',${num})" aria-role="listitem">{{ label('none') }}</b-dropdown-item>`;
         Object.keys(gov_tasks).forEach(function(task){
             if (gov_tasks[task].req()){
-                options += `<b-dropdown-item v-show="activeTask('${task}')" v-on:click="setTask('${task}',${num})">{{ '${task}' | label }}</b-dropdown-item>`;
+                options += `<b-dropdown-item v-show="activeTask('${task}')" @click="setTask('${task}',${num})" aria-role="listitem">{{ label('${task}') }}</b-dropdown-item>`;
             }
         });
 
-        govern.append(`<div class="govTask"><span>${loc(`gov_task`,[num+1])}</span><b-dropdown hoverable>
-            <button class="button is-primary" slot="trigger">
-                <span>{{ t.t${num} | label }}</span>
-                <i class="fas fa-sort-down"></i>
-            </button>
+        govern.append(`<div class="govTask"><span>${loc(`gov_task`,[num+1])}</span><b-dropdown hoverable aria-role="list">
+            <template #trigger="{ active }">
+                <b-button type="is-primary" icon-right="fas fa-sort-down">
+                    {{ label(t.t${num}) }}
+                </b-button>
+            </template>
             ${options}
         </b-dropdown></div>`);
     });
@@ -760,9 +761,7 @@ export function drawnGovernOffice(){
             },
             trashLabel(r){
                 return loc(global.race.governor.config.trash[r].s ? `gov_task_trash_max` : `gov_task_trash_min`,[global.resource[r].name]);
-            }
-        },
-        filters: {
+            },
             label(t){
                 return gov_tasks[t] ? (typeof gov_tasks[t].name === 'string' ? gov_tasks[t].name : gov_tasks[t].name()) : loc(`gov_task_${t}`);
             }
@@ -799,7 +798,7 @@ function appointGovernor(){
     for (let i=0; i<global.race.governor.candidates.length; i++){
         let gov = global.race.governor.candidates[i];
         if ((global.race['warlord'] && gov.bg === 'soldier') || !global.race['warlord']){
-            govern.append($(`<div class="appoint ${gov.bg}"><span class="has-text-warning" role="heading" aria-level="3">${gov.t} ${gov.n}</span><span class="bg">${gmen[gov.bg].name}</span><span><button class="button" v-on:click="appoint(${i})">${loc(`governor_appoint`)}</button></span><div>`));
+            govern.append($(`<div class="appoint ${gov.bg}"><span class="has-text-warning" role="heading" aria-level="3">${gov.t} ${gov.n}</span><span class="bg">${gmen[gov.bg].name}</span><span><b-button @click="appoint(${i})">${loc(`governor_appoint`)}</b-button></span><div>`));
         }
     }
 

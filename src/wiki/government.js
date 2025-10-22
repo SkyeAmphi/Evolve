@@ -30,7 +30,7 @@ export function govPage(content){
             paragraphs: 4,
             break: [2,4],
             para_data: {
-                2: [`{{ b | line2(g) }}%`,'25%'],
+                2: [`{{ line2(b, g) }}%`,'25%'],
                 3: ['18%',loc('tech_electricity'),'10%',loc('tech_virtual_reality')]
             },
             vue: {
@@ -43,10 +43,10 @@ export function govPage(content){
             paragraphs: 6,
             break: [2,5],
             para_data: {
-                2: [loc('job_entertainer'),`{{ b | line2(g) }}%`],
+                2: [loc('job_entertainer'),`{{ line2(b, g) }}%`],
                 3: [loc('job_entertainer')],
-                4: [`{{ b | line4a(g) }}%`,loc('tech_electricity'),`{{ b | line4b(g) }}%`,loc('tech_virtual_reality')],
-                5: [`{{ g | line5 }}%`],
+                4: [`{{ line4b(line4a(b, g) }}%`,loc('tech_electricity'),`{{ b, g) }}%`,loc('tech_virtual_reality')],
+                5: [`{{ line5(g) }}%`],
                 6: [
                     loc('job_farmer'),loc('job_lumberjack'),loc('job_quarry_worker'),loc('job_miner'),loc('job_crystal_miner'),
                     loc('job_coal_miner'),loc('job_cement_worker'),loc('job_professor'),loc('job_scientist'),loc('soldiers')
@@ -65,7 +65,7 @@ export function govPage(content){
             paragraphs: 5,
             break: [2,4,5],
             para_data: {
-                2: ['5%',`{{ b | line2(g) }}%`],
+                2: ['5%',`{{ line2(b, g) }}%`],
                 3: ['2%',loc('tech_electricity'),loc('tech_virtual_reality')],
                 4: ['45%'],
                 5: ['0.5%','20%']
@@ -80,7 +80,7 @@ export function govPage(content){
             paragraphs: 7,
             break: [2,6,7],
             para_data: {
-                2: [`{{ b | line2(g) }}%`],
+                2: [`{{ line2(b, g) }}%`],
                 3: [`{{ g | line3 }}%`],
                 4: ['50%'],
                 6: ['40%',loc('tech_virtual_reality'),'25%',loc('tech_metaphysics')]
@@ -96,7 +96,7 @@ export function govPage(content){
             paragraphs: 7,
             break: [2,5,6],
             para_data: {
-                2: [`{{ b | line2(g) }}%`],
+                2: [`{{ line2(b, g) }}%`],
                 3: [`{{ b | line3(g) }}%`],
                 5: [`{{ b | line5a(g) }}%`,loc('tech_virtual_reality'),`{{ b | line5b(g) }}%`,loc('tech_metaphysics')],
                 6: ['30%'],
@@ -115,7 +115,7 @@ export function govPage(content){
             paragraphs: 6,
             break: [2,6],
             para_data: {
-                2: [`{{ b | line2(g) }}%`],
+                2: [`{{ line2(b, g) }}%`],
                 3: [`{{ b | line3(g) }}%`],
                 4: ['10%'],
                 5: [`{{ b | line5(g) }}%`],
@@ -192,9 +192,9 @@ export function govPage(content){
             paragraphs: 5,
             break: [2,3,5],
             para_data: {
-                2: [`{{ b | line2(g) }}%`],
+                2: [`{{ line2(b, g) }}%`],
                 3: [`{{ b | line3(g) }}%`],
-                4: [`{{ b | line4a(g) }}%`,loc('tech_virtual_reality'),`{{ b | line4b(g) }}%`,loc('tech_metaphysics')]
+                4: [`{{ line4b(line4a(b, g) }}%`,loc('tech_virtual_reality'),`{{ b, g) }}%`,loc('tech_metaphysics')]
             },
             vue: {
                 filters: {
@@ -209,7 +209,7 @@ export function govPage(content){
             paragraphs: 6,
             break: [2,5,6],
             para_data: {
-                2: [`{{ b | line2(g) }}%`],
+                2: [`{{ line2(b, g) }}%`],
                 3: [`{{ b | line3(g) }}%`],
                 4: [`{{ b | line4(g) }}%`, resourceName('Lumber'),resourceName('Stone'),resourceName('Furs'),resourceName('Copper'),resourceName('Iron'),resourceName('Aluminium'),resourceName('Cement'),resourceName('Coal')],
                 5: [`{{ b | line5a(g) }}%`, loc('tech_virtual_reality'), `{{ b | line5b(g) }}%`, loc('tech_metaphysics')]

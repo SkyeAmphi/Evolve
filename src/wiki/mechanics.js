@@ -1260,12 +1260,12 @@ function jobStressCalc(info){
     let jobsDropdown = `
         <div class="calcInput"><span>${loc('wiki_calc_job_stress_job')}</span> <b-dropdown hoverable scrollable>
             <button class="button is-primary" slot="trigger">
-                <span>{{ i.job.val | jobLabel }}</span>
+                <span>{{ jobLabel(i.job.val) }}</span>
                 <i class="fas fa-sort-down"></i>
             </button>`;
     jobs.forEach(function (job){
         jobsDropdown += `
-            <b-dropdown-item v-on:click="pickJob('${job}')">{{ '${job}' | jobLabel }}</b-dropdown-item>`;
+            <b-dropdown-item v-on:click="pickJob('${job}')">{{ jobLabel('${job}') }}</b-dropdown-item>`;
     });
     jobsDropdown += `
         </b-dropdown></div>
@@ -1277,13 +1277,13 @@ function jobStressCalc(info){
             <h2 class="has-text-caution">${loc('wiki_calc_job_stress_divisor')}</h2>
         </div>
         <div>
-            <span v-show="i.freespirit.vis && i.freespirit.val">(</span><span>{{ i.job.val | stressDiv }}</span><span v-show="i.content.vis"> + ({{ i.content.val, 'content' | generic }} * {{ i.job.val | contentVal }})</span><span v-show="i.mellow.val"> {{ i.job.val | mellowOp }}</span><span v-show="i.dense.vis && i.dense.val"> - 1</span><span v-show="i.freespirit.vis && i.freespirit.val">) / {{ i.freespirit.val, 'freespirit', 0 | traitVal }}</span><span v-show="s.result.vis"> = {{ | calc }}</span>
+            <span v-show="i.freespirit.vis && i.freespirit.val">(</span><span>{{ stressDiv(i.job.val) }}</span><span v-show="i.content.vis"> + ({{ generic(i.content.val, 'content') }} * {{ contentVal(i.job.val) }})</span><span v-show="i.mellow.val"> {{ mellowOp(i.job.val) }}</span><span v-show="i.dense.vis && i.dense.val"> - 1</span><span v-show="i.freespirit.vis && i.freespirit.val">) / {{ traitVal(i.freespirit.val, 'freespirit', 0) }}</span><span v-show="s.result.vis"> = {{ calc() }}</span>
         </div>
         <div>
             <h2 class="has-text-caution">${loc('wiki_calc_job_stress_generated')}</h2>
         </div>
         <div>
-            <span v-show="i.playful.vis && i.playful.val">0 * </span><span>{{ i.workers.val, 'workers' | generic }}<span v-show="i.high_pop.val"> / {{ i.high_pop.val, 'high_pop', 0 | traitVal }}</span> / {{ s.result.val, 'divisor' | generic }}<span v-show="i.emotionless.val"> * {{ i.emotionless.val, 'emotionless', 1 | traitVal }}</span><span> * {{ i.government.val, i.electricity.val, i.virtual_reality.val | govVal }}</span><span v-show="i.annexed.vis"> * {{ i.annexed.val | anxVal }}</span><span v-show="s.total.vis"> = -{{ | calcTotal }}%</span>
+            <span v-show="i.playful.vis && i.playful.val">0 * </span><span>{{ generic(i.workers.val, 'workers') }}<span v-show="i.high_pop.val"> / {{ traitVal(i.high_pop.val, 'high_pop', 0) }}</span> / {{ generic(s.result.val, 'divisor') }}<span v-show="i.emotionless.val"> * {{ traitVal(i.emotionless.val, 'emotionless', 1) }}</span><span> * {{ govVal(i.government.val, i.electricity.val, i.virtual_reality.val) }}</span><span v-show="i.annexed.vis"> * {{ anxVal(i.annexed.val) }}</span><span v-show="s.total.vis"> = -{{ calcTotal() }}%</span>
         </div>
     `);
     
@@ -1294,57 +1294,57 @@ function jobStressCalc(info){
             <div class="calcInput" v-show="i.dense.vis"><b-checkbox class="patrol" v-model="i.dense.val">${loc('planet_dense')}</b-checkbox></div>
             <div class="calcInput" v-show="i.freespirit.vis"><span>${loc('trait_freespirit_name')}</span> <b-dropdown hoverable>
                 <button class="button is-primary" slot="trigger">
-                    <span>{{ i.freespirit.val | traitLabel }}</span>
+                    <span>{{ traitLabel(i.freespirit.val) }}</span>
                     <i class="fas fa-sort-down"></i>
                 </button>
-                <b-dropdown-item v-on:click="pickTrait(0, 'freespirit')">{{ 0 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(0.25, 'freespirit')">{{ 0.25 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(0.5, 'freespirit')">{{ 0.5 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(1, 'freespirit')">{{ 1 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(2, 'freespirit')">{{ 2 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(3, 'freespirit')">{{ 3 | traitLabel }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(0, 'freespirit')">{{ traitLabel(0) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(0.25, 'freespirit')">{{ traitLabel(0.25) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(0.5, 'freespirit')">{{ traitLabel(0.5) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(1, 'freespirit')">{{ traitLabel(1) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(2, 'freespirit')">{{ traitLabel(2) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(3, 'freespirit')">{{ traitLabel(3) }}</b-dropdown-item>
             </b-dropdown></div>
         </div>
         <div>
-            <div class="calcInput"><span>{{ i.job.val | workersLabel }}</span> <b-numberinput :input="val('workers')" min="0" v-model="i.workers.val" :controls="false"></b-numberinput></div>
+            <div class="calcInput"><span>{{ workersLabel(i.job.val) }}</span> <b-numberinput :input="val('workers')" min="0" v-model="i.workers.val" :controls="false"></b-numberinput></div>
             <div class="calcInput" v-show="i.annexed.vis"><span>${loc('wiki_calc_job_stress_annexed')}</span> <b-numberinput :input="val('annexed')" min="0" v-model="i.annexed.val" :controls="false"></b-numberinput></div>
             <div class="calcInput"><span>${loc('civics_government')}</span> <b-dropdown hoverable>
                 <button class="button is-primary" slot="trigger">
-                    <span>{{ i.government.val | govLabel }}</span>
+                    <span>{{ govLabel(i.government.val) }}</span>
                     <i class="fas fa-sort-down"></i>
                 </button>
-                <b-dropdown-item v-on:click="pickGov('anarchy')">{{ 'anarchy' | govLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickGov('autocracy')">{{ 'autocracy' | govLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickGov('federation')">{{ 'federation' | govLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickGov('socialist')">{{ 'socialist' | govLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickGov('other')">{{ 'other' | govLabel }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickGov('anarchy')">{{ govLabel('anarchy') }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickGov('autocracy')">{{ govLabel('autocracy') }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickGov('federation')">{{ govLabel('federation') }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickGov('socialist')">{{ govLabel('socialist') }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickGov('other')">{{ govLabel('other') }}</b-dropdown-item>
             </b-dropdown></div>
             <div class="calcInput" v-show="i.electricity.vis"><b-checkbox class="patrol" v-model="i.electricity.val">${loc('tech_electricity')}</b-checkbox></div>
             <div class="calcInput" v-show="i.electricity.vis && i.electricity.val"><b-checkbox class="patrol" v-model="i.virtual_reality.val">${loc('tech_virtual_reality')}</b-checkbox></div>
             <div class="calcInput" v-show="i.playful.vis"><b-checkbox class="patrol" v-model="i.playful.val">${loc('trait_playful_name')}</b-checkbox></div>
             <div class="calcInput"><span>${loc('trait_high_pop_name')}</span> <b-dropdown hoverable>
                 <button class="button is-primary" slot="trigger">
-                    <span>{{ i.high_pop.val | traitLabel }}</span>
+                    <span>{{ traitLabel(i.high_pop.val) }}</span>
                     <i class="fas fa-sort-down"></i>
                 </button>
-                <b-dropdown-item v-on:click="pickTrait(0, 'high_pop')">{{ 0 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(0.25, 'high_pop')">{{ 0.25 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(0.5, 'high_pop')">{{ 0.5 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(1, 'high_pop')">{{ 1 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(2, 'high_pop')">{{ 2 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(3, 'high_pop')">{{ 3 | traitLabel }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(0, 'high_pop')">{{ traitLabel(0) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(0.25, 'high_pop')">{{ traitLabel(0.25) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(0.5, 'high_pop')">{{ traitLabel(0.5) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(1, 'high_pop')">{{ traitLabel(1) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(2, 'high_pop')">{{ traitLabel(2) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(3, 'high_pop')">{{ traitLabel(3) }}</b-dropdown-item>
             </b-dropdown></div>
             <div class="calcInput"><span>${loc('trait_emotionless_name')}</span> <b-dropdown hoverable>
                 <button class="button is-primary" slot="trigger">
-                    <span>{{ i.emotionless.val | traitLabel }}</span>
+                    <span>{{ traitLabel(i.emotionless.val) }}</span>
                     <i class="fas fa-sort-down"></i>
                 </button>
-                <b-dropdown-item v-on:click="pickTrait(0, 'emotionless')">{{ 0 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(0.25, 'emotionless')">{{ 0.25 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(0.5, 'emotionless')">{{ 0.5 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(1, 'emotionless')">{{ 1 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(2, 'emotionless')">{{ 2 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(3, 'emotionless')">{{ 3 | traitLabel }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(0, 'emotionless')">{{ traitLabel(0) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(0.25, 'emotionless')">{{ traitLabel(0.25) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(0.5, 'emotionless')">{{ traitLabel(0.5) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(1, 'emotionless')">{{ traitLabel(1) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(2, 'emotionless')">{{ traitLabel(2) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(3, 'emotionless')">{{ traitLabel(3) }}</b-dropdown-item>
             </b-dropdown></div>
         </div>
         <div class="calcButton">
@@ -1639,7 +1639,7 @@ function warmongerCalc(info){
     
     formula.append(`
         <div>
-            <span>log2({{ i.fatigue.val, 'fatigue' | generic }} + {{ i.protest.val, 'protest' | generic }})</span><span v-show="s.result.vis"> = {{ false | calc }} = {{ true | calc }}% ${loc('wiki_mechanics_warmonger')}</span>
+            <span>log2({{ generic(i.fatigue.val, 'fatigue') }} + {{ generic(i.protest.val, 'protest') }})</span><span v-show="s.result.vis"> = {{ calc(false) }} = {{ calc(true) }}% ${loc('wiki_mechanics_warmonger')}</span>
         </div>
     `);
     
@@ -1937,13 +1937,13 @@ function genomeDecayCalc(info){
             <h2 class="has-text-caution">${loc('wiki_calc_g_decay_game')}</h2>
         </div>
         <div>
-            <span>(50000000 / (1 + {{ i.mutations.val, 'mutations' | generic }})) - {{ i.days.val, 'days' | generic }}</span><span v-show="s.game.vis"> = {{ false | calc }}</span>
+            <span>(50000000 / (1 + {{ i.mutations.val, 'mutations' | generic }})) - {{ i.days.val, 'days' | generic }}</span><span v-show="s.game.vis"> = {{ calc(false) }}</span>
         </div>
         <div>
             <h2 class="has-text-caution">${loc('wiki_calc_g_decay_real')}</h2>
         </div>
         <div>
-            <span>{{ s.game.val, 'game' | generic }} / 17280</span><span v-show="s.real.vis"> = {{ true | calc }}</span>
+            <span>{{ s.game.val, 'game' | generic }} / 17280</span><span v-show="s.real.vis"> = {{ calc(true) }}</span>
         </div>
     `);
     
@@ -2046,15 +2046,15 @@ function quantumLevelCalc(info){
             <div class="calcInput"><b-checkbox class="patrol" v-model="i.supercore.val">${loc('wiki_calc_q_level_supercore')}</b-checkbox></div>
             <div class="calcInput"><span>${loc('trait_linked_name')}</span> <b-dropdown hoverable>
                 <button class="button is-primary" slot="trigger">
-                    <span>{{ i.linked.val | traitLabel }}</span>
+                    <span>{{ traitLabel(i.linked.val) }}</span>
                     <i class="fas fa-sort-down"></i>
                 </button>
-                <b-dropdown-item v-on:click="pickTrait(0, 'linked')">{{ 0 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(0.25, 'linked')">{{ 0.25 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(0.5, 'linked')">{{ 0.5 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(1, 'linked')">{{ 1 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(2, 'linked')">{{ 2 | traitLabel }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(3, 'linked')">{{ 3 | traitLabel }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(0, 'linked')">{{ traitLabel(0) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(0.25, 'linked')">{{ traitLabel(0.25) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(0.5, 'linked')">{{ traitLabel(0.5) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(1, 'linked')">{{ traitLabel(1) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(2, 'linked')">{{ traitLabel(2) }}</b-dropdown-item>
+                <b-dropdown-item v-on:click="pickTrait(3, 'linked')">{{ traitLabel(3) }}</b-dropdown-item>
             </b-dropdown></div>
             <div class="calcInput" v-show="i.linked.val"><span>${loc('wiki_calc_citizens')}</span> <b-numberinput :input="val('citizens')" min="0" v-model="i.citizens.val" :controls="false"></b-numberinput></div>
         </div>
@@ -2191,7 +2191,7 @@ export function massCalc(info){
         `);
         ktFormula.append(`<span>({{ i.${res}.val, '${res}' | generic }} * ${atomic_mass[res]})`);
     });
-    ktFormula.append(`<span v-show="s.result.vis"> = {{ true, 'kt' | calc }}</span>`);
+    ktFormula.append(`<span v-show="s.result.vis"> = {{ calc(true, 'kt') }}</span>`);
     
     formula.append(`
         <div>
@@ -2204,7 +2204,7 @@ export function massCalc(info){
             <h2 class="has-text-caution">${loc('wiki_calc_mass_solar')}</h2>
         </div>
         <div>
-            <span>{{ s.result.kt, 'kt' | generic }} / 10000000000</span><span v-show="s.result.vis"> = {{ false, 'solar' | calc }}</span>
+            <span>{{ s.result.kt, 'kt' | generic }} / 10000000000</span><span v-show="s.result.vis"> = {{ calc(false, 'solar') }}</span>
         </div>
         <div>
             <h2 class="has-text-caution">${loc('wiki_calc_mass_exotic')}</h2>
@@ -2216,31 +2216,31 @@ export function massCalc(info){
             <h2 class="has-text-caution">${loc('wiki_calc_mass_MW')}</h2>
         </div>
         <div>
-            <span>({{ s.result.solar, 'solar' | generic }} * {{ false | amountMW }}) + ({{ s.result.exotic, 'exotic' | generic }} * {{ true | amountMW }})</span><span v-show="s.result.vis"> = {{ false, 'MW' | calc }}</span>
+            <span>({{ s.result.solar, 'solar' | generic }} * {{ amountMW(false) }}) + ({{ s.result.exotic, 'exotic' | generic }} * {{ amountMW(true) }})</span><span v-show="s.result.vis"> = {{ calc(false, 'MW') }}</span>
         </div>
         <div>
             <h2 class="has-text-caution">${loc('wiki_calc_mass_MW_tot')}</h2>
         </div>
         <div>
-            <span>{{ | baseMW }} + (({{ i.solar_tot.val, 'solar_tot' | generic }} - 8) * {{ false | amountMW }}) + ({{ i.exotic_tot.val, 'exotic_tot' | generic }} * {{ true | amountMW }})</span><span v-show="s.result.MWVis"> = {{ true, 'MWTot' | calcMW }}</span>
+            <span>{{ | baseMW }} + (({{ i.solar_tot.val, 'solar_tot' | generic }} - 8) * {{ amountMW(false) }}) + ({{ i.exotic_tot.val, 'exotic_tot' | generic }} * {{ amountMW(true) }})</span><span v-show="s.result.MWVis"> = {{ calcMW(true, 'MWTot') }}</span>
         </div>
         <div>
             <h2 class="has-text-caution">${loc('wiki_calc_mass_MW_adj_10k')}</h2>
         </div>
         <div>
-            <span>{{ false, 'MW10k' | calcMW }}</span><span v-show="s.result.MWIs10k"> + ({{ s.result.MWTot, 'MW_tot' | generic }} - 10000) ** 0.975</span><span v-show="s.result.MWVis"> = {{ false, 'MWAdj10k' | calcMW }}</span>
+            <span>{{ calcMW(false, 'MW10k') }}</span><span v-show="s.result.MWIs10k"> + ({{ s.result.MWTot, 'MW_tot' | generic }} - 10000) ** 0.975</span><span v-show="s.result.MWVis"> = {{ calcMW(false, 'MWAdj10k') }}</span>
         </div>
         <div>
             <h2 class="has-text-caution">${loc('wiki_calc_mass_MW_adj_20k')}</h2>
         </div>
         <div>
-            <span>{{ false, 'MW20k' | calcMW }}</span><span v-show="s.result.MWIs20k"> + ({{ s.result.MWAdj10k, 'MW_adj_10k' | generic }} - 20000) ** 0.95</span><span v-show="s.result.MWVis"> = {{ false, 'MWAdj20k' | calcMW }}</span>
+            <span>{{ calcMW(false, 'MW20k') }}</span><span v-show="s.result.MWIs20k"> + ({{ s.result.MWAdj10k, 'MW_adj_10k' | generic }} - 20000) ** 0.95</span><span v-show="s.result.MWVis"> = {{ calcMW(false, 'MWAdj20k') }}</span>
         </div>
         <div>
             <h2 class="has-text-caution">${loc('wiki_calc_mass_MW_adj_30k')}</h2>
         </div>
         <div>
-            <span>{{ false, 'MW30k' | calcMW }}</span><span v-show="s.result.MWIs30k"> + ({{ s.result.MWAdj20k, 'MW_adj_20k' | generic }} - 30000) ** 0.925</span><span v-show="s.result.MWVis"> = {{ false, 'MWAdj30k' | calcMW }}</span>
+            <span>{{ calcMW(false, 'MW30k') }}</span><span v-show="s.result.MWIs30k"> + ({{ s.result.MWAdj20k, 'MW_adj_20k' | generic }} - 30000) ** 0.925</span><span v-show="s.result.MWVis"> = {{ calcMW(false, 'MWAdj30k') }}</span>
         </div>
         <div>
             <h2 class="has-text-caution">${loc('wiki_calc_mass_time_to_explode')}</h2>
@@ -2490,7 +2490,7 @@ function untappedCalc(info){
     
     formula.append(`
         <div>
-            <span>({{ i.genes.val | generic }} / ({{ i.genes.val | generic }} + 20) / 10) + 0.00024</span><span v-show="s.result.vis"> = {{ false | calc }} = +{{ true | calc }}%</span>
+            <span>({{ i.genes.val | generic }} / ({{ i.genes.val | generic }} + 20) / 10) + 0.00024</span><span v-show="s.result.vis"> = {{ calc(false) }} = +{{ calc(true) }}%</span>
         </div>
     `);
     
@@ -2564,7 +2564,7 @@ function syndicateCapCalc(info){
     ['moon','red','gas','gas_moon','belt','titan','enceladus','triton','kuiper','eris'].forEach(function(region){
         regions += `
             <div>
-                <span class="has-text-caution">${getSolarName(region)}</span>: <span class="has-text-warning">{{ '${region}' | calc }}</span>
+                <span class="has-text-caution">${getSolarName(region)}</span>: <span class="has-text-warning">{{ calc('${region}') }}</span>
             </div>
         `;
     });
@@ -2684,19 +2684,19 @@ function syndicatePenaltyCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ i.region.val | regionLabel }}</span>
+                            <span>{{ regionLabel(i.region.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickRegion('moon')">{{ 'moon' | regionLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickRegion('red')">{{ 'red' | regionLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickRegion('gas')">{{ 'gas' | regionLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickRegion('gas_moon')">{{ 'gas_moon' | regionLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickRegion('belt')">{{ 'belt' | regionLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickRegion('titan')">{{ 'titan' | regionLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickRegion('enceladus')">{{ 'enceladus' | regionLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickRegion('triton')">{{ 'triton' | regionLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickRegion('kuiper')">{{ 'kuiper' | regionLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickRegion('eris')">{{ 'eris' | regionLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickRegion('moon')">{{ regionLabel('moon') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickRegion('red')">{{ regionLabel('red') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickRegion('gas')">{{ regionLabel('gas') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickRegion('gas_moon')">{{ regionLabel('gas_moon') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickRegion('belt')">{{ regionLabel('belt') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickRegion('titan')">{{ regionLabel('titan') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickRegion('enceladus')">{{ regionLabel('enceladus') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickRegion('triton')">{{ regionLabel('triton') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickRegion('kuiper')">{{ regionLabel('kuiper') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickRegion('eris')">{{ regionLabel('eris') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -3033,43 +3033,43 @@ function tpShipsCostsCalc(info){
                 <h2 class="has-text-caution">${loc('wiki_calc_tp_ships_costs_base_costs')}</h2>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Money_name')}:</h3><span> {{ i.class.val, 'class', 'Money' | getBase }}</span><span v-show="i.class.val !== 'explorer'">^{{ i.sensor.val, 'sensor', 'Money' | getExponent }}</span><span v-show="r.Money.preVis"> = {{ 'Money' | calcPre }}</span>
+                <h3 class="has-text-info">${loc('resource_Money_name')}:</h3><span> {{ getBase(i.class.val, 'class', 'Money') }}</span><span v-show="i.class.val !== 'explorer'">^{{ i.sensor.val, 'sensor', 'Money' | getExponent }}</span><span v-show="r.Money.preVis"> = {{ calcPre('Money') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Aluminium_name')}:</h3><span> {{ i.class.val, 'class', 'Aluminium' | getBase }}</span><span v-show="r.Aluminium.preVis"> = {{ 'Aluminium' | calcPre }}</span>
+                <h3 class="has-text-info">${loc('resource_Aluminium_name')}:</h3><span> {{ calcPre(getBase(i.class.val, 'class', 'Aluminium') }}</span><span v-show="r.Aluminium.preVis"> = {{ 'Aluminium') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Adamantite_name')}:</h3><span> {{ i.class.val, 'class', 'Adamantite' | getBase }}</span><span v-show="r.Adamantite.preVis"> = {{ 'Adamantite' | calcPre }}</span>
+                <h3 class="has-text-info">${loc('resource_Adamantite_name')}:</h3><span> {{ calcPre(getBase(i.class.val, 'class', 'Adamantite') }}</span><span v-show="r.Adamantite.preVis"> = {{ 'Adamantite') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Steel_name')}:</h3><span> {{ i.armor.val, 'armor', 'Steel' | getBase }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="r.Steel.preVis"> = {{ 'Steel' | calcPre }}</span>
+                <h3 class="has-text-info">${loc('resource_Steel_name')}:</h3><span> {{ getBase(i.armor.val, 'armor', 'Steel') }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="r.Steel.preVis"> = {{ calcPre('Steel') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Alloy_name')}:</h3><span> {{ i.armor.val, 'armor', 'Alloy' | getBase }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="r.Alloy.preVis"> = {{ 'Alloy' | calcPre }}</span>
+                <h3 class="has-text-info">${loc('resource_Alloy_name')}:</h3><span> {{ getBase(i.armor.val, 'armor', 'Alloy') }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="r.Alloy.preVis"> = {{ calcPre('Alloy') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Neutronium_name')}:</h3><span> {{ i.armor.val, 'armor', 'Neutronium' | getBase }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="r.Neutronium.preVis"> = {{ 'Neutronium' | calcPre }}</span>
+                <h3 class="has-text-info">${loc('resource_Neutronium_name')}:</h3><span> {{ getBase(i.armor.val, 'armor', 'Neutronium') }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="r.Neutronium.preVis"> = {{ calcPre('Neutronium') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Titanium_name')}:</h3><span> {{ i.engine.val, 'engine', 'Titanium' | getBase }}^{{ s.exp2.val, 'exp2' | generic }}</span><span v-show="i.class.val === 'explorer'"> * 5</span><span v-show="r.Titanium.preVis"> = {{ 'Titanium' | calcPre }}</span>
+                <h3 class="has-text-info">${loc('resource_Titanium_name')}:</h3><span> {{ getBase(i.engine.val, 'engine', 'Titanium') }}^{{ s.exp2.val, 'exp2' | generic }}</span><span v-show="i.class.val === 'explorer'"> * 5</span><span v-show="r.Titanium.preVis"> = {{ calcPre('Titanium') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Copper_name')}:</h3><span> {{ i.power.val, 'power', 'Copper' | getBase }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="r.Copper.preVis"> = {{ 'Copper' | calcPre }}</span>
+                <h3 class="has-text-info">${loc('resource_Copper_name')}:</h3><span> {{ getBase(i.power.val, 'power', 'Copper') }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="r.Copper.preVis"> = {{ calcPre('Copper') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Orichalcum_name')}:</h3><span> {{ i.power.val, 'power', 'Orichalcum' | getBase }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="r.Orichalcum.preVis"> = {{ 'Orichalcum' | calcPre }}</span>
+                <h3 class="has-text-info">${loc('resource_Orichalcum_name')}:</h3><span> {{ getBase(i.power.val, 'power', 'Orichalcum') }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="r.Orichalcum.preVis"> = {{ calcPre('Orichalcum') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Iridium_name')}:</h3><span> ({{ i.power.val, 'power', 'Iridium' | getBase }}^{{ s.exp2.val, 'exp2' | generic }})^{{ i.weapon.val, 'weapon', 'Iridium' | getExponent }}</span><span v-show="i.class.val === 'explorer'"> * 50</span><span v-show="r.Iridium.preVis"> = {{ 'Iridium' | calcPre }}</span>
+                <h3 class="has-text-info">${loc('resource_Iridium_name')}:</h3><span> ({{ getBase(i.power.val, 'power', 'Iridium') }}^{{ s.exp2.val, 'exp2' | generic }})^{{ i.weapon.val, 'weapon', 'Iridium' | getExponent }}</span><span v-show="i.class.val === 'explorer'"> * 50</span><span v-show="r.Iridium.preVis"> = {{ calcPre('Iridium') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Iron_name')}:</h3><span> {{ i.weapon.val, 'weapon', 'Iron' | getBase }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="i.class.val === 'explorer'"> * 10</span><span v-show="r.Iron.preVis"> = {{ 'Iron' | calcPre }}</span>
+                <h3 class="has-text-info">${loc('resource_Iron_name')}:</h3><span> {{ getBase(i.weapon.val, 'weapon', 'Iron') }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="i.class.val === 'explorer'"> * 10</span><span v-show="r.Iron.preVis"> = {{ calcPre('Iron') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Nano_Tube_name')}:</h3><span> {{ i.weapon.val, 'weapon', 'Nano_Tube' | getBase }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="r.Nano_Tube.preVis"> = {{ 'Nano_Tube' | calcPre }}</span>
+                <h3 class="has-text-info">${loc('resource_Nano_Tube_name')}:</h3><span> {{ getBase(i.weapon.val, 'weapon', 'Nano_Tube') }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="r.Nano_Tube.preVis"> = {{ calcPre('Nano_Tube') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Quantium_name')}:</h3><span> {{ i.weapon.val, 'weapon', 'Quantium' | getBase }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="r.Quantium.preVis"> = {{ 'Quantium' | calcPre }}</span>
+                <h3 class="has-text-info">${loc('resource_Quantium_name')}:</h3><span> {{ getBase(i.weapon.val, 'weapon', 'Quantium') }}^{{ s.exp1.val, 'exp1' | generic }}</span><span v-show="r.Quantium.preVis"> = {{ calcPre('Quantium') }}</span>
             </div>
         </div>
     `);
@@ -3100,16 +3100,16 @@ function tpShipsCostsCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ 'class', i.class.val | genericLabel }}</span>
+                            <span>{{ genericLabel('class', i.class.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'corvette')">{{ 'class', 'corvette' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'frigate')">{{ 'class', 'frigate' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'destroyer')">{{ 'class', 'destroyer' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'cruiser')">{{ 'class', 'cruiser' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'battlecruiser')">{{ 'class', 'battlecruiser' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'dreadnought')">{{ 'class', 'dreadnought' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'explorer')">{{ 'class', 'explorer' | genericLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('class', 'corvette')">{{ genericLabel('class', 'corvette') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('class', 'frigate')">{{ genericLabel('class', 'frigate') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('class', 'destroyer')">{{ genericLabel('class', 'destroyer') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('class', 'cruiser')">{{ genericLabel('class', 'cruiser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('class', 'battlecruiser')">{{ genericLabel('class', 'battlecruiser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('class', 'dreadnought')">{{ genericLabel('class', 'dreadnought') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('class', 'explorer')">{{ genericLabel('class', 'explorer') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -3120,14 +3120,14 @@ function tpShipsCostsCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ 'power', i.power.val | genericLabel }}</span>
+                            <span>{{ genericLabel('power', i.power.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'solar')">{{ 'power', 'solar' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'diesel')">{{ 'power', 'diesel' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'fission')">{{ 'power', 'fission' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'fusion')">{{ 'power', 'fusion' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'elerium')">{{ 'power', 'elerium' | genericLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('power', 'solar')">{{ genericLabel('power', 'solar') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('power', 'diesel')">{{ genericLabel('power', 'diesel') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('power', 'fission')">{{ genericLabel('power', 'fission') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('power', 'fusion')">{{ genericLabel('power', 'fusion') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('power', 'elerium')">{{ genericLabel('power', 'elerium') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -3138,15 +3138,15 @@ function tpShipsCostsCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ 'weapon', i.weapon.val | genericLabel }}</span>
+                            <span>{{ genericLabel('weapon', i.weapon.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'railgun')">{{ 'weapon', 'railgun' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'laser')">{{ 'weapon', 'laser' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'p_laser')">{{ 'weapon', 'p_laser' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'plasma')">{{ 'weapon', 'plasma' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'phaser')">{{ 'weapon', 'phaser' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'disruptor')">{{ 'weapon', 'disruptor' | genericLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'railgun')">{{ genericLabel('weapon', 'railgun') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'laser')">{{ genericLabel('weapon', 'laser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'p_laser')">{{ genericLabel('weapon', 'p_laser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'plasma')">{{ genericLabel('weapon', 'plasma') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'phaser')">{{ genericLabel('weapon', 'phaser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'disruptor')">{{ genericLabel('weapon', 'disruptor') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -3157,12 +3157,12 @@ function tpShipsCostsCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ 'armor', i.armor.val | genericLabel }}</span>
+                            <span>{{ genericLabel('armor', i.armor.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickGeneric('armor', 'steel')">{{ 'armor', 'steel' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('armor', 'alloy')">{{ 'armor', 'alloy' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('armor', 'neutronium')">{{ 'armor', 'neutronium' | genericLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('armor', 'steel')">{{ genericLabel('armor', 'steel') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('armor', 'alloy')">{{ genericLabel('armor', 'alloy') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('armor', 'neutronium')">{{ genericLabel('armor', 'neutronium') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -3173,15 +3173,15 @@ function tpShipsCostsCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ 'engine', i.engine.val | genericLabel }}</span>
+                            <span>{{ genericLabel('engine', i.engine.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'ion')">{{ 'engine', 'ion' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'tie')">{{ 'engine', 'tie' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'pulse')">{{ 'engine', 'pulse' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'photon')">{{ 'engine', 'photon' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'vacuum')">{{ 'engine', 'vacuum' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'emdrive')">{{ 'engine', 'emdrive' | genericLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('engine', 'ion')">{{ genericLabel('engine', 'ion') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('engine', 'tie')">{{ genericLabel('engine', 'tie') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('engine', 'pulse')">{{ genericLabel('engine', 'pulse') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('engine', 'photon')">{{ genericLabel('engine', 'photon') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('engine', 'vacuum')">{{ genericLabel('engine', 'vacuum') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('engine', 'emdrive')">{{ genericLabel('engine', 'emdrive') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -3192,13 +3192,13 @@ function tpShipsCostsCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ 'sensor', i.sensor.val | genericLabel }}</span>
+                            <span>{{ genericLabel('sensor', i.sensor.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'visual')">{{ 'sensor', 'visual' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'radar')">{{ 'sensor', 'radar' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'lidar')">{{ 'sensor', 'lidar' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'quantum')">{{ 'sensor', 'quantum' | genericLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'visual')">{{ genericLabel('sensor', 'visual') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'radar')">{{ genericLabel('sensor', 'radar') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'lidar')">{{ genericLabel('sensor', 'lidar') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'quantum')">{{ genericLabel('sensor', 'quantum') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -3590,16 +3590,16 @@ function tpShipsPowerCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ 'class', i.class.val | genericLabel }}</span>
+                            <span>{{ genericLabel('class', i.class.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'corvette')">{{ 'class', 'corvette' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'frigate')">{{ 'class', 'frigate' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'destroyer')">{{ 'class', 'destroyer' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'cruiser')">{{ 'class', 'cruiser' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'battlecruiser')">{{ 'class', 'battlecruiser' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'dreadnought')">{{ 'class', 'dreadnought' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'explorer')">{{ 'class', 'explorer' | genericLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('class', 'corvette')">{{ genericLabel('class', 'corvette') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('class', 'frigate')">{{ genericLabel('class', 'frigate') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('class', 'destroyer')">{{ genericLabel('class', 'destroyer') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('class', 'cruiser')">{{ genericLabel('class', 'cruiser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('class', 'battlecruiser')">{{ genericLabel('class', 'battlecruiser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('class', 'dreadnought')">{{ genericLabel('class', 'dreadnought') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('class', 'explorer')">{{ genericLabel('class', 'explorer') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -3612,7 +3612,7 @@ function tpShipsPowerCalc(info){
                 <h2 class="has-text-caution">${loc('wiki_calc_tp_ships_power_gen')}</h2>
             </div>
             <div>
-                <span>{{ i.power.val, 'power' | genericVal }} * {{ s.genMulti.val, 'gen_multi' | generic }}</span><span v-show="s.power.vis"> = {{ | calcPower }}</span>
+                <span>{{ genericVal(i.power.val, 'power') }} * {{ s.genMulti.val, 'gen_multi' | generic }}</span><span v-show="s.power.vis"> = {{ | calcPower }}</span>
             </div>
         </div>
         <div>
@@ -3623,14 +3623,14 @@ function tpShipsPowerCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ 'power', i.power.val | genericLabel }}</span>
+                            <span>{{ genericLabel('power', i.power.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'solar')">{{ 'power', 'solar' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'diesel')">{{ 'power', 'diesel' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'fission')">{{ 'power', 'fission' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'fusion')">{{ 'power', 'fusion' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'elerium')">{{ 'power', 'elerium' | genericLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('power', 'solar')">{{ genericLabel('power', 'solar') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('power', 'diesel')">{{ genericLabel('power', 'diesel') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('power', 'fission')">{{ genericLabel('power', 'fission') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('power', 'fusion')">{{ genericLabel('power', 'fusion') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('power', 'elerium')">{{ genericLabel('power', 'elerium') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -3643,25 +3643,25 @@ function tpShipsPowerCalc(info){
                 <h2 class="has-text-caution">${loc('wiki_calc_tp_ships_power_use',[loc('outer_shipyard_weapon')])}</h2>
             </div>
             <div>
-                <span>{{ i.weapon.val, 'weapon' | genericVal }} * {{ s.useMulti.val, 'use_multi' | generic }}</span><span v-show="s.weapon.vis"> = {{ | calcWeapon }}</span>
+                <span>{{ genericVal(i.weapon.val, 'weapon') }} * {{ s.useMulti.val, 'use_multi' | generic }}</span><span v-show="s.weapon.vis"> = {{ | calcWeapon }}</span>
             </div>
             <div>
                 <h2 class="has-text-caution">${loc('wiki_calc_tp_ships_power_use',[loc('outer_shipyard_engine')])}</h2>
             </div>
             <div>
-                <span>{{ i.engine.val, 'engine' | genericVal }} * {{ s.useMulti.val, 'use_multi' | generic }}</span><span v-show="s.engine.vis"> = {{ | calcEngine }}</span>
+                <span>{{ genericVal(i.engine.val, 'engine') }} * {{ s.useMulti.val, 'use_multi' | generic }}</span><span v-show="s.engine.vis"> = {{ | calcEngine }}</span>
             </div>
             <div>
                 <h2 class="has-text-caution">${loc('wiki_calc_tp_ships_power_use',[loc('outer_shipyard_sensor')])}</h2>
             </div>
             <div>
-                <span>{{ i.sensor.val, 'sensor' | genericVal }} * {{ s.useMulti.val, 'use_multi' | generic }}</span><span v-show="s.sensor.vis"> = {{ | calcSensor }}</span>
+                <span>{{ genericVal(i.sensor.val, 'sensor') }} * {{ s.useMulti.val, 'use_multi' | generic }}</span><span v-show="s.sensor.vis"> = {{ | calcSensor }}</span>
             </div>
             <div>
                 <h2 class="has-text-caution">${loc('wiki_calc_tp_ships_power_net')}</h2>
             </div>
             <div>
-                <span>{{ s.power.val, 'power' | genericResult }} - {{ s.weapon.val, 'weapon' | genericResult }} - {{ s.engine.val, 'engine' | genericResult }} - {{ s.sensor.val, 'sensor' | genericResult }}</span><span v-show="s.net.vis"> = {{ | calcNet }}</span><span v-show="s.net.neg === false"> = ${loc('wiki_calc_tp_ships_power_net_pos')}</span><span v-show="s.net.neg"> = ${loc('wiki_calc_tp_ships_power_net_neg')}</span>
+                <span>{{ genericResult(s.power.val, 'power') }} - {{ genericResult(s.weapon.val, 'weapon') }} - {{ genericResult(s.engine.val, 'engine') }} - {{ genericResult(s.sensor.val, 'sensor') }}</span><span v-show="s.net.vis"> = {{ | calcNet }}</span><span v-show="s.net.neg === false"> = ${loc('wiki_calc_tp_ships_power_net_pos')}</span><span v-show="s.net.neg"> = ${loc('wiki_calc_tp_ships_power_net_neg')}</span>
             </div>
         </div>
         <div>
@@ -3672,15 +3672,15 @@ function tpShipsPowerCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ 'weapon', i.weapon.val | genericLabel }}</span>
+                            <span>{{ genericLabel('weapon', i.weapon.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'railgun')">{{ 'weapon', 'railgun' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'laser')">{{ 'weapon', 'laser' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'p_laser')">{{ 'weapon', 'p_laser' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'plasma')">{{ 'weapon', 'plasma' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'phaser')">{{ 'weapon', 'phaser' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'disruptor')">{{ 'weapon', 'disruptor' | genericLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'railgun')">{{ genericLabel('weapon', 'railgun') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'laser')">{{ genericLabel('weapon', 'laser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'p_laser')">{{ genericLabel('weapon', 'p_laser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'plasma')">{{ genericLabel('weapon', 'plasma') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'phaser')">{{ genericLabel('weapon', 'phaser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'disruptor')">{{ genericLabel('weapon', 'disruptor') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -3691,15 +3691,15 @@ function tpShipsPowerCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ 'engine', i.engine.val | genericLabel }}</span>
+                            <span>{{ genericLabel('engine', i.engine.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'ion')">{{ 'engine', 'ion' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'tie')">{{ 'engine', 'tie' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'pulse')">{{ 'engine', 'pulse' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'photon')">{{ 'engine', 'photon' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'vacuum')">{{ 'engine', 'vacuum' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'emdrive')">{{ 'engine', 'emdrive' | genericLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('engine', 'ion')">{{ genericLabel('engine', 'ion') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('engine', 'tie')">{{ genericLabel('engine', 'tie') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('engine', 'pulse')">{{ genericLabel('engine', 'pulse') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('engine', 'photon')">{{ genericLabel('engine', 'photon') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('engine', 'vacuum')">{{ genericLabel('engine', 'vacuum') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('engine', 'emdrive')">{{ genericLabel('engine', 'emdrive') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -3710,13 +3710,13 @@ function tpShipsPowerCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ 'sensor', i.sensor.val | genericLabel }}</span>
+                            <span>{{ genericLabel('sensor', i.sensor.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'visual')">{{ 'sensor', 'visual' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'radar')">{{ 'sensor', 'radar' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'lidar')">{{ 'sensor', 'lidar' | genericLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'quantum')">{{ 'sensor', 'quantum' | genericLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'visual')">{{ genericLabel('sensor', 'visual') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'radar')">{{ genericLabel('sensor', 'radar') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'lidar')">{{ genericLabel('sensor', 'lidar') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'quantum')">{{ genericLabel('sensor', 'quantum') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -3905,15 +3905,15 @@ function tpShipsFirepowerCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ i.weapon.val | weaponLabel }}</span>
+                            <span>{{ weaponLabel(i.weapon.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickWeapon('railgun')">{{ 'railgun' | weaponLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickWeapon('laser')">{{ 'laser' | weaponLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickWeapon('p_laser')">{{ 'p_laser' | weaponLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickWeapon('plasma')">{{ 'plasma' | weaponLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickWeapon('phaser')">{{ 'phaser' | weaponLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickWeapon('disruptor')">{{ 'disruptor' | weaponLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickWeapon('railgun')">{{ weaponLabel('railgun') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickWeapon('laser')">{{ weaponLabel('laser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickWeapon('p_laser')">{{ weaponLabel('p_laser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickWeapon('plasma')">{{ weaponLabel('plasma') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickWeapon('phaser')">{{ weaponLabel('phaser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickWeapon('disruptor')">{{ weaponLabel('disruptor') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -3924,16 +3924,16 @@ function tpShipsFirepowerCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ i.class.val | classLabel }}</span>
+                            <span>{{ classLabel(i.class.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickClass('corvette')">{{ 'corvette' | classLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickClass('frigate')">{{ 'frigate' | classLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickClass('destroyer')">{{ 'destroyer' | classLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickClass('cruiser')">{{ 'cruiser' | classLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickClass('battlecruiser')">{{ 'battlecruiser' | classLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickClass('dreadnought')">{{ 'dreadnought' | classLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickClass('explorer')">{{ 'explorer' | classLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickClass('corvette')">{{ classLabel('corvette') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickClass('frigate')">{{ classLabel('frigate') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickClass('destroyer')">{{ classLabel('destroyer') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickClass('cruiser')">{{ classLabel('cruiser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickClass('battlecruiser')">{{ classLabel('battlecruiser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickClass('dreadnought')">{{ classLabel('dreadnought') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickClass('explorer')">{{ classLabel('explorer') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -4055,12 +4055,12 @@ function tpShipsHullCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ i.hull.val | hullLabel }}</span>
+                            <span>{{ hullLabel(i.hull.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickHull('steel')">{{ 'steel' | hullLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickHull('alloy')">{{ 'alloy' | hullLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickHull('neutronium')">{{ 'neutronium' | hullLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickHull('steel')">{{ hullLabel('steel') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickHull('alloy')">{{ hullLabel('alloy') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickHull('neutronium')">{{ hullLabel('neutronium') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -4154,13 +4154,13 @@ function tpShipsScanCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ i.sensor.val | sensorLabel }}</span>
+                            <span>{{ sensorLabel(i.sensor.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickSensor('visual')">{{ 'visual' | sensorLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickSensor('radar')">{{ 'radar' | sensorLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickSensor('lidar')">{{ 'lidar' | sensorLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickSensor('quantum')">{{ 'quantum' | sensorLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickSensor('visual')">{{ sensorLabel('visual') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickSensor('radar')">{{ sensorLabel('radar') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickSensor('lidar')">{{ sensorLabel('lidar') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickSensor('quantum')">{{ sensorLabel('quantum') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>
@@ -4171,16 +4171,16 @@ function tpShipsScanCalc(info){
                 <div>
                     <b-dropdown hoverable>
                         <button class="button is-primary" slot="trigger">
-                            <span>{{ i.class.val | classLabel }}</span>
+                            <span>{{ classLabel(i.class.val) }}</span>
                             <i class="fas fa-sort-down"></i>
                         </button>
-                        <b-dropdown-item v-on:click="pickClass('corvette')">{{ 'corvette' | classLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickClass('frigate')">{{ 'frigate' | classLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickClass('destroyer')">{{ 'destroyer' | classLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickClass('cruiser')">{{ 'cruiser' | classLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickClass('battlecruiser')">{{ 'battlecruiser' | classLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickClass('dreadnought')">{{ 'dreadnought' | classLabel }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickClass('explorer')">{{ 'explorer' | classLabel }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickClass('corvette')">{{ classLabel('corvette') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickClass('frigate')">{{ classLabel('frigate') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickClass('destroyer')">{{ classLabel('destroyer') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickClass('cruiser')">{{ classLabel('cruiser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickClass('battlecruiser')">{{ classLabel('battlecruiser') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickClass('dreadnought')">{{ classLabel('dreadnought') }}</b-dropdown-item>
+                        <b-dropdown-item v-on:click="pickClass('explorer')">{{ classLabel('explorer') }}</b-dropdown-item>
                     </b-dropdown>
                 </div>
             </div>

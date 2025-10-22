@@ -851,9 +851,9 @@ const edenicModules = {
             desc: loc('eden_elysium_desc'),
             prop(){
                 let soldier_title = global.tech['world_control'] && !global.race['truepath'] ? loc('civics_garrison_peacekeepers') : loc('civics_garrison_soldiers');
-                let desc = `<span class="pad"><span class="soldier">${soldier_title}</span> <span v-html="$options.filters.filter(workers,'stationed')"></span> / <span>{{ max | filter('s_max') }}</span></span>`;
+                let desc = `<span class="pad"><span class="soldier">${soldier_title}</span> <span v-html="filter(workers,'stationed')"></span> / <span>{{ filter(max, 's_max') }}</span></span>`;
                 desc += `<span class="pad"><span class="wounded">${loc('civics_garrison_wounded')}</span> <span>{{ wounded }}</span></span>`;
-                desc += `<span class="pad"><span v-html="$options.filters.filter(m_use,'m_use')"></span></span>`;
+                desc += `<span class="pad"><span v-html="filter(m_use,'m_use')"></span></span>`;
                 return desc;
             },
             bind(){
@@ -2039,7 +2039,7 @@ const edenicModules = {
             name: loc('eden_palace_name'),
             desc(){ return loc('eden_palace_desc'); },
             prop(){
-                return `<span class="pad"><span v-html="$options.filters.filter(energy,'energy')"></span></span>`;
+                return `<span class="pad"><span v-html="filter(energy,'energy')"></span></span>`;
             },
             bind(){
                 return global.eden.palace;
@@ -2380,7 +2380,7 @@ export function renderEdenic(){
                 vBind({
                     el: `#sr${region}`,
                     data: bind ? bind : global.eden[support],
-                    filters: {
+                    methods: {
                         filter(){
                             return edenicModules[region].info.filter(...arguments);
                         }
@@ -2392,7 +2392,7 @@ export function renderEdenic(){
                 vBind({
                     el: `#sr${region}`,
                     data: bind,
-                    filters: {
+                    methods: {
                         filter(){
                             return edenicModules[region].info.filter(...arguments);
                         }

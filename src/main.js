@@ -304,9 +304,7 @@ vBind({
     methods: {
         name(){
             return flib('name');
-        }
-    },
-    filters: {
+        },
         replicate(kw){
             if (global.race.hasOwnProperty('governor') && global.race.governor.hasOwnProperty('tasks') && global.race.hasOwnProperty('replicator') && Object.values(global.race.governor.tasks).includes('replicate') && global.race.governor.config.replicate.pow.on && global.race.replicator.pow > 0){
                 return kw + global.race.replicator.pow;
@@ -599,9 +597,7 @@ vBind({
                     messageQueue(loc(`event_${global.race.pet.type}_pet_success`,[loc(`event_${global.race.pet.type}_name${global.race.pet.name}`)]),false,false,['events','minor_events']);
                 }
             }
-        }
-    },
-    filters: {
+        },
         planet(species){
             return races[species].home;
         },
@@ -12935,7 +12931,7 @@ function steelCheck(){
 }
 
 function resourceAlt(){
-    ['#resources > .resource','.tab-item > .market-item','#galaxyTrade > .market-item'].forEach(function(id){
+    ['#resources .resource','.tab-item > .market-item','#galaxyTrade > .market-item'].forEach(function(id){
         let alt = false;
         $(`${id}:visible`).each(function(){
             if (alt){

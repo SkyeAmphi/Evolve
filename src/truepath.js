@@ -1713,16 +1713,14 @@ const tauCetiModules = {
             support: 'orbital_station',
             extra(region){
                 if (global.tech['tau_home'] && global.tech.tau_home >= 2 && !tauEnabled()){
-                    $(`#${region}`).append(`<div id="${region}Mats" v-show="tauShow()" class="syndThreat has-text-warning">${loc('resource_Materials_name')} <span class="has-text-info">{{ amount | round | locale }}</span> / <span class="has-text-info">{{ max | locale }}</span></div>`);
+                    $(`#${region}`).append(`<div id="${region}Mats" v-show="tauShow()" class="syndThreat has-text-warning">${loc('resource_Materials_name')} <span class="has-text-info">{{ locale(locale(round(amount)) }}</span> / <span class="has-text-info">{{ max) }}</span></div>`);
                     vBind({
                         el: `#${region}Mats`,
                         data: global.resource.Materials,
                         methods: {
                             tauShow(){
                                 return !tauEnabled();
-                            }
-                        },
-                        filters: {
+                            },
                             round(v){
                                 return +v.toFixed(0);
                             },
@@ -4075,7 +4073,7 @@ export function renderTauCeti(){
                 vBind({
                     el: `#sr${region}`,
                     data: global.tauceti[support],
-                    filters: {
+                    methods: {
                         filter(){
                             return tauCetiModules[region].info.filter(...arguments);
                         }
@@ -4162,29 +4160,27 @@ export function drawShipYard(){
         Object.keys(shipConfig).forEach(function(k){
             let values = ``;
             shipConfig[k].forEach(function(v,idx){
-                values += `<b-dropdown-item aria-role="listitem" v-on:click="setVal('${k}','${v}')" class="${k} a${idx}" data-val="${v}" v-show="avail('${k}','${idx}','${v}')">${loc(`outer_shipyard_${k}_${v}`)}</b-dropdown-item>`;
+                values += `<b-dropdown-item aria-role="listitem" @click="setVal('${k}','${v}')" class="${k} a${idx}" data-val="${v}" v-show="avail('${k}','${idx}','${v}')">${loc(`outer_shipyard_${k}_${v}`)}</b-dropdown-item>`;
             });
 
             options.append(`<b-dropdown :triggers="['hover', 'click']" aria-role="list">
-                <button class="button is-info" slot="trigger">
-                    <span>${loc(`outer_shipyard_${k}`)}: {{ b.${k} | lbl('${k}') }}</span>
-                </button>${values}
+                <template #trigger>
+                    <button class="button is-info">
+                        <span>${loc(`outer_shipyard_${k}`)}: {{ lbl(b.${k}, '${k}') }}</span>
+                    </button>
+                </template>${values}
             </b-dropdown>`);
         });
 
         let assemble = $(`<div class="assemble"></div>`);
-        assemble.append(`<button class="button is-info" slot="trigger" v-on:click="build()"><span>${loc('outer_shipyard_build')}</span></button>`);
-        assemble.append(`<span><b-checkbox class="patrol" v-model="s.expand" v-on:input="redraw()">${loc('outer_shipyard_fleet_details')}</b-checkbox></span>`);
-        assemble.append(`<span><b-checkbox class="patrol" v-model="s.sort" v-on:input="redraw()">${loc('outer_shipyard_fleet_sort')}</b-checkbox></span>`);
+        assemble.append(`<button class="button is-info" v-on:click="build()"><span>${loc('outer_shipyard_build')}</span></button>`);
+        assemble.append(`<span><b-checkbox class="patrol" v-model="s.expand" @change="redraw()">${loc('outer_shipyard_fleet_details')}</b-checkbox></span>`);
+        assemble.append(`<span><b-checkbox class="patrol" v-model="s.sort" @change="redraw()">${loc('outer_shipyard_fleet_sort')}</b-checkbox></span>`);
 
         plans.append(assemble);
         assemble.append(`<div><span>${loc(`outer_shipyard_park`,[planetName().dwarf])}</span><a href="#" class="solarMap" @click="trigModal">${loc(`outer_shipyard_map`)}</span></a>`);
 
         updateCosts();
-
-        let modal = {
-            template: '<div id="modalBox" class="modalBox"></div>'
-        };
 
         vBind({
             el: '#shipPlans',
@@ -4206,6 +4202,7 @@ export function drawShipYard(){
                     }
                     global.space.shipyard.blueprint[b] = v;
                     updateCosts();
+                    vBind({el: `#shipPlans`},'update');
                 },
                 avail(k,i,v){
                     if ((k === 'class' || k === 'engine') && global.tech['tauceti'] && (v === 'emdrive' || v === 'explorer')){
@@ -4291,8 +4288,8 @@ export function drawShipYard(){
                 },
                 trigModal(){
                     this.$buefy.modal.open({
-                        parent: this,
-                        component: modal
+                        hasModalCard: false,
+                        content: '<div id="modalBox" class="modalBox"></div>'
                     });
 
                     let checkExist = setInterval(function(){
@@ -4304,9 +4301,7 @@ export function drawShipYard(){
                 },
                 redraw(){
                     drawShips();
-                }
-            },
-            filters: {
+                },
                 lbl(l,c){
                     return loc(`outer_shipyard_${c}_${l}`);
                 }
@@ -4366,11 +4361,11 @@ export function TPShipDesc(parent,obj){
     });
 
     if (tc && tc['t']){
-        desc.append($(`<div class="divider"></div><div id="popTimer" class="flair has-text-advanced">{{ t | timer }}</div>`));
+        desc.append($(`<div class="divider"></div><div id="popTimer" class="flair has-text-advanced">{{ timer(t) }}</div>`));
         vBind({
             el: '#popTimer',
             data: tc,
-            filters: {
+            methods: {
                 timer(t){
                     return loc('action_ready',[timeFormat(t)]);
                 }
@@ -5034,9 +5029,11 @@ function drawShips(){
         let location = ship.location === 'tauceti' ? loc('tech_era_tauceti') : typeof spaceRegions[ship.location].info.name === 'string' ? spaceRegions[ship.location].info.name : spaceRegions[ship.location].info.name();
 
         let dispatch = `<b-dropdown id="ship${i}loc" :triggers="['hover', 'click']" aria-role="list" scrollable position="is-bottom-left">
-            <button class="button is-info" slot="trigger">
-                <span>${location}</span>
-            </button>${values}
+            <template #trigger>
+                <button class="button is-info">
+                    <span>${location}</span>
+                </button>
+            </template>${values}
         </b-dropdown>`;
 
         if (global.space.shipyard.expand){

@@ -7016,9 +7016,7 @@ function galaxySpace(){
                             }
                         }
                         return "has-text-danger";
-                    }
-                },
-                filters: {
+                    },
                     pirate(r){
                         let scouts_req = global.race['infiltrator'] ? 1 : 2;
                         if (global.galaxy.defense[r].scout_ship >= scouts_req){
@@ -7070,7 +7068,7 @@ function galaxySpace(){
             }
 
             if (global.tech['piracy']){
-                regionContent.append(`<div><span class="has-text-caution pirate">${loc('galaxy_piracy_threat',[races[global.galaxy.alien2.id].name])}</span><span :class="threat('${region}')">{{ '${region}' | pirate }}</span><span class="sep">|</span><span class="has-text-warning">${loc('galaxy_armada')}</span>: <span class="has-text-success">{{ '${region}' | defense }}</span></div>`);
+                regionContent.append(`<div><span class="has-text-caution pirate">${loc('galaxy_piracy_threat',[races[global.galaxy.alien2.id].name])}</span><span :class="threat('${region}')">{{ pirate('${region}') }}</span><span class="sep">|</span><span class="has-text-warning">${loc('galaxy_armada')}</span>: <span class="has-text-success">{{ defense('${region}') }}</span></div>`);
             }
 
             vBind(vData);
@@ -7111,7 +7109,7 @@ function armada(parent,id){
 
         let soldier_title = global.tech['world_control'] ? loc('civics_garrison_peacekeepers') : loc('civics_garrison_soldiers');
         header.append($(`<span>|</span>`));
-        header.append($(`<span class="has-text-caution"><span class="soldier">${soldier_title}</span> <span>{{ g.workers | stationed }} / {{ g.max | s_max }}</span></span>`));
+        header.append($(`<span class="has-text-caution"><span class="soldier">${soldier_title}</span> <span>{{ stationed(g.workers) }} / {{ s_max(g.max) }}</span></span>`));
         header.append($(`<span>|</span>`));
         header.append($(`<span class="has-text-caution"><span class="crew1">${loc('job_crew_mil')}</span> <span>{{ g.crew }}</span></span>`));
         header.append($(`<span>|</span>`));
@@ -7123,7 +7121,7 @@ function armada(parent,id){
                 g: global.civic.garrison,
                 c: global.civic.crew,
             },
-            filters: {
+            methods: {
                 stationed(v){
                     return garrisonSize();
                 },
@@ -7573,7 +7571,7 @@ export function ascendLab(hybrid,wiki){
         $(`#city`).append(lab);
     }
 
-    let labStatus = `<div><h3 class="has-text-danger">${loc('genelab_title')}</h3> - <span class="has-text-warning">${loc('genelab_genes')} {{ g.genes }}</span> - <span class="has-text-warning">${loc('trait_untapped_name')}: {{ g.genes | untapped }}</span></div>`;
+    let labStatus = `<div><h3 class="has-text-danger">${loc('genelab_title')}</h3> - <span class="has-text-warning">${loc('genelab_genes')} {{ g.genes }}</span> - <span class="has-text-warning">${loc('trait_untapped_name')}: {{ untapped(g.genes) }}</span></div>`;
     lab.append(labStatus);
 
     if (isWiki){
@@ -7617,14 +7615,14 @@ export function ascendLab(hybrid,wiki){
     let genes = $(`<div class="sequence"></div>`);
     lab.append(genes);
 
-    let fanatic = `<div id="geneLabFanatic" class="genus"><div class="has-text-caution header">${loc(`tech_fanaticism`)}</div><button class="button" @click="fanatic()">{{ g.fanaticism | fanaticism }}</button></div>`;
+    let fanatic = `<div id="geneLabFanatic" class="genus"><div class="has-text-caution header">${loc(`tech_fanaticism`)}</div><button class="button" @click="fanatic()">{{ fanaticism(g.fanaticism) }}</button></div>`;
 
     let dGenus = 'humanoid';
     if (hybrid){
         dGenus = 'hybrid';
         let genus = `<div class="genus_selection">`;
-        genus += `<div id="geneLabGenusA" class="genus"><div class="has-text-caution header">${loc('genelab_genus_a')}</div><button class="button" @click="genus(0)" v-html="$options.filters.genus(g.hybrid,0)"></button></div>`;
-        genus += `<div id="geneLabGenusB" class="genus"><div class="has-text-caution header">${loc('genelab_genus_b')}</div><button class="button" @click="genus(1)" v-html="$options.filters.genus(g.hybrid,1)"></button></div>`;
+        genus += `<div id="geneLabGenusA" class="genus"><div class="has-text-caution header">${loc('genelab_genus_a')}</div><button class="button" @click="genus(0)" v-html="genus_f(g.hybrid,0)"></button></div>`;
+        genus += `<div id="geneLabGenusB" class="genus"><div class="has-text-caution header">${loc('genelab_genus_b')}</div><button class="button" @click="genus(1)" v-html="genus_f(g.hybrid,1)"></button></div>`;
         genus += `${fanatic}`;
         genus += `<div class="resetLab"><button class="button" @click="reset()">${loc('genelab_reset')}</button></div>`;
         genus += `</div>`;
@@ -7632,7 +7630,7 @@ export function ascendLab(hybrid,wiki){
     }
     else {
         let genus = `<div class="genus_selection">`;
-        genus += `<div id="geneLabGenus" class="genus"><div class="has-text-caution header">${loc('genelab_genus')}</div><button class="button" @click="genus()">{{ g.genus | genus }}</button></div>`;
+        genus += `<div id="geneLabGenus" class="genus"><div class="has-text-caution header">${loc('genelab_genus')}</div><button class="button" @click="genus()">{{ genus(g.genus) }}</button></div>`;
         genus += `${fanatic}`;
         genus += `<div class="resetLab"><button class="button" @click="reset()">${loc('genelab_reset')}</button></div>`;
         genus += `</div>`;
@@ -7728,10 +7726,10 @@ export function ascendLab(hybrid,wiki){
         Object.keys(taxomized[tax]).sort().forEach(function (trait){
             if (traits.hasOwnProperty(trait) && traits[trait].type === 'major'){
                 if (traits[trait].val >= 0){
-                    trait_list += `<div class="field t${trait}"><b-checkbox :disabled="allowed('${trait}')" @input="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-success">${loc(`trait_${trait}_name`)}</span> (<span class="has-text-advanced">{{ '${trait}' | cost }}</span><span v-html="$options.filters.empower(g.traitlist,'${trait}')"></span>)</b-checkbox></div>`;
+                    trait_list += `<div class="field t${trait}"><b-checkbox :disabled="allowed('${trait}')" @input="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-success">${loc(`trait_${trait}_name`)}</span> (<span class="has-text-advanced">{{ cost('${trait}') }}</span><span v-html="empower(g.traitlist,'${trait}')"></span>)</b-checkbox></div>`;
                 }
                 else {
-                    negative += `<div class="field t${trait}"><b-checkbox :disabled="allowed('${trait}')" @input="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-danger">${loc(`trait_${trait}_name`)}</span> (<span class="has-text-caution">{{ '${trait}' | cost }}</span><span v-html="$options.filters.empower(g.traitlist,'${trait}')"></span>)</b-checkbox></div>`;
+                    negative += `<div class="field t${trait}"><b-checkbox :disabled="allowed('${trait}')" @input="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-danger">${loc(`trait_${trait}_name`)}</span> (<span class="has-text-caution">{{ cost('${trait}') }}</span><span v-html="empower(g.traitlist,'${trait}')"></span>)</b-checkbox></div>`;
                 }
             }
         });
@@ -7772,10 +7770,6 @@ export function ascendLab(hybrid,wiki){
 
     genome.genes = calcGenomeScore(genome,(isWiki ? wikiVars : false));
     let error = { msg: "" };
-
-    var modal = {
-        template: '<div id="modalBox" class="modalBox"></div>'
-    };
 
     let tRanks = genome.ranks;
     let activeTab = { t: 0 };
@@ -7883,8 +7877,12 @@ export function ascendLab(hybrid,wiki){
             },
             fanatic(){
                 this.$buefy.modal.open({
-                    parent: this,
-                    component: modal
+                    hasModalCard: false,
+                    customClass: 'evolve-modal',
+                    content: '<div id="modalBox" class="modalBox"></div>',
+                    onCancel: () => {
+                        // Modal closed
+                    }
                 });
             
                 var checkExist = setInterval(function() {
@@ -7913,8 +7911,12 @@ export function ascendLab(hybrid,wiki){
             },
             genus(slot){
                 this.$buefy.modal.open({
-                    parent: this,
-                    component: modal
+                    hasModalCard: false,
+                    customClass: 'evolve-modal',
+                    content: '<div id="modalBox" class="modalBox"></div>',
+                    onCancel: () => {
+                        // Modal closed
+                    }
                 });
             
                 var checkExist = setInterval(function() {
@@ -8068,9 +8070,7 @@ export function ascendLab(hybrid,wiki){
                     URL.revokeObjectURL(a.href);
                 };
                 downloadToFile(JSON.stringify(exportGenome, null, 4), `evolve-${hybrid ? 'hybrid' : 'custom'}-${exportGenome.name}.txt`, 'text/plain');
-            }
-        },
-        filters: {
+            },
             cost(trait){
                 return geneCost(genome,trait,tRanks);
             },
@@ -8082,7 +8082,7 @@ export function ascendLab(hybrid,wiki){
             fanaticism(trait){
                 return trait ? loc(`trait_${trait}_name`) : loc(`genelab_unset`);
             },
-            genus(g,i){
+            genus_f(g,i){
                 return typeof i === 'undefined' ? loc(`genelab_genus_${g}`) : loc(`genelab_genus_${g[i]}`);
             },
             empower(e,t){
@@ -8172,8 +8172,8 @@ export function ascendLab(hybrid,wiki){
                     if (traits[trait].val >= 0){
                         summary += `<div class="field t${trait}">`;
                         summary += `<b-checkbox :input="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-success">${loc(`trait_${trait}_name`)}</span></b-checkbox>`;
-                        summary += `<span>[<span class="rc"><span class="has-text-warning">${loc(`wiki_calc_cost`)}</span> <span>{{ '${trait}' | cost }}</span>, <span class="has-text-warning">${loc(`genelab_rank`)}</span> <span>{{ '${trait}' | tRank }}</span>`;
-                        summary += `<span v-html="$options.filters.empower(t.empowered,'${trait}')"></span></span>]`;
+                        summary += `<span>[<span class="rc"><span class="has-text-warning">${loc(`wiki_calc_cost`)}</span> <span>{{ cost('${trait}') }}</span>, <span class="has-text-warning">${loc(`genelab_rank`)}</span> <span>{{ tRank('${trait}') }}</span>`;
+                        summary += `<span v-html="empower(t.empowered,'${trait}')"></span></span>]`;
                         summary += `<span role="button" aria-label="${loc(`genelab_rank_lower`,[loc(`trait_${trait}_name`)])}" class="sub has-text-danger" @click="reduce('${trait}')"><span>-</span></span>`;
                         summary += `<span role="button" aria-label="${loc(`genelab_rank_higher`,[loc(`trait_${trait}_name`)])}" class="add has-text-success" @click="increase('${trait}')"><span>+</span></span>`;
                         summary += `</span></div>`;
@@ -8181,8 +8181,8 @@ export function ascendLab(hybrid,wiki){
                     else {
                         negative_sum += `<div class="field t${trait}">`;
                         negative_sum += `<b-checkbox :input="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-danger">${loc(`trait_${trait}_name`)}</span></b-checkbox>`;
-                        negative_sum += `<span>[<span class="rc"><span class="has-text-warning">${loc(`wiki_calc_cost`)}</span> <span>{{ '${trait}' | cost }}</span>, <span class="has-text-warning">${loc(`genelab_rank`)}</span> <span>{{ '${trait}' | tRank }}</span>`;
-                        negative_sum += `<span v-html="$options.filters.empower(t.empowered,'${trait}')"></span></span>]`;
+                        negative_sum += `<span>[<span class="rc"><span class="has-text-warning">${loc(`wiki_calc_cost`)}</span> <span>{{ cost('${trait}') }}</span>, <span class="has-text-warning">${loc(`genelab_rank`)}</span> <span>{{ tRank('${trait}') }}</span>`;
+                        negative_sum += `<span v-html="empower(t.empowered,'${trait}')"></span></span>]`;
                         negative_sum += `<span role="button" aria-label="${loc(`genelab_rank_lower`,[loc(`trait_${trait}_name`)])}" class="sub has-text-danger" @click="reduce('${trait}')"><span>-</span></span>`;
                         negative_sum += `<span role="button" aria-label="${loc(`genelab_rank_higher`,[loc(`trait_${trait}_name`)])}" class="add has-text-success" @click="increase('${trait}')"><span>+</span></span>`;
                         negative_sum += `</span></div>`;
@@ -8289,9 +8289,7 @@ export function ascendLab(hybrid,wiki){
                             wiki: isWiki
                         }
                         getTraitDesc(desc, t, opts);
-                    }
-                },
-                filters: {
+                    },
                     cost(trait){
                         return geneCost(genome,trait,tRanks);
                     },
@@ -8506,7 +8504,7 @@ export function terraformLab(wiki){
         geology[res] = 0;
         geo_list += `<div class="field t${res}"><div>${global.resource[res].name}</div><div>`;
         geo_list += `<span role="button" aria-label="export ${res}" class="sub has-text-danger" @click="less('${res}')"><span>-</span></span>`;
-        geo_list += `<span class="current" v-html="$options.filters.res('${res}')"></span>`;
+        geo_list += `<span class="current" v-html="res('${res}')"></span>`;
         geo_list += `<span role="button" aria-label="import ${res}" class="add has-text-success" @click="more('${res}')"><span>+</span></span>`;
         geo_list += `</div></div>`;
     });
@@ -8615,9 +8613,7 @@ export function terraformLab(wiki){
                 if (planet.geology[r] > max){
                     planet.geology[r] = max;
                 }
-            }
-        },
-        filters: {
+            },
             res(r){
                 return planet.geology[r];
             }

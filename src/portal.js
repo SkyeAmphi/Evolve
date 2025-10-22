@@ -208,7 +208,7 @@ const fortressModules = {
             prop(){
                 let desc = '';
                 if (global.portal['minions'] && global.portal.minions.count > 0){
-                    desc = ` <span class="has-text-danger">${loc('portal_minions_bd')}:</span> <span class="has-text-caution">{{ spawns | approx }}</span>`;
+                    desc = ` <span class="has-text-danger">${loc('portal_minions_bd')}:</span> <span class="has-text-caution">{{ filter(spawns, 'approx') }}</span>`;
                 }
                 return desc;
             },
@@ -1851,8 +1851,8 @@ const fortressModules = {
             support: 'guard_post',
             prop(){
                 if (global.race['warlord']){ return ''; }
-                let desc = ` - <span class="has-text-advanced">${loc('portal_ruins_security')}:</span> <span class="has-text-caution">{{ on | filter('army') }}</span>`;
-                desc = desc + ` - <span class="has-text-advanced">${loc('portal_ruins_supressed')}:</span> <span class="has-text-caution">{{ on | filter('sup') }}</span>`;
+                let desc = ` - <span class="has-text-advanced">${loc('portal_ruins_security')}:</span> <span class="has-text-caution">{{ filter(on, 'army') }}</span>`;
+                desc = desc + ` - <span class="has-text-advanced">${loc('portal_ruins_supressed')}:</span> <span class="has-text-caution">{{ filter(on, 'sup') }}</span>`;
                 return desc;
             },
             filter(v,type){
@@ -2300,8 +2300,8 @@ const fortressModules = {
             support: 'guard_post',
             hide_support: true,
             prop(){
-                let desc = ` - <span class="has-text-advanced">${loc('portal_ruins_security')}:</span> <span class="has-text-caution">{{ on | filter('army') }}</span>`;
-                desc = desc + ` - <span class="has-text-advanced">${loc('portal_ruins_supressed')}:</span> <span class="has-text-caution">{{ on | filter('sup') }}</span>`;
+                let desc = ` - <span class="has-text-advanced">${loc('portal_ruins_security')}:</span> <span class="has-text-caution">{{ filter(on, 'army') }}</span>`;
+                desc = desc + ` - <span class="has-text-advanced">${loc('portal_ruins_supressed')}:</span> <span class="has-text-caution">{{ filter(on, 'sup') }}</span>`;
                 return desc;
             },
             filter(v,type){
@@ -3029,8 +3029,8 @@ const fortressModules = {
             desc: loc('portal_spire_desc'),
             support: 'purifier',
             prop(){
-                let desc = ` - <span class="has-text-advanced">${loc('portal_spire_supply')}:</span> <span class="has-text-caution">{{ supply | filter }} / {{ sup_max | filter }}</span>`;
-                return desc + ` (<span class="has-text-success">+{{ diff | filter(2) }}/s</span>)`;
+                let desc = ` - <span class="has-text-advanced">${loc('portal_spire_supply')}:</span> <span class="has-text-caution">{{ filter(supply) }} / {{ filter(sup_max) }}</span>`;
+                return desc + ` (<span class="has-text-success">+{{ filter(diff, 2) }}/s</span>)`;
             },
             filter(v,fix){
                 let val = fix ? +(v).toFixed(fix) : Math.floor(v);
@@ -3714,7 +3714,7 @@ export function renderFortress(){
                 vBind({
                     el: `#sr${region}`,
                     data: global.portal[support],
-                    filters: {
+                    methods: {
                         filter(){
                             return fortressModules[region].info.filter(...arguments);
                         }
@@ -3783,8 +3783,8 @@ function buildEnemyFortress(parent){
     parent.append(fort);
 
     let enemy = $(`<div v-for="(e, index) of enemy" :key="index" class="enemyFortress">
-        <div class="fortRow"><span class="has-text-success">{{ e.r | species }}</span><span class="has-text-warning">${loc(`fortress_wall`)} {{ e.f }}%</span></div>
-        <div class="fortRow second"><span class="has-text-caution">${loc(`fortress_demon_kills`)} {{ e.k | kills }}</span><a class="button" v-on:click="attack(index)" role="button">${loc(`civics_garrison_attack`)}</a></div>
+        <div class="fortRow"><span class="has-text-success">{{ species(e.r) }}</span><span class="has-text-warning">${loc(`fortress_wall`)} {{ e.f }}%</span></div>
+        <div class="fortRow second"><span class="has-text-caution">${loc(`fortress_demon_kills`)} {{ kills(e.k) }}</span><a class="button" v-on:click="attack(index)" role="button">${loc(`civics_garrison_attack`)}</a></div>
     </div>`);
     fort.append(enemy);
 
@@ -3830,9 +3830,7 @@ function buildEnemyFortress(parent){
                     global.portal.throne.enemy.splice(idx,1);
                     renderFortress();
                 }
-            }
-        },
-        filters: {
+            },
             species(v){
                 return races[v].name;
             },
@@ -3883,11 +3881,11 @@ export function buildFortress(parent,full){
     let status = $('<div></div>');
     fort.append(status);
 
-    let defense = $(`<span class="defense has-text-success" :aria-label="defense()">${loc('fortress_defense')} {{ f.garrison | defensive }}</span>`);
+    let defense = $(`<span class="defense has-text-success" :aria-label="defense()">${loc('fortress_defense')} {{ defensive(f.garrison) }}</span>`);
     status.append(defense);
     let activity = $(`<span class="has-text-danger pad hostiles" :aria-label="hostiles()">${loc('fortress_spotted')} {{ f.threat }}</span>`);
     status.append(activity);
-    let threatLevel = $(`<span class="pad threatLevel" :class="threaten()" :aria-label="threatLevel()">{{ f.threat | threat }}</span>`);
+    let threatLevel = $(`<span class="pad threatLevel" :class="threaten()" :aria-label="threatLevel()">{{ threat(f.threat) }}</span>`);
     status.append(threatLevel);
 
     let wallStatus = $('<div></div>');
@@ -3900,7 +3898,7 @@ export function buildFortress(parent,full){
     
     station.append($(`<span>${loc('fortress_army')}</span>`));
     station.append($('<span role="button" aria-label="remove soldiers from the fortress" class="sub has-text-danger" @click="aLast"><span>&laquo;</span></span>'));
-    station.append($('<span class="current armyLabel">{{ f.garrison | patrolling }}</span>'));
+    station.append($('<span class="current armyLabel">{{ patrolling(f.garrison) }}</span>'));
     station.append($('<span role="button" aria-label="add soldiers to the fortress" class="add has-text-success" @click="aNext"><span>&raquo;</span></span>'));
     
     station.append($(`<span>${loc('fortress_patrol')}</span>`));
@@ -3919,7 +3917,7 @@ export function buildFortress(parent,full){
     station.append(bunks);
     bunks.append($(`<span class="has-text-warning">${loc('civics_garrison')}: </span>`));
     let soldier_title = global.tech['world_control'] && !global.race['truepath'] ? loc('civics_garrison_peacekeepers') : loc('civics_garrison_soldiers');
-    bunks.append($(`<span><span class="soldier">${soldier_title}</span> <span v-html="$options.filters.stationed(g.workers)"></span> / <span>{{ g.max | s_max }} | <span></span>`));
+    bunks.append($(`<span><span class="soldier">${soldier_title}</span> <span v-html="stationed(g.workers)"></span> / <span>{{ s_max(g.max) }} | <span></span>`));
     bunks.append($(`<span v-show="g.crew > 0"><span class="crew">${loc('civics_garrison_crew')}</span> <span>{{ g.crew }} | </span></span>`));
     bunks.append($(`<span><span class="wounded">${loc('civics_garrison_wounded')}</span> <span>{{ g.wounded }}</span></span>`));
 
@@ -3931,7 +3929,7 @@ export function buildFortress(parent,full){
     reports.append($(`<b-checkbox class="patrol" v-model="f.nocrew"${color} v-show="s.showGalactic">${loc('fortress_nocrew')}</b-checkbox>`));
 
     if (full){
-        fort.append($(`<div class="training"><span>${loc('civics_garrison_training')} - ${loc('arpa_to_complete')} {{ g.rate, g.progress | trainTime }}</span><button class="button observe right" @click="observation">${loc('hell_observation_button')}</button> <progress class="progress" :value="g.progress" max="100">{{ g.progress }}%</progress></div>`));
+        fort.append($(`<div class="training"><span>${loc('civics_garrison_training')} - ${loc('arpa_to_complete')} {{ trainTime(g.rate, g.progress) }}</span><button class="button observe right" @click="observation">${loc('hell_observation_button')}</button> <progress class="progress" :value="g.progress" max="100">{{ g.progress }}%</progress></div>`));
     }
 
     vBind({
@@ -4070,9 +4068,7 @@ export function buildFortress(parent,full){
                 if (!global.settings.tabLoad){
                     drawHellObservations();
                 }
-            }
-        },
-        filters: {
+            },
             defensive(v){
                 return fortressDefenseRating(v);
             },
@@ -6401,15 +6397,15 @@ export function drawMechLab(){
         let assemble = $(`<div id="mechAssembly" class="mechAssembly"></div>`);
         lab.append(assemble);
 
-        let title = $(`<div><span class="has-text-caution">${loc(global.race['warlord'] ? `portal_mech_spawn` : `portal_mech_assembly`)}</span> - <span>{{ b.size | slabel }} {{ b.chassis | clabel }}</span></div>`);
+        let title = $(`<div><span class="has-text-caution">${loc(global.race['warlord'] ? `portal_mech_spawn` : `portal_mech_assembly`)}</span> - <span>{{ slabel(b.size) }} {{ clabel(b.chassis) }}</span></div>`);
         assemble.append(title);
 
         title.append(` | <span><span class="has-text-warning">${loc(global.race['warlord'] ? `portal_mech_lair_space` : 'portal_mech_bay_space')}</span>: {{ m.bay }} / {{ m.max }}</span>`);
-        title.append(` | <span><span class="has-text-warning">${loc('portal_mech_sup_avail')}</span>: {{ p.supply | round }} / {{ p.sup_max }}</span>`);
+        title.append(` | <span><span class="has-text-warning">${loc('portal_mech_sup_avail')}</span>: {{ round(p.supply) }} / {{ p.sup_max }}</span>`);
 
         let infernal = global.blood['prepared'] && global.blood.prepared >= 3 ? `<b-checkbox class="patrol" v-model="b.infernal">${loc('portal_mech_infernal')} (${loc('portal_mech_infernal_effect',[25])})</b-checkbox>` : ``;
-        assemble.append(`<div><span class="has-text-warning">${loc(global.race['warlord'] ? `portal_mech_lair` : `portal_mech_space`)}</span> <span class="has-text-danger">{{ b.size | bay }}</span> | <span class="has-text-warning">${loc(`portal_mech_cost`)}</span> <span class="has-text-danger">{{ b.size | price }}</span> | <span class="has-text-warning">${loc(`portal_mech_soul`,[global.resource.Soul_Gem.name])}</span> <span class="has-text-danger">{{ b.size | soul }}</span>${infernal}</div>`)
-        assemble.append(`<div>{{ b.size | desc }}</div>`);
+        assemble.append(`<div><span class="has-text-warning">${loc(global.race['warlord'] ? `portal_mech_lair` : `portal_mech_space`)}</span> <span class="has-text-danger">{{ bay(b.size) }}</span> | <span class="has-text-warning">${loc(`portal_mech_cost`)}</span> <span class="has-text-danger">{{ price(b.size) }}</span> | <span class="has-text-warning">${loc(`portal_mech_soul`,[global.resource.Soul_Gem.name])}</span> <span class="has-text-danger">{{ soul(b.size) }}</span>${infernal}</div>`)
+        assemble.append(`<div>{{ desc(b.size) }}</div>`);
 
         let options = $(`<div class="bayOptions"></div>`);
         assemble.append(options);
@@ -6422,7 +6418,7 @@ export function drawMechLab(){
 
         options.append(`<b-dropdown :triggers="['hover', 'click']" aria-role="list">
             <button class="button is-info" slot="trigger">
-                <span>${loc(`portal_mech_size`)}: {{ b.size | slabel }}</span>
+                <span>${loc(`portal_mech_size`)}: {{ slabel(b.size) }}</span>
                 <b-icon icon="menu-down"></b-icon>
             </button>${sizes}
         </b-dropdown>`);
@@ -6451,7 +6447,7 @@ export function drawMechLab(){
 
         options.append(`<b-dropdown :triggers="['hover', 'click']" aria-role="list">
             <button class="button is-info" slot="trigger">
-                <span>${loc(`portal_mech_type`)}: {{ b.chassis | clabel }}</span>
+                <span>${loc(`portal_mech_type`)}: {{ clabel(b.chassis) }}</span>
                 <b-icon icon="menu-down"></b-icon>
             </button>${chassis}
         </b-dropdown>`);
@@ -6465,7 +6461,7 @@ export function drawMechLab(){
 
             options.append(`<b-dropdown :triggers="['hover', 'click']" aria-role="list" v-show="vis(${i})">
                 <button class="button is-info" slot="trigger">
-                    <span>${loc(`portal_mech_weapon`)}: {{ b.hardpoint[${i}] || 'laser' | wlabel }}</span>
+                    <span>${loc(`portal_mech_weapon`)}: {{ wlabel(b.hardpoint[i] || 'laser') }}</span>
                     <b-icon icon="menu-down"></b-icon>
                 </button>${weapons}
             </b-dropdown>`);
@@ -6476,12 +6472,12 @@ export function drawMechLab(){
             let equip = ``;
             let equipTypes = validEquipment(global.portal.mechbay.blueprint.size,global.portal.mechbay.blueprint.chassis,i);
             equipTypes.forEach(function(val,idx){
-                equip += `<b-dropdown-item aria-role="listitem" v-on:click="setEquip('${val}',${i})" class="equip r${i} a${idx}" data-val="${val}">{{ '${val}' | equipment }}</b-dropdown-item>`;
+                equip += `<b-dropdown-item aria-role="listitem" v-on:click="setEquip('${val}',${i})" class="equip r${i} a${idx}" data-val="${val}">{{ equipment('${val}') }}</b-dropdown-item>`;
             });
 
             options.append(`<b-dropdown :triggers="['hover', 'click']" aria-role="list" v-show="eVis(${i})">
                 <button class="button is-info" slot="trigger">
-                    <span>${loc(global.race['warlord'] ? `portal_mech_attribute` : `portal_mech_equipment`)}: {{ b.equip[${i}] || 'shields' | equipment }}</span>
+                    <span>${loc(global.race['warlord'] ? `portal_mech_attribute` : `portal_mech_equipment`)}: {{ equipment(b.equip[i] || 'shields') }}</span>
                     <b-icon icon="menu-down"></b-icon>
                 </button>${equip}
             </b-dropdown>`);
@@ -6699,9 +6695,7 @@ export function drawMechLab(){
                         case 'archfiend':
                             return true;
                     }
-                }
-            },
-            filters: {
+                },
                 bay(s){
                     return mechSize(s);
                 },
@@ -6857,11 +6851,11 @@ export function mechDesc(parent,obj){
     });
 
     if (tc && tc['t']){
-        desc.append($(`<div class="divider"></div><div id="popTimer" class="flair has-text-advanced">{{ t | timer }}</div>`));
+        desc.append($(`<div class="divider"></div><div id="popTimer" class="flair has-text-advanced">{{ timer(t) }}</div>`));
         vBind({
             el: '#popTimer',
             data: tc,
-            filters: {
+            methods: {
                 timer(t){
                     return loc('action_ready',[timeFormat(t)]);
                 }
@@ -6964,12 +6958,12 @@ function drawMechs(){
       <div v-for="(mech, index) of mechs" :key="index" class="mechRow" :class="index < active ? '' : 'inactive-row' ">
         <a class="scrap" @click="scrap(index)" role="button">${loc(global.race['warlord'] ? 'portal_mech_unsummon' : 'portal_mech_scrap')}</a>
         <span> | </span><span>${loc(global.race['warlord'] ? 'portal_demon' : 'portal_mech')} #{{index + 1}}: </span>
-        <span class="has-text-caution">{{ mech.infernal ? "${loc('portal_mech_infernal')} " : "" }}{{ mech | size }} {{ mech | chassis }}</span>
+        <span class="has-text-caution">{{ mech.infernal ? "${loc('portal_mech_infernal')} " : "" }}{{ size(mech) }} {{ chassis(mech) }}</span>
         <div :class="'gearList '+mech.size">
           <div>
             <template v-for="hp of mech.hardpoint">
               <span> | </span>
-              <span class="has-text-danger">{{ hp | weapon }}</span>
+              <span class="has-text-danger">{{ weapon(hp) }}</span>
             </template>
           </div>
         </div>
@@ -6977,7 +6971,7 @@ function drawMechs(){
           <div>
             <template v-for="eq of mech.equip">
               <span> | </span>
-              <span class="has-text-warning">{{ eq, mech.size | equipment }}</span>
+              <span class="has-text-warning">{{ equipment(eq, mech.size) }}</span>
             </template>
           </div>
         </div>
@@ -7001,9 +6995,7 @@ function drawMechs(){
                     global.portal.mechbay.bay -= size;
                     global.portal.mechbay.active--;
                 }
-            }
-        },
-        filters: {
+            },
             equipment(e,size){
                 if (e !== 'special'){
                     return loc(`portal_mech_equip_${e}`);
@@ -7849,33 +7841,33 @@ function drawHellAnalysis(){
         clearElement(elem);
         
         elem.append(`
-            <div><h2 class="has-text-warning">${loc('hell_analysis_' + type)}</h2>${type === 'period' ? '<h2 id="resetHellObservation" class="text-button has-text-danger" @click="resetObservations()">{{ | resetLabel }}</h2>' : ''}</div>
-            <div><h2 class="has-text-alert">{{ st.${type}.start | startLabel }}</h2></div>
-            <div><h2>{{ st.${type}.days, s.display | time }}</h2></div>
-            <div><h2>{{ st.${type}.kills, 'kills', s.average | genericMulti }}</h2><h2 class="text-button has-text-advanced" aria-label="${loc('hell_analysis_toggle_bd',[loc('hell_analysis_toggle_bd_kills')])}" @click="toggleDropdown('dropKills')">{{ s.dropKills | dropdownLabel }}</h2></div>
+            <div><h2 class="has-text-warning">${loc('hell_analysis_' + type)}</h2>${type === 'period' ? '<h2 id="resetHellObservation" class="text-button has-text-danger" @click="resetObservations()">{{ resetLabel() }}</h2>' : ''}</div>
+            <div><h2 class="has-text-alert">{{ startLabel(st.${type}.start) }}</h2></div>
+            <div><h2>{{ time(st.${type}.days, s.display) }}</h2></div>
+            <div><h2>{{ genericMulti(st.${type}.kills, 'kills', s.average) }}</h2><h2 class="text-button has-text-advanced" aria-label="${loc('hell_analysis_toggle_bd',[loc('hell_analysis_toggle_bd_kills')])}" @click="toggleDropdown('dropKills')">{{ dropdownLabel(s.dropKills) }}</h2></div>
             <div v-show="s.dropKills">
-                <div v-show="p.war_drone"><h2>{{ st.${type}.kills.drones, 'kills_drones', s.average | genericSub }}</h2></div>
-                <div><h2>{{ st.${type}.kills.patrols, 'kills_patrols', s.average | genericSub }}</h2></div>
-                <div><h2>{{ st.${type}.kills.sieges, 'kills_sieges', s.average | genericSub }}</h2></div>
-                <div v-show="p.gun_emplacement"><h2>{{ st.${type}.kills.guns, 'kills_guns', s.average | genericSub }}</h2></div>
-                <div v-show="p.soul_forge"><h2>{{ st.${type}.kills.soul_forge, 'kills_soul_forge', s.average | genericSub }}</h2></div>
-                <div v-show="p.gate_turret"><h2>{{ st.${type}.kills.turrets, 'kills_turrets', s.average | genericSub }}</h2></div>
+                <div v-show="p.war_drone"><h2>{{ genericSub(st.${type}.kills.drones, 'kills_drones', s.average) }}</h2></div>
+                <div><h2>{{ genericSub(st.${type}.kills.patrols, 'kills_patrols', s.average) }}</h2></div>
+                <div><h2>{{ genericSub(st.${type}.kills.sieges, 'kills_sieges', s.average) }}</h2></div>
+                <div v-show="p.gun_emplacement"><h2>{{ genericSub(st.${type}.kills.guns, 'kills_guns', s.average) }}</h2></div>
+                <div v-show="p.soul_forge"><h2>{{ genericSub(st.${type}.kills.soul_forge, 'kills_soul_forge', s.average) }}</h2></div>
+                <div v-show="p.gate_turret"><h2>{{ genericSub(st.${type}.kills.turrets, 'kills_turrets', s.average) }}</h2></div>
             </div>
-            <div v-show="sg.display"><h2>{{ st.${type}.gems, 'gems', s.average | genericMulti }}</h2><h2 class="text-button has-text-advanced" aria-label="${loc('hell_analysis_toggle_bd',[global.resource.Soul_Gem.name])}" @click="toggleDropdown('dropGems')">{{ s.dropGems | dropdownLabel }}</h2></div>
+            <div v-show="sg.display"><h2>{{ genericMulti(st.${type}.gems, 'gems', s.average) }}</h2><h2 class="text-button has-text-advanced" aria-label="${loc('hell_analysis_toggle_bd',[global.resource.Soul_Gem.name])}" @click="toggleDropdown('dropGems')">{{ dropdownLabel(s.dropGems) }}</h2></div>
             <div v-show="sg.display && s.dropGems">
-                <div><h2>{{ st.${type}.gems.patrols, 'gems_patrols', s.average | genericSub }}</h2></div>
-                <div v-show="p.gun_emplacement"><h2>{{ st.${type}.gems.guns, 'gems_guns', s.average | genericSub }}</h2></div>
-                <div v-show="p.soul_forge"><h2>{{ st.${type}.gems.soul_forge, 'gems_soul_forge', s.average | genericSub }}</h2></div>
-                <div v-show="p.soul_forge"><h2>{{ st.${type}.gems.crafted, 'gems_crafted', s.average | genericSub }}</h2></div>
-                <div v-show="p.gate_turret"><h2>{{ st.${type}.gems.turrets, 'gems_turrets', s.average | genericSub }}</h2></div>
-                <div v-show="p.war_drone && p.carport"><h2>{{ st.${type}.gems.surveyors, 'gems_surveyors', s.average | genericSub }}</h2></div>
-                <div v-show="e.soul_compactor"><h2>{{ st.${type}.gems.compactor, 'gems_compactor', s.average | genericSub }}</h2></div>
+                <div><h2>{{ genericSub(st.${type}.gems.patrols, 'gems_patrols', s.average) }}</h2></div>
+                <div v-show="p.gun_emplacement"><h2>{{ genericSub(st.${type}.gems.guns, 'gems_guns', s.average) }}</h2></div>
+                <div v-show="p.soul_forge"><h2>{{ genericSub(st.${type}.gems.soul_forge, 'gems_soul_forge', s.average) }}</h2></div>
+                <div v-show="p.soul_forge"><h2>{{ genericSub(st.${type}.gems.crafted, 'gems_crafted', s.average) }}</h2></div>
+                <div v-show="p.gate_turret"><h2>{{ genericSub(st.${type}.gems.turrets, 'gems_turrets', s.average) }}</h2></div>
+                <div v-show="p.war_drone && p.carport"><h2>{{ genericSub(st.${type}.gems.surveyors, 'gems_surveyors', s.average) }}</h2></div>
+                <div v-show="e.soul_compactor"><h2>{{ genericSub(st.${type}.gems.compactor, 'gems_compactor', s.average) }}</h2></div>
             </div>
-            <div><h2>{{ st.${type}.wounded, 'wounded', s.average | generic }}</h2></div>
-            <div><h2>{{ st.${type}.died, 'died', s.average | generic }}</h2></div>
-            <div v-show="r.revive"><h2>{{ st.${type}.revived, 'revived', s.average | generic }}</h2></div>
-            <div><h2>{{ st.${type}.surveyors, 'surveyors', s.average | generic }}</h2></div>
-            <div><h2>{{ st.${type}.sieges, 'sieges', s.average | generic }}</h2></div>
+            <div><h2>{{ generic(st.${type}.wounded, 'wounded', s.average) }}</h2></div>
+            <div><h2>{{ generic(st.${type}.died, 'died', s.average) }}</h2></div>
+            <div v-show="r.revive"><h2>{{ generic(st.${type}.revived, 'revived', s.average) }}</h2></div>
+            <div><h2>{{ generic(st.${type}.surveyors, 'surveyors', s.average) }}</h2></div>
+            <div><h2>{{ generic(st.${type}.sieges, 'sieges', s.average) }}</h2></div>
         `);
     
         vBind({
@@ -7906,9 +7898,7 @@ function drawHellAnalysis(){
                 },
                 toggleDropdown(type){
                     global.portal.observe.settings[type] = !global.portal.observe.settings[type];
-                }
-            },
-            filters: {
+                },
                 generic(num, name, average){
                     if (!average){
                         let val = sizeApproximation(num, 5, global.portal.observe.settings.expanded);
@@ -7988,12 +7978,13 @@ function drawHellAnalysis(){
         el: '#hellGraphCreator',
         methods: {
             createGraph(){
-                let modal = {
-                    template: '<div id="modalBox" class="modalBox"></div>'
-                };
                 this.$buefy.modal.open({
-                    parent: this,
-                    component: modal
+                    hasModalCard: false,
+                    customClass: 'evolve-modal',
+                    content: '<div id="modalBox" class="modalBox"></div>',
+                    onCancel: () => {
+                        // Modal closed
+                    }
                 });
 
                 let checkExist = setInterval(function(){

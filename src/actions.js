@@ -6261,12 +6261,12 @@ export function setAction(c_action,action,type,old,prediction){
         if (prediction){ clss = ' precog'; }
         else if (c_action['aura'] && c_action.aura()){ clss = ` ${c_action.aura()}`; }
         let active = c_action['highlight'] ? (c_action.highlight() ? `<span class="is-sr-only">${loc('active')}</span>` : `<span class="is-sr-only">${loc('not_active')}</span>`) : '';
-        element = $(`<a class="button is-dark${cst}${clss}"${data} v-on:click="action" role="link"><span class="aTitle" v-html="$options.filters.title(title)"></span>${active}</a><a role="button" v-on:click="describe" class="is-sr-only">{{ title }} description</a>`);
+        element = $(`<a class="button is-dark${cst}${clss}"${data} v-on:click="action" role="link"><span class="aTitle" v-html="title_l(title)"></span>${active}</a><a role="button" v-on:click="describe" class="is-sr-only">{{ title }} description</a>`);
     }
     parent.append(element);
 
     if (c_action.hasOwnProperty('special') && ((typeof c_action['special'] === 'function' && c_action.special()) || c_action['special'] === true) ){
-        let special = $(`<div class="special" role="button" v-bind:title="title | options" @click="trigModal"><svg version="1.1" x="0px" y="0px" width="12px" height="12px" viewBox="340 140 280 279.416" enable-background="new 340 140 280 279.416" xml:space="preserve">
+        let special = $(`<div class="special" role="button" v-bind:title="options(title)" @click="trigModal"><svg version="1.1" x="0px" y="0px" width="12px" height="12px" viewBox="340 140 280 279.416" enable-background="new 340 140 280 279.416" xml:space="preserve">
             <path class="gear" d="M620,305.666v-51.333l-31.5-5.25c-2.333-8.75-5.833-16.917-9.917-23.917L597.25,199.5l-36.167-36.75l-26.25,18.083
                 c-7.583-4.083-15.75-7.583-23.916-9.917L505.667,140h-51.334l-5.25,31.5c-8.75,2.333-16.333,5.833-23.916,9.916L399.5,163.333
                 L362.75,199.5l18.667,25.666c-4.083,7.584-7.583,15.75-9.917,24.5l-31.5,4.667v51.333l31.5,5.25
@@ -6279,19 +6279,19 @@ export function setAction(c_action,action,type,old,prediction){
     }
     if (c_action['on'] || c_action['off']){
         if (c_action['on']){
-            let powerOn = $(`<span class="on" title="ON" v-html="$options.filters.val('on')"></span>`);
+            let powerOn = $(`<span class="on" title="ON" v-html="val('on')"></span>`);
             parent.append(powerOn);
         }
         if (c_action['off']){
-            let powerOff = $(`<span class="off" title="OFF" v-html="$options.filters.val('off')"></span>`);
+            let powerOff = $(`<span class="off" title="OFF" v-html="val('off')"></span>`);
             parent.append(powerOff);
         }
     }
     else {
         let switchable = c_action['switchable'] ? c_action.switchable() : (c_action['powered'] && global.tech['high_tech'] && global.tech['high_tech'] >= 2 && checkPowerRequirements(c_action));
         if (switchable){
-            let powerOn = $(`<span role="button" :aria-label="on_label()" class="on" @click="power_on" title="ON" v-html="$options.filters.p_on(act.on,'${c_action.id}')"></span>`);
-            let powerOff = $(`<span role="button" :aria-label="off_label()" class="off" @click="power_off" title="OFF" v-html="$options.filters.p_off(act.on,'${c_action.id}')"></span>`);
+            let powerOn = $(`<span role="button" :aria-label="on_label()" class="on" @click="power_on" title="ON" v-html="p_on(act.on,'${c_action.id}')"></span>`);
+            let powerOff = $(`<span role="button" :aria-label="off_label()" class="off" @click="power_off" title="OFF" v-html="p_off(act.on,'${c_action.id}')"></span>`);
             parent.append(powerOn);
             parent.append(powerOff);
         }
@@ -6303,7 +6303,7 @@ export function setAction(c_action,action,type,old,prediction){
         }
     }
     else if (action !== 'tech' && global[action] && global[action][type] && global[action][type].count >= 0){
-        element.append($(`<span class="count" v-html="$options.filters.count(act.count,'${type}')"></span>`));
+        element.append($(`<span class="count" v-html="count(act.count,'${type}')"></span>`));
     }
     else if (action === 'blood' && global[action] && global[action][c_action.grant[0]] && global[action][c_action.grant[0]] > 0 && c_action.grant[1] === '*'){
         element.append($(`<span class="count"> ${global[action][c_action.grant[0]]} </span>`));
@@ -6329,10 +6329,6 @@ export function setAction(c_action,action,type,old,prediction){
         parent.append($(emblem));
     }
 
-    let modal = {
-        template: '<div id="modalBox" class="modalBox"></div>'
-    };
-
     vBind({
         el: '#'+id,
         data: {
@@ -6357,8 +6353,8 @@ export function setAction(c_action,action,type,old,prediction){
                 }
                 else {
                     this.$buefy.modal.open({
-                        parent: this,
-                        component: modal
+                        hasModalCard: false,
+                        content: '<div id="modalBox" class="modalBox"></div>'
                     });
 
                     let checkExist = setInterval(function(){
@@ -6408,9 +6404,7 @@ export function setAction(c_action,action,type,old,prediction){
             },
             repairMax(){
                 return c_action.repair();
-            }
-        },
-        filters: {
+            },
             val(v){
                 switch(v){
                     case 'on':
@@ -6455,7 +6449,7 @@ export function setAction(c_action,action,type,old,prediction){
                 }
                 return p;
             },
-            title(t){
+            title_l(t){
                 return t;
             },
             options(t){
@@ -7458,11 +7452,11 @@ export function actionDesc(parent,c_action,obj,old,action,a_type,bres){
             return;
         }
         if (obj && obj['time']){
-            parent.append($(`<div id="popTimer" class="flair has-text-advanced">{{ time | timer }}</div>`));
+            parent.append($(`<div id="popTimer" class="flair has-text-advanced">{{ timer(time) }}</div>`));
             vBind({
                 el: '#popTimer',
                 data: obj,
-                filters: {
+                methods: {
                     timer(t){
                         return loc('action_ready',[t]);
                     }
@@ -7476,11 +7470,11 @@ export function actionDesc(parent,c_action,obj,old,action,a_type,bres){
     }
     if (c_action.id === 'portal-spire' || (c_action.id === 'portal-waygate' && global.tech.waygate >= 2)){
         if (obj && obj['time']){
-            parent.append($(`<div id="popTimer" class="flair has-text-advanced">{{ time | timer }}</div>`));
+            parent.append($(`<div id="popTimer" class="flair has-text-advanced">{{ timer(time) }}</div>`));
             vBind({
                 el: '#popTimer',
                 data: obj,
-                filters: {
+                methods: {
                     timer(t){
                         let time = !c_action.hasOwnProperty('mscan') || (c_action.hasOwnProperty('mscan') && c_action.mscan() > 0) ? t : '???';
                         return loc('floor_clearing',[time]);
@@ -7491,11 +7485,11 @@ export function actionDesc(parent,c_action,obj,old,action,a_type,bres){
     }
     if(c_action.id === "portal-devilish_dish"){
         if (obj && obj['time']){
-            parent.append($(`<div id="popTimer" class="flair has-text-advanced">{{ time | timer }}</div>`));
+            parent.append($(`<div id="popTimer" class="flair has-text-advanced">{{ timer(time) }}</div>`));
             vBind({
                 el: '#popTimer',
                 data: obj,
-                filters: {
+                methods: {
                     timer(t){
                         let time = !c_action.hasOwnProperty('mscan') || (c_action.hasOwnProperty('mscan') && c_action.mscan() > 0) ? t : '???';
                         return loc('action_done',[time]);
@@ -8012,6 +8006,7 @@ export function orbitDecayed(){
             global.resource.Slave.display = false;
             global.resource.Slave.amount = 0;
             removeTask('slave');
+            console.log('remove slave task called');
             defineGovernor();
         }
         if (global.race['deconstructor']){
@@ -9568,7 +9563,7 @@ export function resQueue(){
     let queue = $(`<ul class="buildList"></ul>`);
     $('#resQueue').append(queue);
 
-    queue.append($(`<li v-for="(item, index) in queue"><a v-bind:id="setID(index)" class="queued" v-bind:class="{ 'qany': item.qa }" @click="remove(index)" role="link"><span class="has-text-warning">{{ item.label }}</span> [<span v-bind:class="{ 'has-text-danger': item.cna, 'has-text-success': !item.cna && item.req, 'has-text-caution': !item.req && !item.cna }">{{ item.time | time }}</span>]</a></li>`));
+    queue.append($(`<li v-for="(item, index) in queue"><a v-bind:id="setID(index)" class="queued" v-bind:class="{ 'qany': item.qa }" @click="remove(index)" role="link"><span class="has-text-warning">{{ item.label }}</span> [<span v-bind:class="{ 'has-text-danger': item.cna, 'has-text-success': !item.cna && item.req, 'has-text-caution': !item.req && !item.cna }">{{ time(item.time) }}</span>]</a></li>`));
 
     try {
         vBind({
@@ -9598,9 +9593,7 @@ export function resQueue(){
                 },
                 pausedesc(){
                     return global.r_queue.pause ? loc('r_queue_play') : loc('r_queue_pause');
-                }
-            },
-            filters: {
+                },
                 time(time){
                     return timeFormat(time);
                 }

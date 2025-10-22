@@ -1791,7 +1791,7 @@ function genetics(){
         if (global.race['artifical']){
             label = global.tech.genetics > 2 ? loc('arpa_code_modification') : loc('arpa_decompile_source');
         }
-        let sequence = $(`<div><span class="seqlbl has-text-warning">${label}</span> - ${loc('arpa_to_complete')} <span v-html="$options.filters.timer(time)"></span></div>`);
+        let sequence = $(`<div><span class="seqlbl has-text-warning">${label}</span> - ${loc('arpa_to_complete')} <span v-html="timer(time)"></span></div>`);
         genome.append(sequence);
         let progress = $(`<progress class="progress" :value="progress" max="${global.arpa.sequence.max}">{{ progress }}%</progress>`);
         genome.append(progress);
@@ -1886,9 +1886,7 @@ function genetics(){
                 },
                 autoLabel(sr){
                     return loc(global.race['artifical'] ? 'arpa_auto_compile_label' : 'arpa_auto_seq_label') + (sr ? (global.arpa.sequence.boost ? loc('city_on') : loc('city_off')) : '');
-                }
-            },
-            filters: {
+                },
                 timer(val){
                     if (global.arpa.sequence.on && global.arpa.sequence.labs > 0){
                         if (global.arpa.sequence.boost){
@@ -2438,7 +2436,7 @@ function addProject(parent,project){
         parent.append(current);
 
         let title = typeof arpaProjects[project].title === 'string' ? arpaProjects[project].title : arpaProjects[project].title();
-        let head = $(`<div class="head"><span class="desc has-text-warning" role="heading" aria-level="3">${title}</span><a v-on:click="srDescAndEffect" class="is-sr-only" role="button">{{ projectName() }} description</a><span aria-hidden="true" v-show="rank" class="rank">{{ rank | level }}</span><span class="is-sr-only">{{ rank | level }}</span></div>`);
+        let head = $(`<div class="head"><span class="desc has-text-warning" role="heading" aria-level="3">${title}</span><a v-on:click="srDescAndEffect" class="is-sr-only" role="button">{{ projectName() }} description</a><span aria-hidden="true" v-show="rank" class="rank">{{ level(rank) }}</span><span class="is-sr-only">{{ level(rank) }}</span></div>`);
         current.append(head);
 
         let progress = $(`<div class="pbar"><progress class="progress" :value="complete" max="100"></progress><span class="progress-value has-text-danger">{{ complete }}%</span></div>`);
@@ -2451,7 +2449,7 @@ function addProject(parent,project){
         buy.append($(`<button :aria-label="arpaProjectSRCosts('1','${project}')" class="button x1" @click="build('${project}',1)">1%</button>`));
         buy.append($(`<button :aria-label="arpaProjectSRCosts('10','${project}')" class="button x10" @click="build('${project}',10)">10%</button>`));
         buy.append($(`<button :aria-label="arpaProjectSRCosts('25','${project}')" class="button x25" @click="build('${project}',25)">25%</button>`));
-        buy.append($(`<button :aria-label="arpaProjectSRCosts('100','${project}')" class="button x100" @click="build('${project}',100)">{{ complete | remain }}%</button>`));
+        buy.append($(`<button :aria-label="arpaProjectSRCosts('100','${project}')" class="button x100" @click="build('${project}',100)">{{ remain(complete) }}%</button>`));
 
         vBind({
             el: `#arpa${project}`,
@@ -2511,9 +2509,7 @@ function addProject(parent,project){
                         }
                     });
                     return cost;
-                }
-            },
-            filters: {
+                },
                 remain(val){
                     return 100 - val;
                 },

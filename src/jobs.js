@@ -514,21 +514,23 @@ function loadJob(job, define, impact, stress, color){
 
     var id = servant ? 'servant-' + job : 'civ-' + job;
 
+    var bind_container = $(`<div id="${id}"></div>`);
     var civ_container = $(`<div id="${id}" v-show="showJob('${job}')" class="job"></div>`);
+    bind_container.append(civ_container);
     var controls = servant ? $(`<div class="controls"></div>`) : $(`<div v-show="!isDefault('${job}')" class="controls"></div>`);
     if (!color || job === 'unemployed'){
         color = color || 'info';
         let job_label = servant
          ? $(`<div class="job_label"><h3 class="has-text-${color}">{{ civic.${job}.name }}</h3><span class="count">{{ sjob.${job} }}</span></div>`)
-         : $(`<div class="job_label"><h3><a class="has-text-${color}" @click="setDefault('${job}')">{{ civic.${job}.name }}{{ '${job}' | d_state }}</a></h3><span class="count" v-html="$options.filters.event(civic.${job}.workers)">{{ civic.${job}.workers }}</span></div>`);
+         : $(`<div class="job_label"><h3><a class="has-text-${color}" @click="setDefault('${job}')">{{ civic.${job}.name }}{{ d_state('${job}') }}</a></h3><span class="count" v-html="event(civic.${job}.workers)"></span></div>`);
         civ_container.append(job_label);
     }
     else {
-        let job_label = $(`<div class="job_label"><h3 class="has-text-${color}">{{ civic.${job}.name }}</h3><span :class="level('${job}')">{{ civic.${job}.workers | adjust('${job}') }} / {{ civic.${job}.max | adjust('${job}') }}</span></div>`);
+        let job_label = $(`<div class="job_label"><h3 class="has-text-${color}">{{ civic.${job}.name }}</h3><span :class="level('${job}')">{{ adjust(civic.${job}.workers, '${job}') }} / {{ adjust(civic.${job}.max, '${job}') }}</span></div>`);
         civ_container.append(job_label);
     }
     civ_container.append(controls);
-    $(servant ? '#servants' : '#jobs').append(civ_container);
+    $(servant ? '#servants' : '#jobs').append(bind_container);
 
     if (job !== 'crew' && !noControl[job]){
         var sub = $(`<span role="button" aria-label="${loc('remove')} ${global['civic'][job].name}" class="sub has-text-danger" @click="sub"><span>&laquo;</span></span>`);
@@ -636,9 +638,7 @@ function loadJob(job, define, impact, stress, color){
                 },
                 isDefault(j){
                     return global.civic.d_job === j;
-                }
-            },
-            filters: {
+                },
                 d_state(j){
                     return global.civic.d_job === j ? '*' : '';
                 },
@@ -857,10 +857,10 @@ export function loadFoundry(servants){
                 let controls = $('<div class="controls"></div>');
                 let job_label;
                 if (res === 'Scarletite' && global.portal.hasOwnProperty('hell_forge')){
-                    job_label = $(`<div id="craft${res}" class="job_label"><h3 class="has-text-danger">${name}</h3><span class="count">{{ f.${res} }} / {{ p.on | maxScar }}</span></div>`);
+                    job_label = $(`<div id="craft${res}" class="job_label"><h3 class="has-text-danger">${name}</h3><span class="count">{{ f.${res} }} / {{ maxScar(p.on) }}</span></div>`);
                 }
                 else if (res === 'Quantium' && (global.space.hasOwnProperty('zero_g_lab') || global.tauceti.hasOwnProperty('infectious_disease_lab'))){
-                    job_label = $(`<div id="craft${res}" class="job_label"><h3 class="has-text-danger">${name}</h3><span class="count">{{ f.${res} }} / {{ e.on | maxQuantium }}</span></div>`);
+                    job_label = $(`<div id="craft${res}" class="job_label"><h3 class="has-text-danger">${name}</h3><span class="count">{{ f.${res} }} / {{ maxQuantium(e.on) }}</span></div>`);
                 }
                 else {
                     let tracker = servants ? `{{ s.sjobs.${res} }}` : `{{ f.${res} }}`;
@@ -976,9 +976,7 @@ export function loadFoundry(servants){
                     else {
                         return 'count';
                     }
-                }
-            },
-            filters: {
+                },
                 maxScar(v){
                     return craftsmanCap('Scarletite');
                 },
