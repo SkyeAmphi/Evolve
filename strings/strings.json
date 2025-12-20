@@ -7245,6 +7245,8 @@
   "portal_sphinx_warlord": "Harmachis",
   "portal_sphinx_warlord_desc": "Harmachis the Ancient",
   "portal_sphinx_warlord_effect": "It just looks at you with disappointment.",
+  "portal_sphinx_warlord_effect2": "It's head appears enticingly soft.",
+  "portal_sphinx_warlord_msg": "You pet the Harmachis. It grumbles at you in what could be interpreted as marginal tolerance.",
   "portal_spire_survey_title": "Survey the Tower",
   "portal_spire_survey_effect": "Survey the inside of the Tower.",
   "portal_spire_survey_msg": "A holographic device found in the lobby of the spire indicates that each level of the tower is like a micro world with a unique biome filled with dangerous monsters and that in order to climb the spire you must defeat a floor guardian on each level. You devise a plan to construct combat mechs to ascend the tower.",

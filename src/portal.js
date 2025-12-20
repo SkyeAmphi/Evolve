@@ -3252,12 +3252,16 @@ const fortressModules = {
                     return loc('portal_sphinx_effect2');
                 }
                 else if (count === 2){
-                    return global.race['warlord'] ? loc('portal_sphinx_warlord_effect') :loc('portal_sphinx_effect3');
+                    return global.race['warlord'] ? `<div>${loc('portal_sphinx_warlord_effect')}</div><div class="has-text-special">${loc('portal_sphinx_warlord_effect2')}</div>` : loc('portal_sphinx_effect3');
                 }
                 return loc('portal_sphinx_effect');
             },
             action(args){
                 if (payCosts($(this)[0])){
+                    if (global.race['warlord']) {
+                        messageQueue(loc('portal_sphinx_warlord_msg'),'info',false,['minor','hell']);
+                        return true;
+                    }
                     if (global.tech.hell_spire === 6){
                         global.tech.hell_spire = 7;
                         messageQueue(loc('portal_sphinx_msg'),'info',false,['progress','hell']);
