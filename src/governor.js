@@ -382,7 +382,7 @@ export function defineGovernor(){
     }
     if (global.genes['governor'] && global.tech['governor']){
         clearElement($('#r_govern1'));
-        if (global.race.hasOwnProperty('governor') && !global.race.governor.hasOwnProperty('candidates')){
+        if (global.race.hasOwnProperty('governor') && (!global.race.governor.hasOwnProperty('candidates') || global.race.governor.candidates.length === 0)){
             drawnGovernOffice();
         }
         else {
@@ -788,7 +788,9 @@ function appointGovernor(){
     let govern = $(`<div id="candidates" class="governor candidates"></div>`);
     $('#r_govern1').append(govern);
 
-    if (!global.race.hasOwnProperty('governor') || !global.race.governor.hasOwnProperty('candidates')){
+    console.log('holding election');
+    if (!global.race.hasOwnProperty('governor') || !global.race.governor.hasOwnProperty('candidates') || global.race.governor.candidates.length === 0){
+        console.log('drafting candidates');
         global.race['governor'] = {
             candidates: genGovernor(10)
         };
@@ -802,15 +804,20 @@ function appointGovernor(){
         }
     }
 
+    console.log(global);
+    console.log(global.race);
+    console.log(global.race.governor);
+
     vBind({
         el: '#candidates',
-        data: global.race.governor,
+        data: [],
         methods: {
             appoint(gi){
                 if (global.genes['governor'] && global.tech['governor']){
                     let gov = global.race.governor.candidates[gi];
                     global.race.governor['g'] = gov;
-                    delete global.race.governor.candidates;
+                    global.race.governor.candidates = [];
+                    console.log(global.race.governor);
                     global.race.governor['tasks'] = {
                         t0: 'none', t1: 'none', t2: 'none', t3: 'none', t4: 'none', t5: 'none'
                     };

@@ -56876,7 +56876,7 @@ ${effect}`);
     }
     if (global.genes["governor"] && global.tech["governor"]) {
       clearElement($("#r_govern1"));
-      if (global.race.hasOwnProperty("governor") && !global.race.governor.hasOwnProperty("candidates")) {
+      if (global.race.hasOwnProperty("governor") && (!global.race.governor.hasOwnProperty("candidates") || global.race.governor.candidates.length === 0)) {
         drawnGovernOffice();
       } else {
         appointGovernor();
@@ -57235,7 +57235,9 @@ ${effect}`);
   function appointGovernor() {
     let govern2 = $(`<div id="candidates" class="governor candidates"></div>`);
     $("#r_govern1").append(govern2);
-    if (!global.race.hasOwnProperty("governor") || !global.race.governor.hasOwnProperty("candidates")) {
+    console.log("holding election");
+    if (!global.race.hasOwnProperty("governor") || !global.race.governor.hasOwnProperty("candidates") || global.race.governor.candidates.length === 0) {
+      console.log("drafting candidates");
       global.race["governor"] = {
         candidates: genGovernor(10)
       };
@@ -57247,15 +57249,19 @@ ${effect}`);
         govern2.append($(`<div class="appoint ${gov.bg}"><span class="has-text-warning" role="heading" aria-level="3">${gov.t} ${gov.n}</span><span class="bg">${gmen[gov.bg].name}</span><span><b-button @click="appoint(${i})">${loc(`governor_appoint`)}</b-button></span><div>`));
       }
     }
+    console.log(global);
+    console.log(global.race);
+    console.log(global.race.governor);
     vBind({
       el: "#candidates",
-      data: global.race.governor,
+      data: [],
       methods: {
         appoint(gi) {
           if (global.genes["governor"] && global.tech["governor"]) {
             let gov = global.race.governor.candidates[gi];
             global.race.governor["g"] = gov;
-            delete global.race.governor.candidates;
+            global.race.governor.candidates = [];
+            console.log(global.race.governor);
             global.race.governor["tasks"] = {
               t0: "none",
               t1: "none",
@@ -89265,15 +89271,38 @@ ${effect}`);
   }
   function vBind(bind, action) {
     action = action || "create";
+    if (action === "native") {
+      return vBindNative(bind, "create");
+    }
     if ($(bind.el).length > 0 && typeof $(bind.el)[0].__vue_app__ !== "undefined") {
       try {
         if (action === "update") {
           $(bind.el)[0].__vue_app__._instance.proxy.$forceUpdate();
         } else {
-          $(bind.el)[0].__vue_app__.unmount();
+          console.log(`unmount ${bind.el} called`);
+          const app = $(bind.el)[0].__vue_app__;
+          if (app._instance && app._instance.proxy && app._instance.proxy._syncInterval) {
+            clearInterval(app._instance.proxy._syncInterval);
+            delete app._instance.proxy._syncInterval;
+          }
+          if (app._instance && app._instance.proxy && app._instance.proxy.$data) {
+            const data = app._instance.proxy.$data;
+            for (const key in data) {
+              if (data.hasOwnProperty(key)) {
+                try {
+                  delete data[key];
+                } catch (e) {
+                  data[key] = null;
+                }
+              }
+            }
+          }
+          app.unmount();
           delete $(bind.el)[0].__vue_app__;
+          $(bind.el).removeClass("vb");
         }
       } catch (e) {
+        console.warn("Error during vBind cleanup:", e);
       }
     }
     if (action === "create") {
@@ -89339,6 +89368,17 @@ ${effect}`);
           vueOptions.beforeUnmount = function() {
             if (this._syncInterval) {
               clearInterval(this._syncInterval);
+              delete this._syncInterval;
+            }
+            const data = this.$data;
+            for (const key in data) {
+              if (data.hasOwnProperty(key)) {
+                try {
+                  delete data[key];
+                } catch (e) {
+                  data[key] = null;
+                }
+              }
             }
             if (originalBeforeUnmount) {
               originalBeforeUnmount.call(this);
@@ -89352,6 +89392,35 @@ ${effect}`);
         app.mount(bind.el);
         $(bind.el)[0].__vue_app__ = app;
         $(bind.el).addClass("vb");
+        return app;
+      }
+    }
+  }
+  function vBindNative(bind, action) {
+    action = action || "create";
+    if (action === "create") {
+      if ($(bind.el).length > 0) {
+        const vueOptions = { ...bind };
+        if (vueOptions.data && typeof vueOptions.data === "object") {
+          const originalData = vueOptions.data;
+          vueOptions.data = function() {
+            return Vue.reactive(originalData);
+          };
+          const originalMounted = vueOptions.mounted;
+          vueOptions.mounted = function() {
+            if (originalMounted) {
+              originalMounted.call(this);
+            }
+          };
+        }
+        const app = Vue.createApp(vueOptions);
+        if (!bind.hasOwnProperty("buefy") || bind.buefy) {
+          app.use(Buefy.default);
+        }
+        app.mount(bind.el);
+        $(bind.el)[0].__vue_app__ = app;
+        $(bind.el).addClass("vb");
+        return app;
       }
     }
   }
