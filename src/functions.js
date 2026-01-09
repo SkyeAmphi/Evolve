@@ -1108,24 +1108,33 @@ export function arpaTimeCheck(project, remain, track, detailed){
     return detailed ? { t: allRemainingSegmentsTime, r: bottleneck, s: shorted } : allRemainingSegmentsTime;
 }
 
-export function clearElement(elm,remove){
-    elm.find('.vb').each(function(){
+export function clearElement(elm, remove) {
+    // Unmount all Vue apps in child elements first
+    elm.find('.vb').each(function () {
         try {
             if ($(this)[0].__vue_app__) {
                 $(this)[0].__vue_app__.unmount();
                 delete $(this)[0].__vue_app__;
             }
         }
-        catch(e){}
-    });
-    if (remove){
-        try {
-            if (elm[0].__vue_app__) {
-                elm[0].__vue_app__.unmount();
-                delete elm[0].__vue_app__;
-            }
+        catch (e) {
+            console.warn('Error unmounting nested Vue app:', e);
         }
-        catch(e){}
+    });
+
+    // Unmount element's Vue app if it exists before clearing
+    if (elm[0] && elm[0].__vue_app__) {
+        try {
+            elm[0].__vue_app__.unmount();
+            delete elm[0].__vue_app__;
+        }
+        catch (e) {
+            console.warn('Error unmounting element Vue app:', e);
+        }
+    }
+
+    // Don't remove DOM until after unmounting
+    if (remove) {
         elm.remove();
     }
     else {
