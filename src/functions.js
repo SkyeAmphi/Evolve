@@ -1142,17 +1142,15 @@ export function clearElement(elm, remove) {
     }
 }
 
-export function vBind(bind,action){
+export function vBind(bind, action) {
     action = action || 'create';
-    if (action === 'native'){
-        return vBindNative(bind,'create');
-    }
-    if ($(bind.el).length > 0 && typeof $(bind.el)[0].__vue_app__ !== "undefined"){
+    
+    if ($(bind.el).length > 0 && typeof $(bind.el)[0].__vue_app__ !== "undefined") {
         try {
-            if (action === 'update'){
+            if (action === 'update') {
                 $(bind.el)[0].__vue_app__._instance.proxy.$forceUpdate();
             }
-            else {
+            else if (action === 'destroy') {
                 console.log(`unmount ${bind.el} called`);
                 const app = $(bind.el)[0].__vue_app__;
                 
@@ -1162,21 +1160,71 @@ export function vBind(bind,action){
                     delete app._instance.proxy._syncInterval;
                 }
                 
-                // Force cleanup of reactive references
-                if (app._instance && app._instance.proxy && app._instance.proxy.$data) {
-                    // Clear data references to help GC
-                    const data = app._instance.proxy.$data;
-                    for (const key in data) {
-                        if (data.hasOwnProperty(key)) {
-                            try {
-                                delete data[key];
-                            } catch(e) {
-                                // Some properties might be non-configurable
-                                data[key] = null;
-                            }
-                        }
+                app.unmount();
+                delete $(bind.el)[0].__vue_app__;
+                $(bind.el).removeClass('vb');
+            }
+        }
+        catch(e) {
+            console.warn('Error during vBind cleanup:', e);
+        }
+    }
+    
+    if (action === 'create') {
+        if ($(bind.el).length > 0) {
+            const vueOptions = { ...bind };
+
+            if (vueOptions.data && typeof vueOptions.data === 'object') {
+                const originalData = vueOptions.data;
+                
+                // Create reactive data that REFERENCES the original objects
+                vueOptions.data = function() {
+                    return originalData;  // Don't copy or wrap - use original directly
+                };
+                
+                // Set up sync to force Vue to check for external changes
+                const originalMounted = vueOptions.mounted;
+                vueOptions.mounted = function() {
+                    const vueInstance = this;
+                    
+                    // Periodically force Vue to re-check everything
+                    this._syncInterval = setInterval(() => {
+                        vueInstance.$forceUpdate();
+                    }, 100);
+                    
+                    if (originalMounted) {
+                        originalMounted.call(this);
                     }
-                }
+                };
+                
+                // Clean up interval on unmount
+                const originalBeforeUnmount = vueOptions.beforeUnmount;
+                vueOptions.beforeUnmount = function() {
+                    if (this._syncInterval) {
+                        clearInterval(this._syncInterval);
+                        delete this._syncInterval;
+                    }
+                    
+                    if (originalBeforeUnmount) {
+                        originalBeforeUnmount.call(this);
+                    }
+                };
+            }
+
+            const app = Vue.createApp(vueOptions);
+            if (!bind.hasOwnProperty('buefy') || bind.buefy) {
+                app.use(Buefy.default);
+            }
+            
+            app.mount(bind.el);
+            $(bind.el)[0].__vue_app__ = app;
+            $(bind.el).addClass('vb');
+
+            return app;
+        }
+    }
+}
+
                 
                 app.unmount();
                 delete $(bind.el)[0].__vue_app__;
