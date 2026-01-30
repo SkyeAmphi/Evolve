@@ -2370,6 +2370,11 @@ function loadContainerCounter(){
     if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 1)){
         return;
     }
+    
+    // Check if already mounted - if so, just update and return
+    if ($('#crateTotal').length > 0) {
+        return;  // Already exists, Vue reactivity will handle updates
+    }
 
     var market_item = $(`<div id="crateTotal" class="market-item"><span v-show="cr.display" class="crtTotal"><span class="has-text-warning">${global.resource.Crates.name}</span><span>{{ cr.amount }} / {{ cr.max }}</span></span><span v-show="cn.display" class="cntTotal"><span class="has-text-warning">${global.resource.Containers.name}</span><span>{{ cn.amount }} / {{ cn.max }}</span></span></div>`);
     $('#resStorage').append(market_item);

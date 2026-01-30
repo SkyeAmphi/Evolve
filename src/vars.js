@@ -2440,3 +2440,16 @@ window.reset = function reset(){
     }
     window.location.reload();
 }
+
+export function makeGlobalReactive() {
+    // Make the entire global object reactive
+    // must be called after global is loaded from save but before any vBind calls
+    const reactiveGlobal = Vue.reactive(global);
+    
+    // We need to update the module-level export and window.global
+    // Some code accesses it via import, some via window
+    global = reactiveGlobal;
+    window.global = reactiveGlobal;
+    
+    return reactiveGlobal;
+}
