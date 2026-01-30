@@ -1753,7 +1753,7 @@ export function setPowerGrid(){
                     break;
             }
 
-            if (gridEnabled(c_action,region,parts[0],parts[1])){
+            if (gridEnabled(c_action, region, parts[0], parts[1]) && global[region] && global[region][parts[1]]) {
                 idx++;
                 let circuit = $(`<div id="pg${c_action.id}${grid_type}" class="circuit" data-idx="${i}"></div>`);
                 circuit.append(`<span v-html="idx(${idx})"></span> <span class="struct has-text-warning">${title}${extra}</span>`);
@@ -1766,8 +1766,11 @@ export function setPowerGrid(){
                     data: global[region][parts[1]],
                     methods: {
                         power_on(){
+                            if (!global[region] || !global[region][parts[1]]) {
+                                return;
+                            }
                             let keyMult = keyMultiplier();
-                            for (let i=0; i<keyMult; i++){
+                            for (let i = 0; i < keyMult; i++) {
                                 if (global[region][parts[1]].on < global[region][parts[1]].count){
                                     global[region][parts[1]].on++;
                                 }
@@ -1780,8 +1783,11 @@ export function setPowerGrid(){
                             }
                         },
                         power_off(){
+                            if (!global[region] || !global[region][parts[1]]) {
+                                return;
+                            }
                             let keyMult = keyMultiplier();
-                            for (let i=0; i<keyMult; i++){
+                            for (let i = 0; i < keyMult; i++) {
                                 if (global[region][parts[1]].on > 0){
                                     global[region][parts[1]].on--;
                                 }
@@ -1813,7 +1819,10 @@ export function setPowerGrid(){
                                 setPowerGrid(grid_type);
                             }
                         },
-                        off(c){
+                        off(c) {
+                            if (!global[region] || !global[region][parts[1]]) {
+                                return 0;
+                            }
                             return global[region][parts[1]].count - c;
                         },
                         idx(idx){

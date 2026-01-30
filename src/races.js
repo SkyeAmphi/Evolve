@@ -6847,8 +6847,8 @@ function purgeLumber(){
         global.race.casting.total -= global.race.casting.lumberjack;
         global.race.casting.lumberjack = 0;
         active_rituals.lumberjack = 0;
-        defineIndustry();
     }
+    defineIndustry();
     if (global.city['s_alter']) {
         global.city.s_alter.harvest = 0;
     }
@@ -7120,13 +7120,14 @@ export function cleanAddTrait(trait){
         case 'flier':
             setResourceName('Stone');
             setResourceName('Brick');
-            global.resource.Cement.display = false;
+            releaseResource('Cement');
             global.civic.cement_worker.display = false;
             global.civic.cement_worker.workers = 0;
             global.civic.cement_worker.assigned = 0;
             setPurgatory('tech','cement');
             setPurgatory('city','cement_plant');
             setPurgatory('eden','eden_cement');
+            defineIndustry();
             break;
         case 'sappy':
             if (global.civic.d_job === 'quarry_worker'){
@@ -7138,6 +7139,7 @@ export function cleanAddTrait(trait){
             setResourceName('Stone');
             setPurgatory('tech','hammer');
             setPurgatory('city','rock_quarry');
+            defineIndustry();
             break;
         case 'apex_predator':
             removeFromRQueue(['armor']);
@@ -7341,6 +7343,7 @@ export function cleanRemoveTrait(trait,rank){
             global.resource.Lumber.display = true;
             if (global.tech['foundry']){
                 global.resource.Plywood.display = true;
+                loadFoundry();
             }
             if (global.race['casting']){
                 defineIndustry();
@@ -7363,6 +7366,7 @@ export function cleanRemoveTrait(trait,rank){
             global.resource.Lumber.display = true;
             if (global.tech['foundry']){
                 global.resource.Plywood.display = true;
+                loadFoundry();
             }
             if (global.race['casting']){
                 defineIndustry();
@@ -7380,6 +7384,7 @@ export function cleanRemoveTrait(trait,rank){
         case 'iron_wood':
             if (global.tech['foundry']){
                 global.resource.Plywood.display = true;
+                loadFoundry();
             }
             break;
         case 'forge':
@@ -7406,6 +7411,7 @@ export function cleanRemoveTrait(trait,rank){
                 global.resource.Cement.display = true;
                 global.civic.cement_worker.display = true;
             }
+            defineIndustry();
             break;
         case 'sappy':
             setResourceName('Stone');
@@ -7416,6 +7422,7 @@ export function cleanRemoveTrait(trait,rank){
                     global.civic.quarry_worker.display = true;
                 }
             }
+            defineIndustry();
             break;
         case 'apex_predator':
             checkPurgatory('tech','armor');
@@ -7670,12 +7677,14 @@ export function shapeShift(genus,setup,forceClean){
         });
 
         $('#sshifter').append(
-            `<span>${loc(`trait_shapeshifter_name`)}</span>: <b-dropdown hoverable scrollable>
-            <button class="button is-primary" slot="trigger">
-                <span>{{ genus(ss_genus) }}</span>
-            </button>
-            <b-dropdown-item v-on:click="setShape('none')">{{ genus('none') }}</b-dropdown-item>${drop}
-        </b-dropdown>`);
+            `<span>${loc(`trait_shapeshifter_name`)}</span>: <b-dropdown aria-role="list" scrollable>
+                <template #trigger>
+                    <button class="button is-primary">
+                        <span>{{ genus(ss_genus) }}</span>
+                    </button>
+                </template>
+                <b-dropdown-item v-on:click="setShape('none')">{{ genus('none') }}</b-dropdown-item>${drop}
+            </b-dropdown>`);
 
         vBind({
             el: `#sshifter`,

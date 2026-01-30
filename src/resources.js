@@ -597,10 +597,10 @@ export function drawResourceTab(tab){
             Object.keys(tmp_vars.resource).forEach(function(name){
                 let color = tmp_vars.resource[name].color;
                 let tradable = tmp_vars.resource[name].tradable;
-                if (tradable){
-                    var market_item = $(`<div id="market-${name}" class="market-item" v-show="r.display"></div>`);
+                if (tradable) {
+                    var market_item = $(`<div id="market-${name}" class="market-item"></div>`);
                     $('#market').append(market_item);
-                    marketItem(`#market-${name}`,market_item,name,color,true);
+                    marketItem(`#market-${name}`, market_item, name, color, true);
                 }
             });
         }
@@ -615,10 +615,10 @@ export function drawResourceTab(tab){
             Object.keys(tmp_vars.resource).forEach(function(name){
                 let color = tmp_vars.resource[name].color;
                 let stackable = tmp_vars.resource[name].stackable;
-                if (stackable){
-                    var market_item = $(`<div id="stack-${name}" class="market-item" v-show="display"></div>`);
+                if (stackable) {
+                    var market_item = $(`<div id="stack-${name}" class="market-item"></div>`);
                     $('#resStorage').append(market_item);
-                    containerItem(`#stack-${name}`,market_item,name,color,true);
+                    containerItem(`#stack-${name}`, market_item, name, color, true);
                 }
             });
         }
@@ -1393,27 +1393,31 @@ export function marketItem(mount,market_item,name,color,full){
         return;
     }
 
+    let wrapper = $(`<div v-show="r.display"></div>`);
+
     if (full){
-        market_item.append($(`<h3 class="res has-text-${color}">{{ namespace(r.name) }}</h3>`));
+        wrapper.append($(`<h3 class="res has-text-${color}">{{ namespace(r.name) }}</h3>`));
     }
 
     if (!global.race['no_trade']){
-        market_item.append($(`<span class="buy"><span class="has-text-success">${loc('resource_market_buy')}</span></span>`));
-        market_item.append($(`<span role="button" class="order" @click="purchase('${name}')">\${{ buy(r.value) }}</span>`));
+        wrapper.append($(`<span class="buy"><span class="has-text-success">${loc('resource_market_buy')}</span></span>`));
+        wrapper.append($(`<span role="button" class="order" @click="purchase('${name}')">\${{ buy(r.value) }}</span>`));
         
-        market_item.append($(`<span class="sell"><span class="has-text-danger">${loc('resource_market_sell')}</span></span>`));
-        market_item.append($(`<span role="button" class="order" @click="sell('${name}')">\${{ sell_f(r.value) }}</span>`));
+        wrapper.append($(`<span class="sell"><span class="has-text-danger">${loc('resource_market_sell')}</span></span>`));
+        wrapper.append($(`<span role="button" class="order" @click="sell('${name}')">\${{ sell_f(r.value) }}</span>`));
     }
 
     if (full && ((global.race['banana'] && name === 'Food') || (global.tech['trade'] && !global.race['terrifying']))){
         let trade = $(`<span class="trade" v-show="m.active"><span class="has-text-warning">${loc('resource_market_routes')}</span></span>`);
-        market_item.append(trade);
+        wrapper.append(trade);
         trade.append($(`<b-tooltip :label="aSell('${name}')" position="is-bottom" size="is-small" multilined animated><span role="button" aria-label="export ${global.resource[name].name}" class="sub has-text-danger" @click="autoSell('${name}')"><span>-</span></span></b-tooltip>`));
         trade.append($(`<span class="current" v-html="trade(r.trade)"></span>`));
         trade.append($(`<b-tooltip :label="aBuy('${name}')" position="is-bottom" size="is-small" multilined animated><span role="button" aria-label="import ${global.resource[name].name}" class="add has-text-success" @click="autoBuy('${name}')"><span>+</span></span></b-tooltip>`));
         trade.append($(`<span role="button" class="zero has-text-advanced" @click="zero('${name}')">${loc('cancel_routes')}</span>`));
         tradeRouteColor(name);
     }
+
+    market_item.append(wrapper);
     
     vBind({
         el: mount,
@@ -1892,29 +1896,35 @@ export function containerItem(mount,market_item,name,color){
         return;
     }
 
-    market_item.append($(`<h3 class="res has-text-${color}">{{ name }}</h3>`));
+    let wrapper = $(`<div v-show="r.display"></div>`);
+
+    wrapper.append($(`<h3 class="res has-text-${color}">{{ r.name }}</h3>`));
 
     if (global.resource.Crates.display){
         let crate = $(`<span class="trade"><span class="has-text-warning">${global.resource.Crates.name}</span></span>`);
-        market_item.append(crate);
+        wrapper.append(crate);
 
         crate.append($(`<span role="button" aria-label="remove ${global.resource[name].name} ${global.resource.Crates.name}" class="sub has-text-danger" @click="subCrate('${name}')"><span>&laquo;</span></span>`));
-        crate.append($(`<span class="current" v-html="cCnt(crates,'${name}')"></span>`));
+        crate.append($(`<span class="current" v-html="cCnt(r.crates,'${name}')"></span>`));
         crate.append($(`<span role="button" aria-label="add ${global.resource[name].name} ${global.resource.Crates.name}" class="add has-text-success" @click="addCrate('${name}')"><span>&raquo;</span></span>`));
     }
 
     if (global.resource.Containers.display){
         let container = $(`<span class="trade"><span class="has-text-warning">${global.resource.Containers.name}</span></span>`);
-        market_item.append(container);
+        wrapper.append(container);
 
         container.append($(`<span role="button" aria-label="remove ${global.resource[name].name} ${global.resource.Containers.name}" class="sub has-text-danger" @click="subCon('${name}')"><span>&laquo;</span></span>`));
-        container.append($(`<span class="current" v-html="trick(containers)"></span>`));
+        container.append($(`<span class="current" v-html="trick(r.containers)"></span>`));
         container.append($(`<span role="button" aria-label="add ${global.resource[name].name} ${global.resource.Containers.name}" class="add has-text-success" @click="addCon('${name}')"><span>&raquo;</span></span>`));
     }
 
+    market_item.append(wrapper);
+
     vBind({
         el: mount,
-        data: global.resource[name],
+        data: {
+            r: global.resource[name]
+        },
         methods: {
             addCrate(res){
                 assignCrate(res);
