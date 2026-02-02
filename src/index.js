@@ -1299,7 +1299,7 @@ export function index(){
         <div class="reset">
             <b-collapse :open="false">
                 <b-switch v-model="s.disableReset" slot="trigger">{{ label('enable_reset') }}</b-switch>
-                <div class="notification">
+                <div class="notification" v-if="s.disableReset">
                     <div class="content">
                         <h4 class="has-text-danger">
                             {{ label('reset_warn') }}

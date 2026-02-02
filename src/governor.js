@@ -706,14 +706,16 @@ export function drawnGovernOffice(){
                 });
                 vBind({el: `#race`},'update');
             },
-            showTask(t){
+            showTask(t) {
+                if (!global.race.governor?.tasks) return false;
+                
                 return Object.values(global.race.governor.tasks).includes(t) 
                 || (Object.values(global.race.governor.tasks).includes('combo_storage') && ['storage','bal_storage'].includes(t))
                 || (Object.values(global.race.governor.tasks).includes('combo_spy') && ['spy','spyop'].includes(t));
             },
             activeTask(t){
                 let activeTasks = [];
-                if (global.race.hasOwnProperty('governor')){
+                if (global.race.hasOwnProperty('governor') && global.race.governor?.tasks) {
                     Object.keys(global.race.governor.tasks).forEach(function(ts){
                         if (global.race.governor.tasks[ts] !== 'none'){
                             activeTasks.push(global.race.governor.tasks[ts]);
@@ -751,16 +753,19 @@ export function drawnGovernOffice(){
                     defineGovernor();
                 }
             },
-            fireText(){
-                let inc = global.race.governor.hasOwnProperty('f') ? global.race.governor.f : 0;
+            fireText() {
+                let inc = global.race.governor?.f ?? 0;
                 let cost = ((10 + inc) ** 2) - 50;
                 return `<div>${loc(`governor_fire`)}</div><div>${cost} ${loc(global.race.universe === 'antimatter' ? `resource_AntiPlasmid_plural_name` : `resource_Plasmid_plural_name`)}</div>`
             },
-            trashStrat(r){
-                global.race.governor.config.trash[r].s = global.race.governor.config.trash[r].s ? false : true;
+            trashStrat(r) {
+                const trash = global.race.governor?.config?.trash?.[r];
+                if (!trash) return;
+                trash.s = trash.s ? false : true; // toggle between max/min
             },
-            trashLabel(r){
-                return loc(global.race.governor.config.trash[r].s ? `gov_task_trash_max` : `gov_task_trash_min`,[global.resource[r].name]);
+            trashLabel(r) {
+                const isMax = global.race.governor?.config?.trash?.[r]?.s ?? true;
+                return loc(isMax ? `gov_task_trash_max` : `gov_task_trash_min`, [global.resource[r]?.name]);
             },
             label(t){
                 return gov_tasks[t] ? (typeof gov_tasks[t].name === 'string' ? gov_tasks[t].name : gov_tasks[t].name()) : loc(`gov_task_${t}`);

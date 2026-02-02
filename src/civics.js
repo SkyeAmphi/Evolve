@@ -33,39 +33,49 @@ export function defineGovernment(define){
 
     vBind({
         el: '#government',
+
         data: {
             t: global.civic['taxes'],
-            s: global.settings
+            s: global.settings,
+            tech: global.tech,
+            genes: global.genes
         },
-        template: `<b-tabs class="resTabs govTabs2" v-show="vis()" v-model="s.govTabs2" :animated="s.animated">
+
+        template: `<b-tabs class="resTabs govTabs2" v-show="showGovernment()" v-model="s.govTabs2" :animated="s.animated">
             <b-tab-item id="r_govern0" :label="govLabel"></b-tab-item>
-            <b-tab-item id="r_govern1" v-show="s.showGovernor" :label="governorLabel"></b-tab-item>
+            <b-tab-item v-if="showGovernor()" id="r_govern1" :label="governorLabel"></b-tab-item>
         </b-tabs>`,
-        mounted(){
-            // Initialize content after Vue has rendered the tabs
-            this.$nextTick(() => {
-                government($(`#r_govern0`));
-                taxRates($(`#r_govern0`));
-                
-                var civ_garrison = $('<div id="c_garrison" v-show="g.display" class="garrison tile is-child"></div>');
-                $('#r_govern0').append(civ_garrison);
-            });
-        },
+
         methods: {
-            vis(){
+            showGovernment() {
                 return global.tech['govern'] ? true : false;
+            },
+            showGovernor() {
+                return global.genes['governor'] && global.tech['governor'] ? true : false;
             }
         },
+
         computed: {
-            govLabel(){
+            govLabel() {
                 return loc('civics_government');
             },
-            governorLabel(){
+            governorLabel() {
                 return loc('governor');
             }
         }
     });
-    
+
+    // make sure Vue populates government tab in the right order
+    government($(`#r_govern0`));
+    taxRates($(`#r_govern0`));
+
+    // Garrison data structure must be initialized before building compact garrison
+    commisionGarrison();
+
+    const civ_garrison = $('<div id="c_garrison" class="garrison tile is-child"></div>');
+    $('#r_govern0').append(civ_garrison);
+    buildGarrison(civ_garrison, false);
+
     defineGovernor();
 }
 
@@ -487,7 +497,18 @@ export function foreignGov(){
     if ($('#foreign').length === 0 && !global.race['cataclysm'] && (!global.tech['world_control'] || global.race['truepath']) && !global.tech['isolation']){
         let foreign = $('<div id="foreign" v-show="vis()" class="government is-child"></div>');
         foreign.append($(`<div class="header"><h2 class="has-text-warning">${loc('civics_foreign')}</h2></div>`));
-        $('#r_govern0').append(foreign);
+
+        // Insert foreign powers section after the last government element
+        const insertAfter = $('#c_garrison').length ? $('#c_garrison')
+                          : $('#tax_rates').length ? $('#tax_rates')
+                          : $('#govType').length ? $('#govType')
+                          : null;
+        
+        if (insertAfter) {
+            foreign.insertAfter(insertAfter);
+        } else {
+            $('#r_govern0').append(foreign);
+        }
 
         let govEnd = global.race['truepath'] ? 5 : 3;
         for (let i=0;i<govEnd;i++){
@@ -1047,22 +1068,18 @@ function adjustTax(a,n){
 }
 
 function taxRates(govern){
-    var tax_rates = $('<div id="tax_rates" v-show="display" class="taxRate"></div>');
+    var tax_rates = $('<div id="tax_rates"></div>');
     govern.append(tax_rates);
-    
-    var label = $(`<h3 id="taxRateLabel">${loc('civics_tax_rates')}</h3>`);
-    tax_rates.append(label);
-    
-    var tax_level = $('<span class="current" v-html="tax_level(tax_rate)"></span>');
-    var sub = $(`<span role="button" aria-label="decrease taxes" class="sub has-text-success" @click="sub">&laquo;</span>`);
-    var add = $(`<span role="button" aria-label="increase taxes" class="add has-text-danger" @click="add">&raquo;</span>`);
-    tax_rates.append(sub);
-    tax_rates.append(tax_level);
-    tax_rates.append(add);
     
     vBind({
         el: '#tax_rates',
         data: global.civic['taxes'],
+        template: `<div v-if="display" class="taxRate">
+            <h3 id="taxRateLabel">${loc('civics_tax_rates')}</h3>
+            <span role="button" aria-label="decrease taxes" class="sub has-text-success" @click="sub">&laquo;</span>
+            <span class="current" v-html="tax_level(tax_rate)"></span>
+            <span role="button" aria-label="increase taxes" class="add has-text-danger" @click="add">&raquo;</span>
+        </div>`,
         methods: {
             tax_level(rate){
                 let egg = easterEgg(11,14);
@@ -1349,13 +1366,14 @@ export function buildGarrison(garrison,full){
 
     ['tactic','bat','soldier','crew','wounded','hmerc','defenseRating','offenseRating','soldierRating'].forEach(function(k){
         popover(full ? `garrison${k}` : `cGarrison${k}`,
-            function(){ return '<span v-html="label()"></span>'; },
+            function () { return `<span></span>`; }, // return empty span to let Vue populate the content
             {
                 elm: `${full ? '#garrison' : '#c_garrison'} .${k}`,
                 in: function(obj){
                     vBind({
                         el: `#${obj.id} > span`,
                         data: { test: 'val' },
+                        template: '<span v-html="label()"></span>',
                         methods: {
                             label(){
                                 switch(k){
@@ -1405,17 +1423,19 @@ export function buildGarrison(garrison,full){
         );
     });
 
-    if (full){
+    if (full) {
         let end = global.race['truepath'] ? 4 : 3;
-        for (let i=0; i<end; i++){
+
+        for (let i = 0; i < end; i++) {
             popover(`garrison${i}`,
-                function(){ return '<span>{{ label() }}</span>'; },
+                function () { return '<span></span>'; }, // return empty span to let Vue populate the content
                 {
                     elm: `#garrison .gov${i} button`,
                     in: function(obj){
                         vBind({
                             el: `#${obj.id} > span`,
                             data: { test: 'val' },
+                            template: '<span>{{ label() }}</span>',
                             methods: {
                                 label(){
                                     return battleAssessment(i);
@@ -1429,6 +1449,7 @@ export function buildGarrison(garrison,full){
                 }
             );
         }
+        
         if (global.race['truepath'] && !global.tech['isolation']){
             popover(`garRivaldesc2`,
                 function(){ return loc(`civics_gov_tp_rival`,[govTitle(3),races[global.race.species].home]); },
@@ -2399,26 +2420,21 @@ function defineMad(){
     if (global.race['sludge'] || global.race['ultra_sludge']){ return false; }
     if ($(`#mad`).length === 0){
         let plasmidType = global.race.universe === 'antimatter' ? loc('resource_AntiPlasmid_plural_name') : loc('resource_Plasmid_plural_name');
-        var mad_command = $('<div id="mad" v-show="display" class="tile is-child"></div>');
-        $('#military').append(mad_command);
-        var mad = $('<div class="mad"></div>');
-        mad_command.append(mad);
-
-        mad.append($(`<div class="warn">${loc('civics_mad_reset_desc',[plasmidType])}</div>`));
-
         let altText = global.race['hrt'] && ['wolven','vulpine'].includes(global.race['hrt']) ? true : false;
-
-        mad.append($(`<div class="defcon mdarm"><button class="button arm" @click="arm">${loc(altText ? 'civics_mad_arm_grenades' : 'civics_mad_arm_missiles')}</button></div>`));
-        mad.append($(`<div class="defcon mdlaunch"><button class="button" @click="launch" :disabled="armed">${loc(altText ? 'civics_mad_launch_grenades' : 'civics_mad_launch_missiles')}</button></div>`));
-
-        if (!global.civic.mad.armed){
-            $('#mad').addClass('armed');
-            $('#mad .arm').html(loc(altText ? 'civics_mad_disarm_grenades' : 'civics_mad_disarm_missiles'));
-        }
+        
+        var mad_command = $('<div id="mad" class="tile is-child"></div>');
+        $('#military').append(mad_command);
 
         vBind({
             el: '#mad',
             data: global.civic['mad'],
+            template: `<div v-if="display">
+                <div class="mad">
+                    <div class="warn">${loc('civics_mad_reset_desc', [plasmidType])}</div>
+                    <div class="defcon mdarm"><button class="button arm" @click="arm">${loc(altText ? 'civics_mad_arm_grenades' : 'civics_mad_arm_missiles')}</button></div>
+                    <div class="defcon mdlaunch"><button class="button" @click="launch" :disabled="armed">${loc(altText ? 'civics_mad_launch_grenades' : 'civics_mad_launch_missiles')}</button></div>
+                </div>
+            </div>`,
             methods: {
                 launch(){
                     if (!global.civic.mad.armed && !global.race['cataclysm']){
@@ -2437,6 +2453,7 @@ function defineMad(){
                     }
                 },
                 arm(){
+                    let altText = global.race['hrt'] && ['wolven', 'vulpine'].includes(global.race['hrt']) ? true : false;
                     if (global.civic.mad.armed){
                         $('#mad .arm').html(loc(altText ? 'civics_mad_disarm_grenades' : 'civics_mad_disarm_missiles'));
                         global.civic.mad.armed = false;
@@ -2448,41 +2465,50 @@ function defineMad(){
                         $('#mad').removeClass('armed');
                     }
                 }
-            }
-        });
+            },
 
-        ['mdarm','mdlaunch'].forEach(function(k){
-            popover(`mad${k}`,
-                function(){ return '<span>{{ label() }}</span>'; },
-                {
-                    elm: `#mad .${k}`,
-                    in: function(obj){
-                        vBind({
-                            el: `#${obj.id} > span`,
-                            data: { test: 'val' },
-                            methods: {
-                                label(){
-                                    switch(k){
-                                        case 'mdarm':
-                                            return global.tech['world_control'] && !global.race['truepath']
-                                                ? loc('civics_mad_missiles_world_control_desc')
-                                                : loc(altText ? 'civics_mad_missiles_desc_easter' : 'civics_mad_missiles_desc');
-                                        case 'mdlaunch':
-                                            {
-                                                let gains = calcPrestige('mad');
-                                                let plasmidType = global.race.universe === 'antimatter' ? loc('resource_AntiPlasmid_plural_name') : loc('resource_Plasmid_plural_name');
-                                                return loc('civics_mad_missiles_warning',[gains.plasmid,plasmidType]);
-                                            }
-                                    }
-                                }
-                            }
-                        });
-                    },
-                    out: function(obj){
-                        vBind({el: `#${obj.id} > span`},'destroy');
-                    },
+            mounted() {
+                if (!global.civic.mad.armed) {
+                    $('#mad').addClass('armed');
+                    let altText = global.race['hrt'] && ['wolven', 'vulpine'].includes(global.race['hrt']) ? true : false;
+                    $('#mad .arm').html(loc(altText ? 'civics_mad_disarm_grenades' : 'civics_mad_disarm_missiles'));
                 }
-            );
+
+                ['mdarm', 'mdlaunch'].forEach(function (k) {
+                    popover(`mad${k}`,
+                        function () { return '<span>{{ label() }}</span>'; },
+                        {
+                            elm: `#mad .${k}`,
+                            in: function (obj) {
+                                vBind({
+                                    el: `#${obj.id} > span`,
+                                    data: { test: 'val' },
+                                    methods: {
+                                        label() {
+                                            let altText = global.race['hrt'] && ['wolven', 'vulpine'].includes(global.race['hrt']) ? true : false;
+                                            switch (k) {
+                                                case 'mdarm':
+                                                    return global.tech['world_control'] && !global.race['truepath']
+                                                        ? loc('civics_mad_missiles_world_control_desc')
+                                                        : loc(altText ? 'civics_mad_missiles_desc_easter' : 'civics_mad_missiles_desc');
+                                                case 'mdlaunch':
+                                                    {
+                                                        let gains = calcPrestige('mad');
+                                                        let plasmidType = global.race.universe === 'antimatter' ? loc('resource_AntiPlasmid_plural_name') : loc('resource_Plasmid_plural_name');
+                                                        return loc('civics_mad_missiles_warning', [gains.plasmid, plasmidType]);
+                                                    }
+                                            }
+                                        }
+                                    }
+                                });
+                            },
+                            out: function (obj) {
+                                vBind({ el: `#${obj.id} > span` }, 'destroy');
+                            },
+                        }
+                    );
+                });
+            }
         });
     }
 }
