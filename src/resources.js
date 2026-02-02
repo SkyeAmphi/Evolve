@@ -889,8 +889,9 @@ function loadResource(name,wiki,max,rate,tradable,stackable,color){
                 return val.replace("_", " ");
             },
             resRate(n){
-                let diff = sizeApproximation(global.resource[n].diff,2);
-                return `${global.resource[name].name} ${diff} per second`;
+                if (!global.resource[n]) return '';
+                let diff = sizeApproximation(global.resource[n].diff, 2);
+                return `${global.resource[n].name} ${diff} per second`;
             },
             trigModal(){
                 this.$buefy.modal.open({
@@ -910,7 +911,7 @@ function loadResource(name,wiki,max,rate,tradable,stackable,color){
                 }, 50);
             },
             showTrigger(){
-                return global.resource.Crates.display;
+                return global.resource.Crates?.display || false;
             },
             craft(res,vol){
                 if (!global.race['no_craft']){
@@ -1651,6 +1652,12 @@ function initGalaxyTrade(){
     if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 0)){
         return;
     }
+    
+    // Check if already initialized - Vue reactivity will handle updates
+    if ($('#galaxyTrade').length > 0) {
+        return;
+    }
+    
     $('#market').append($(`<div id="galaxyTrade"><div v-show="t.xeno && t.xeno >= 5" class="gTrade market-header galaxyTrade"><h2 class="is-sr-only">${loc('galaxy_trade')}</h2></div></div>`));
     galacticTrade();
 }
@@ -2333,6 +2340,11 @@ function loadRouteCounter(){
         return;
     }
 
+    // Just update and return
+    if ($('#tradeTotal').length > 0) {
+        return;  // Already exists, Vue reactivity will handle updates
+    }
+
     let no_market = global.race['no_trade'] ? ' nt' : '';
     var market_item = $(`<div id="tradeTotal" v-show="active" class="market-item"><div id="tradeTotalPopover"><span class="tradeTotal${no_market}"><span class="has-text-caution">${loc('resource_market_trade_routes')}</span> <span v-html="tdeCnt(trade)"></span> / {{ mtrade }}</span></div></div>`);
     market_item.append($(`<span role="button" class="zero has-text-advanced" @click="zero()">${loc('cancel_all_routes')}</span>`));
@@ -2413,11 +2425,17 @@ function tradeRouteColor(res){
     }
 }
 
-function buildCrateLabel(){
-    let material = global.race['kindling_kindred'] || global.race['smoldering'] ? (global.race['smoldering'] ? global.resource.Chrysotile.name : global.resource.Stone.name) : (global.resource['Plywood'] ? global.resource.Plywood.name : global.resource.Plywood.name);
-    if (global.race['iron_wood']){ material = global.resource.Lumber.name; }
-    let cost = global.race['kindling_kindred'] || global.race['smoldering'] || global.race['iron_wood'] ? 200 : 10
-    return loc('resource_modal_crate_construct_desc',[cost,material,crateValue()]);
+function buildCrateLabel() {
+    const race = global.race;
+    const res = global.resource;
+
+    const material = race?.iron_wood ? (res.Lumber?.name ?? 'Lumber')
+        : (race?.kindling_kindred || race?.smoldering)
+            ? (race?.smoldering ? (res.Chrysotile?.name ?? 'Chrysotile') : (res.Stone?.name ?? 'Stone'))
+            : (res.Plywood?.name ?? 'Plywood');
+
+    const cost = (race?.kindling_kindred || race?.smoldering || race?.iron_wood) ? 200 : 10;
+    return loc('resource_modal_crate_construct_desc', [cost, material, crateValue()]);
 }
 
 function buildContainerLabel(){
@@ -2756,12 +2774,15 @@ function loadMarket(){
             el: `#market-qty`,
             data: global.city.market,
             methods: {
-                val(){
-                    if (global.city.market.qty < 1){
-                        global.city.market.qty = 1;
+                val() {
+                    const market = global.city.market;
+                    if (!market) return;
+
+                    if (market.qty < 1) {
+                        market.qty = 1;
                     }
-                    else if (global.city.market.qty > tradeMax()){
-                        global.city.market.qty = tradeMax();
+                    else if (market.qty > tradeMax()) {
+                        market.qty = tradeMax();
                     }
                 },
                 limit(){
