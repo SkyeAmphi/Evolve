@@ -548,7 +548,7 @@ function loadJob(job, define, impact, stress, color){
             },
             methods: {
                 showJob(j){
-                    return global.civic[j].display || (j === 'scavenger' && global.race.servants.force_scavenger);
+                    return global.civic[j]?.display || (j === 'scavenger' && global.race.servants?.force_scavenger);
                 },
                 add(){
                     let keyMult = keyMultiplier();
@@ -585,7 +585,7 @@ function loadJob(job, define, impact, stress, color){
             },
             methods: {
                 showJob(j){
-                    return global.civic[j].display;
+                    return global.civic[j]?.display;
                 },
                 add(){
                     let keyMult = keyMultiplier();
@@ -614,6 +614,7 @@ function loadJob(job, define, impact, stress, color){
                     }
                 },
                 level(job){
+                    if (!global.civic[job]) return 'count';
                     if (global.civic[job].workers === 0){
                         return 'count has-text-danger';
                     }
@@ -642,8 +643,9 @@ function loadJob(job, define, impact, stress, color){
                 d_state(j){
                     return global.civic.d_job === j ? '*' : '';
                 },
-                event(c){
-                    if ((job === 'unemployed' && global.civic.unemployed.display) || (job === 'hunter' && !global.civic.unemployed.display)){
+
+                event(c) {
+                    if ((job === 'unemployed' && global.civic.unemployed?.display) || (job === 'hunter' && !global.civic.unemployed?.display)){
                         let egg = easterEgg(3,14);
                         if (c === 0 && egg.length > 0){
                             return egg;
@@ -687,20 +689,23 @@ export function loadServants(){
                 s: global.race.servants
             },
             methods: {
-                level(){
-                    if (global.race.servants.used === 0){
+                level() {
+                    let used = global.race.servants?.used ?? 0;
+                    let max = global.race.servants?.max ?? 1;
+
+                    if (used === 0) {
                         return 'count has-text-danger';
                     }
-                    else if (global.race.servants.used === global.race.servants.max){
+                    else if (used === max) {
                         return 'count has-text-success';
                     }
-                    else if (global.race.servants.used <= global.race.servants.max / 3){
+                    else if (used <= max / 3) {
                         return 'count has-text-caution';
                     }
-                    else if (global.race.servants.used <= global.race.servants.max * 0.66){
+                    else if (used <= max * 0.66) {
                         return 'count has-text-warning';
                     }
-                    else if (global.race.servants.used < global.race.servants.max){
+                    else if (used < max) {
                         return 'count has-text-info';
                     }
                     else {
@@ -956,8 +961,9 @@ export function loadFoundry(servants){
                     }
                 },
                 level(){
-                    let workers = servants ? global.race.servants.sused : global.civic.craftsman.workers;
-                    let max = servants ? global.race.servants.smax : global.civic.craftsman.max;
+                    let workers = servants ? (global.race.servants?.sused ?? 0) : (global.civic.craftsman?.workers ?? 0);
+                    let max = servants ? (global.race.servants?.smax ?? 1) : (global.civic.craftsman?.max ?? 1);
+
                     if (workers === 0){
                         return 'count has-text-danger';
                     }

@@ -725,10 +725,10 @@ export function drawnGovernOffice(){
                 return !activeTasks.includes(t);
             },
             showStrRes(r){
-                return global.resource[r].display;
+                return global.resource[r]?.display;
             },
             bStrEx(){
-                return global.race.governor.config.bal_storage.adv ? 'm' : '';
+                return global.race.governor?.config?.bal_storage?.adv ? 'm' : '';
             },
             fire(){
                 let inc = global.race.governor.hasOwnProperty('f') ? global.race.governor.f : 0;

@@ -667,7 +667,7 @@ export function foreignGov(){
                     }, 50);
                 },
                 spy_disabled(i){
-                    return global.civic.foreign[`gov${i}`].trn > 0 || spyCost(i) > global.resource.Money.amount ? true : false;
+                    return global.civic.foreign[`gov${i}`]?.trn > 0 || spyCost(i) > global.resource?.Money?.amount ? true : false;
                 },
                 spy(i){
                     trainSpy(i);
@@ -1504,7 +1504,9 @@ export function describeSoldier(){
     return `${loc(soldiers_desc)} ${loc(loot_string, loot_args)}`;
 }
 
-function battleAssessment(gov){
+function battleAssessment(gov) {
+    if (!global.civic.garrison) return '';
+
     if (global.civic.foreign[`gov${gov}`].occ){
         return loc('civics_garrison_deoccupy_desc');
     }

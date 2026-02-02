@@ -6366,9 +6366,11 @@ export function setAction(c_action,action,type,old,prediction){
                 }
             },
             on_label(){
+                if (!global[action]?.[type]) return 'on: 0';
                 return `on: ${global[action][type].on}`;
             },
             off_label(){
+                if (!global[action]?.[type]) return 'off: 0';
                 return `off: ${global[action][type].count - global[action][type].on}`;
             },
             power_on(){
@@ -6414,6 +6416,7 @@ export function setAction(c_action,action,type,old,prediction){
                 }
             },
             p_off(p,id){
+                if (!global[action]?.[type]) return 0;
                 let value = global[action][type].count - p;
                 if (
                     (id === 'city-casino' && !global.race['cataclysm'] && !global.race['orbit_decayed']) || 
