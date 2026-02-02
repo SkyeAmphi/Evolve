@@ -1412,10 +1412,9 @@ export function marketItem(mount,market_item,name,color,full){
         let trade = $(`<span class="trade" v-show="m.active"><span class="has-text-warning">${loc('resource_market_routes')}</span></span>`);
         wrapper.append(trade);
         trade.append($(`<b-tooltip :label="aSell('${name}')" position="is-bottom" size="is-small" multilined animated><span role="button" aria-label="export ${global.resource[name].name}" class="sub has-text-danger" @click="autoSell('${name}')"><span>-</span></span></b-tooltip>`));
-        trade.append($(`<span class="current" v-html="trade(r.trade)"></span>`));
+        trade.append($(`<span class="current" :class="tradeRouteColor(r.trade)" v-html="trade(r.trade)"></span>`));
         trade.append($(`<b-tooltip :label="aBuy('${name}')" position="is-bottom" size="is-small" multilined animated><span role="button" aria-label="import ${global.resource[name].name}" class="add has-text-success" @click="autoBuy('${name}')"><span>+</span></span></b-tooltip>`));
         trade.append($(`<span role="button" class="zero has-text-advanced" @click="zero('${name}')">${loc('cancel_routes')}</span>`));
-        tradeRouteColor(name);
     }
 
     market_item.append(wrapper);
@@ -1572,7 +1571,6 @@ export function marketItem(mount,market_item,name,color,full){
                         global.resource[res].trade++;
                     }
                 }
-                tradeRouteColor(res);
             },
             autoSell(res, keyMult = keyMultiplier()){
                 for (let i=0; i<keyMult; i++){
@@ -1590,7 +1588,6 @@ export function marketItem(mount,market_item,name,color,full){
                         global.resource[res].trade--;
                     }
                 }
-                tradeRouteColor(res);
             },
             zero(res){
                 if (global.resource[res].trade > 0){
@@ -1641,6 +1638,19 @@ export function marketItem(mount,market_item,name,color,full){
                     return 0;
                 }
             },
+
+            tradeRouteColor(val) {
+                if (val > 0) { // importing
+                    return 'has-text-success';
+                }
+                else if (val < 0) { // exporting
+                    return 'has-text-danger';
+                }
+                else { // 0 routes
+                    return 'has-text-warning';
+                }
+            },
+
             namespace(val){
                 return val.replace("_", " ");
             }
@@ -2358,7 +2368,6 @@ function loadRouteCounter(){
                     if (global.resource[res]['trade']){
                         global.city.market.trade -= Math.abs(global.resource[res].trade);
                         global.resource[res].trade = 0;
-                        tradeRouteColor(res);
                     }
                 });
             },
@@ -2408,21 +2417,6 @@ function loadContainerCounter(){
             cn: global.resource.Containers
         }
     });
-}
-
-function tradeRouteColor(res){
-    $(`#market-${res} .trade .current`).removeClass('has-text-warning');
-    $(`#market-${res} .trade .current`).removeClass('has-text-danger');
-    $(`#market-${res} .trade .current`).removeClass('has-text-success');
-    if (global.resource[res].trade > 0){
-        $(`#market-${res} .trade .current`).addClass('has-text-success');
-    }
-    else if (global.resource[res].trade < 0){
-        $(`#market-${res} .trade .current`).addClass('has-text-danger');
-    }
-    else {
-        $(`#market-${res} .trade .current`).addClass('has-text-warning');
-    }
 }
 
 function buildCrateLabel() {
