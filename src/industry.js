@@ -1897,6 +1897,10 @@ export function clearGrids(grids){
 
 function dragPowerGrid(grid_type){
     let el = $(`#grid${grid_type}`)[0];
+    if (!el) {
+        return; // needed to avoid error when enabling preload tab content
+    }
+    
     let grids = gridDefs();
     Sortable.create(el,{
         onEnd(e){

@@ -469,10 +469,14 @@ export function buildQueue(){
             el: '#buildQueue',
             data: global.queue,
             methods: {
-                remove(index){
+                remove(index) {
+                    if (!global.queue.queue[index]) {
+                        return;
+                    }
+
                     let keyMult = keyMultiplier();
-                    for (let i=0; i< keyMult; i++){
-                        if (global.queue.queue[index].q > 0){
+                    for (let i = 0; i < keyMult; i++) {
+                        if (global.queue.queue[index].q > 0) {
                             global.queue.queue[index].q -= global.queue.queue[index].qs;
                         }
                         if (global.queue.queue[index].q <= 0){
@@ -483,10 +487,19 @@ export function buildQueue(){
                         }
                     }
                 },
-                setID(index){
+
+                setID(index) {
+                    if (!global.queue.queue[index]) {
+                        return '';
+                    }
                     return `q${global.queue.queue[index].id}${index}`;
                 },
-                setData(index,prefix){
+
+                setData(index, prefix) {
+                    if (!global.queue.queue[index]) {
+                        return {};
+                    }
+
                     let c_action;
                     let segments = global.queue.queue[index].id.split("-");
                     if (segments[0].substring(0,4) === 'arpa'){
