@@ -556,6 +556,8 @@ export const traits = {
         vars(r){
             // [Weather Penalty, Weather Bonus]
             switch (r || traitRank('cold_blooded') || 1){
+                case 0.1: 
+                    return [35,4];
                 case 0.25:
                     return [30,6];
                 case 0.5:
@@ -647,7 +649,7 @@ export const traits = {
                 case 3:
                     return [10];
                 case 4:
-                    return [12]
+                    return [12];
             }
         },
     },
