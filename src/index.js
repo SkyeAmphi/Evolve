@@ -682,16 +682,16 @@ export function loadTab(tab){
                         let tradable = tmp_vars.resource[name].tradable;
                         let stackable = tmp_vars.resource[name].stackable;
 
-                        if (stackable){
-                            var market_item = $(`<div id="stack-${name}" class="market-item" v-show="display"></div>`);
+                        if (stackable && global.resource[name].display) {
+                            var market_item = $(`<div id="stack-${name}" class="market-item"></div>`);
                             $('#resStorage').append(market_item);
-                            containerItem(`#stack-${name}`,market_item,name,color,true);
+                            containerItem(`#stack-${name}`, market_item, name, color, true);
                         }
 
-                        if (tradable){
-                            var market_item = $(`<div id="market-${name}" class="market-item" v-show="r.display"></div>`);
+                        if (tradable && global.resource[name].display) {
+                            var market_item = $(`<div id="market-${name}" class="market-item"></div>`);
                             $('#market').append(market_item);
-                            marketItem(`#market-${name}`,market_item,name,color,true);
+                            marketItem(`#market-${name}`, market_item, name, color, true);
                         }
                     
                         if (atomic_mass[name]){
