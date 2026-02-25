@@ -1380,7 +1380,7 @@ function loadMechStation(parent,bind){
 
     let stats = $(`<div class="flexAround"></div>`);
     stats.append($(`<span v-html="patrol(mechs)"></span>`));
-    stats.append($(`<span v-html="effect(effect)"></span>`));
+    stats.append($(`<span v-html="effectLabel()"></span>`));
     parent.append(stats);
 
     vBind({
@@ -1403,8 +1403,8 @@ function loadMechStation(parent,bind){
             patrol(v){
                 return loc(global.race['warlord'] ? `eden_demon_station_mechs` : `eden_mech_station_mechs`,[v]);
             },
-            effect(v){
-                return loc(`eden_mech_station_effective`,[v]);
+            effectLabel(){
+                return loc(`eden_mech_station_effective`,[this.effect]);
             }
         }
     });
