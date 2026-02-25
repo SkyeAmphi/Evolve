@@ -1136,11 +1136,11 @@ export function govCivics(f,v){
 }
 
 export function mercCost(){
-    let cost = Math.round((1.24 ** global.civic.garrison.workers) * 75) - 50;
+    let cost = Math.round((1.24 ** global.civic?.garrison?.workers) * 75) - 50;
     if (cost > 25000){
         cost = 25000;
     }
-    if (global.civic.garrison.m_use > 0){
+    if (global.civic?.garrison?.m_use > 0){
         cost *= 1.1 ** global.civic.garrison.m_use;
     }
     if (global.race['brute']){

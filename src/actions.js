@@ -6402,7 +6402,7 @@ export function setAction(c_action,action,type,old,prediction){
                 }
             },
             repair(){
-                return global[action][type].repair;
+                return global[action][type]?.repair;
             },
             repairMax(){
                 return c_action.repair();
