@@ -4018,7 +4018,7 @@ export function buildFortress(parent,full){
                 }
             },
             wall(){
-                let val = global.portal.fortress.walls;
+                let val = global.portal?.fortress?.walls;
                 if (val >= 75){
                     return "has-text-success";
                 }
@@ -4030,7 +4030,7 @@ export function buildFortress(parent,full){
                 }
             },
             threaten(){
-                let val = global.portal.fortress.threat;
+                let val = global.portal?.fortress?.threat;
                 if (val < 1000){
                     return "has-text-success";
                 }
@@ -4046,7 +4046,7 @@ export function buildFortress(parent,full){
                 let canBuy = true;
                 while (canBuy && repeats > 0){
                     let cost = mercCost();
-                    if (global.civic['garrison'].workers < global.civic['garrison'].max && global.resource.Money.amount >= cost){
+                    if (global.civic['garrison']?.workers < global.civic['garrison']?.max && global.resource?.Money?.amount >= cost){
                         global.resource.Money.amount -= cost;
                         global.civic['garrison'].workers++;
                         global.civic.garrison.m_use++;
@@ -4073,7 +4073,7 @@ export function buildFortress(parent,full){
                 return fortressDefenseRating(v);
             },
             patrolling(v){
-                let stationed =  v - (global.portal.fortress.patrols * global.portal.fortress.patrol_size);
+                let stationed =  v - (global.portal?.fortress?.patrols * global.portal?.fortress?.patrol_size);
                 if (p_on['soul_forge']){
                     let forge = soulForgeSoldiers();
                     if (forge <= stationed){
@@ -4149,6 +4149,10 @@ export function buildFortress(parent,full){
 }
 
 function fortressDefenseRating(v){
+    if (!global.portal?.fortress || !global.civic?.garrison) {
+        return 0;
+    }
+
     let army = v - (global.portal.fortress.patrols * global.portal.fortress.patrol_size);
     if (p_on['soul_forge']){
         let forge = soulForgeSoldiers();
@@ -4198,6 +4202,10 @@ function casualties(demons,pat_armor,ambush,report){
 }
 
 function fortressData(dt){
+    if (!global.portal?.fortress) {
+        return '';
+    }
+    
     switch (dt){
         case 'hostiles':
             {
