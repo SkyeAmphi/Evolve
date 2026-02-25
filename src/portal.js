@@ -7703,17 +7703,9 @@ export function drawHellObservations(startup){
     let observe = $(`<div id="hellObservations"></div>`);
     info.append(observe);
     
-    observe.append(`<b-tabs id="hellTabs" class="resTabs" v-model="s.hellTabs" :animated="s.animated" @input="swapTab">
-        <b-tab-item id="h_Report">
-            <template slot="header">
-                <span>${loc('hell_tabs_reports')}</span>
-            </template>
-        </b-tab-item>
-        <b-tab-item id="h_Analysis">
-            <template slot="header">
-                <span>${loc('hell_tabs_analysis')}</span>
-            </template>
-        </b-tab-item>
+    observe.append(`<b-tabs id="hellTabs" class="resTabs" v-model="s.hellTabs" :animated="s.animated" @update:model-value="swapTab">
+        <b-tab-item id="h_Report" :label="label('hell_tabs_reports')"></b-tab-item>
+        <b-tab-item id="h_Analysis" :label="label('hell_tabs_analysis')"></b-tab-item>
     </b-tabs>`);
     
     vBind({
@@ -7722,10 +7714,15 @@ export function drawHellObservations(startup){
             s: global.settings
         },
         methods: {
+            label(lbl) {
+                return loc(lbl);
+            },
+
             swapTab(tab){
                 if (!global.settings.tabLoad){
                     clearElement($(`#h_Report`));
                     clearElement($(`#h_Analysis`));
+                    global.settings.hellTabs = tab;
                     switch (tab){
                         case 0:
                             drawHellReports();
@@ -7761,6 +7758,11 @@ function drawHellAnalysis(){
         return;
     }
     let info = ($(`#h_Analysis`));
+
+    if (info.length === 0) {
+        return; // Tab container doesn't exist yet, Vue hasn't mounted it
+    }
+
     let stats = $(`<div id="hellAnalysis" class="vscroll"></div>`);
     info.append(stats);
     let bd_settings = $(`<div></div>`);
@@ -8220,6 +8222,10 @@ function drawHellReports(){
     let list = ``;
     
     let info = ($(`#h_Report`));
+    if (info.length === 0) {
+        return; // Tab container doesn't exist yet, Vue hasn't mounted it
+    }
+
     let reports = $(`<div id="hellReport" class="hellReports"></div>`);
     info.append(reports);
     let reportListSection = $(`<div class="reportList vscroll"></div>`);
@@ -8273,16 +8279,19 @@ function drawHellReports(){
         
         let reportList = ($(`#hellReportList`));
         clearElement(reportList);
-        reportList.append(list);
-        vBind({
-            el: '#hellReportList',
-            methods: {
-                reportLoad(year,day){
-                    loadReport(year,day);
+
+        if (list) {
+            reportList.append(list);
+            vBind({
+                el: '#hellReportList',
+                methods: {
+                    reportLoad(year, day) {
+                        loadReport(year, day);
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
+    };
 
     let loadReport = function(year,day){
         if (!year || !day){
