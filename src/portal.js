@@ -7794,12 +7794,154 @@ function drawHellAnalysis(){
             <b-radio v-model="s.display" native-value="days">${loc('hell_analysis_time_days')}</b-radio>
         </div>
     `);
-    
+
+    // create the graph section before vBind is called so Vue knows it's there
+    let graphSection = $(`<div></div>`);
+    stats.append(graphSection);
+    graphSection.append(`<div><h2 id="hellGraphCreator" class="text-button has-text-success" @click="createGraph()">${loc('hell_graph_create')}</h2></div>`);
+    graphSection.append(`<div id="hellGraphingArea" class="graphingArea"></div>`);
+
     vBind({
         el: '#hellAnalysis',
         data: {
             s: global.portal.observe.settings,
             r: global.race
+        },
+        methods: {
+            createGraph() {
+                this.$buefy.modal.open({
+                    hasModalCard: false,
+                    customClass: 'evolve-modal',
+                    content: '<div id="modalBox" class="modalBox"></div>',
+                    onCancel: () => {
+                        // Modal closed
+                    }
+                });
+
+                let checkExist = setInterval(function () {
+                    if ($('#modalBox').length > 0) {
+                        clearInterval(checkExist);
+                        $('#modalBox').append($(`<p id="modalBoxTitle" class="has-text-warning modalTitle">${loc('hell_graph_title')}</p>`));
+
+                        var body = $('<div id="specialModal" class="modalBody vscroll"></div>');
+                        $('#modalBox').append(body);
+                        let creator = $(`<div class="graphCreator"></div>`);
+                        body.append(creator);
+
+                        let settings = {
+                            chartType: 'pie',
+                            name: '',
+                            chartName: '',
+                            data: [],
+                            radioFake: '',
+                            showGroups: true
+                        };
+                        let error = {
+                            show: false,
+                            message: ''
+                        }
+
+                        creator.append(`
+                            <div><h2 class="has-text-warning">${loc('hell_graph_name')}</h2> <b-input v-model="s.name" :input="nameUpdate(s.name)"></b-input></div>
+                        `)
+                        creator.append(`
+                            <div>
+                                <div>
+                                    <h2 class="has-text-warning">${loc('hell_graph_type')}</h2>
+                                </div>
+                                <div>
+                                    <b-radio v-model="s.chartType" native-value="pie" @click.native="dataOptions('pie')">${loc('hell_graph_pie')}</b-radio>
+                                </div>
+                            </div>
+                        `);
+
+                        let dataRegion = $(`<div id="graphDataSelection"></div>`);
+                        creator.append(dataRegion);
+                        dataRegion.append(`<div><h2 class="has-text-warning">${loc('hell_graph_data')}</h2></div>`);
+                        Object.keys(global.portal.observe.stats).forEach(function (dataSet) {
+                            ['kills', 'gems'].forEach(function (group) {
+                                dataRegion.append(`<div>
+                                    <b-radio v-show="${group === 'gems' ? 'sg.display && ' : ''}s.showGroups" v-model="s.radioFake" native-value="${dataSet}${group}" @click.native="setData('${dataSet}','${group}')">${loc('hell_graph_datapoint', [loc(`hell_analysis_${dataSet}`), loc(`hell_analysis_${group}`)])}</b-radio>
+                                </div>`);
+                            });
+                        });
+
+                        creator.append(`
+                            <div>
+                                <div v-show="e.show">
+                                    <h2 class="has-text-danger">{{ e.message }}</h2>
+                                </div>
+                                <div>
+                                    <button class="button" @click="createGraph()">${loc('hell_graph_create')}</button>
+                                </div>
+                            </div>
+                        `);
+
+                        vBind({
+                            el: `#specialModal`,
+                            data: {
+                                s: settings,
+                                e: error,
+                                sg: global.resource.Soul_Gem
+                            },
+                            methods: {
+                                nameUpdate(name) {
+                                    if (settings.chartName !== name) {
+                                        error.show = false;
+                                        settings.chartName = name;
+                                    }
+                                },
+
+                                dataOptions(type) {
+                                    switch (type) {
+                                        case 'pie':
+                                            settings.showGroups = true;
+                                            break;
+                                        case 'bar':
+                                            settings.showGroups = false;
+                                            break;
+                                    }
+                                },
+
+                                setData(type, group) {
+                                    error.show = false;
+                                    settings.data = [type, group];
+                                },
+
+                                createGraph() {
+                                    if (!settings.name) {
+                                        error.show = true;
+                                        error.message = loc('hell_graph_error_name_blank');
+                                        return;
+                                    }
+                                    else if (settings.data.length === 0) {
+                                        error.show = true;
+                                        error.message = loc('hell_graph_error_data_missing');
+                                        return;
+                                    }
+                                    let graphLabels = [];
+                                    let graphData = [];
+                                    switch (settings.chartType) {
+                                        case 'pie':
+                                            Object.keys(global.portal.observe.stats[settings.data[0]][settings.data[1]]).forEach(function (dataPoint) {
+                                                graphLabels.push(loc(`hell_analysis_${settings.data[1]}_${dataPoint}`));
+                                                graphData.push([settings.data[0], settings.data[1], dataPoint]);
+                                            });
+                                            break;
+                                        case 'bar':
+                                            break;
+                                    }
+                                    let graphID = newGraph(settings.chartName, settings.chartType, graphLabels, graphData, { title: settings.chartName });
+                                    drawGraph(graphArea, global.portal.observe.graphs[graphID]);
+                                    //Exit the modal
+                                    document.dispatchEvent(new KeyboardEvent('keydown', { 'key': 'Escape' }));
+                                    document.dispatchEvent(new KeyboardEvent('keyup', { 'key': 'Escape' }));
+                                }
+                            }
+                        });
+                    }
+                }, 50);
+            }
         }
     });
     
@@ -7969,150 +8111,8 @@ function drawHellAnalysis(){
     drawStats('hellAnalysisTotal','total');
     drawStats('hellAnalysisPeriod','period');
     
-    stats = ($(`#hellAnalysis`));
-    let graphs = $(`<div></div>`);
-    stats.append(graphs);
-    graphs.append(`<div><h2 id="hellGraphCreator" class="text-button has-text-success" @click="createGraph()">${loc('hell_graph_create')}</h2></div>`);
-    let graphArea = $(`<div id="hellGraphingArea" class="graphingArea"></div>`);
-    graphs.append(graphArea);
-    
-    vBind({
-        el: '#hellGraphCreator',
-        methods: {
-            createGraph(){
-                this.$buefy.modal.open({
-                    hasModalCard: false,
-                    customClass: 'evolve-modal',
-                    content: '<div id="modalBox" class="modalBox"></div>',
-                    onCancel: () => {
-                        // Modal closed
-                    }
-                });
+    let graphArea = $(`#hellGraphingArea`);
 
-                let checkExist = setInterval(function(){
-                    if ($('#modalBox').length > 0){
-                        clearInterval(checkExist);
-                        $('#modalBox').append($(`<p id="modalBoxTitle" class="has-text-warning modalTitle">${loc('hell_graph_title')}</p>`));
-
-                        var body = $('<div id="specialModal" class="modalBody vscroll"></div>');
-                        $('#modalBox').append(body);
-                        let creator = $(`<div class="graphCreator"></div>`);
-                        body.append(creator);
-
-                        let settings = {
-                            chartType: 'pie',
-                            name: '',
-                            chartName: '',
-                            data: [],
-                            radioFake: '',
-                            showGroups: true
-                        };
-                        let error = {
-                            show: false,
-                            message: ''
-                        }
-                        
-                        creator.append(`
-                            <div><h2 class="has-text-warning">${loc('hell_graph_name')}</h2> <b-input v-model="s.name" :input="nameUpdate(s.name)"></b-input></div>
-                        `)
-                        creator.append(`
-                            <div>
-                                <div>
-                                    <h2 class="has-text-warning">${loc('hell_graph_type')}</h2>
-                                </div>
-                                <div>
-                                    <b-radio v-model="s.chartType" native-value="pie" @click.native="dataOptions('pie')">${loc('hell_graph_pie')}</b-radio>
-                                </div>
-                            </div>
-                        `);
-                        
-                        let dataRegion = $(`<div id="graphDataSelection"></div>`);
-                        creator.append(dataRegion); 
-                        dataRegion.append(`<div><h2 class="has-text-warning">${loc('hell_graph_data')}</h2></div>`);
-                        Object.keys(global.portal.observe.stats).forEach(function(dataSet){
-                            ['kills','gems'].forEach(function(group){
-                                dataRegion.append(`<div>
-                                    <b-radio v-show="${group === 'gems' ? 'sg.display && ' : ''}s.showGroups" v-model="s.radioFake" native-value="${dataSet}${group}" @click.native="setData('${dataSet}','${group}')">${loc('hell_graph_datapoint',[loc(`hell_analysis_${dataSet}`),loc(`hell_analysis_${group}`)])}</b-radio>
-                                </div>`);
-                            });
-                        });
-
-                        creator.append(`
-                            <div>
-                                <div v-show="e.show">
-                                    <h2 class="has-text-danger">{{ e.message }}</h2>
-                                </div>
-                                <div>
-                                    <button class="button" @click="createGraph()">${loc('hell_graph_create')}</button>
-                                </div>
-                            </div>
-                        `);
-                        
-                        vBind({
-                            el: `#specialModal`,
-                            data: {
-                                s: settings,
-                                e: error,
-                                sg: global.resource.Soul_Gem
-                            },
-                            methods: {
-                                nameUpdate(name){
-                                    if (settings.chartName !== name){
-                                        error.show = false;
-                                        settings.chartName = name;
-                                    }
-                                },
-                                dataOptions(type){
-                                    switch (type){
-                                        case 'pie':
-                                            settings.showGroups = true;
-                                            break;
-                                        case 'bar':
-                                            settings.showGroups = false;
-                                            break;
-                                    }
-                                },
-                                setData(type,group){
-                                    error.show = false;
-                                    settings.data = [type,group];
-                                },
-                                createGraph(){
-                                    if (!settings.name){
-                                        error.show = true;
-                                        error.message = loc('hell_graph_error_name_blank');
-                                        return;
-                                    }
-                                    else if (settings.data.length === 0){
-                                        error.show = true;
-                                        error.message = loc('hell_graph_error_data_missing');
-                                        return;
-                                    }
-                                    let graphLabels = [];
-                                    let graphData = [];
-                                    switch(settings.chartType){
-                                        case 'pie':
-                                            Object.keys(global.portal.observe.stats[settings.data[0]][settings.data[1]]).forEach(function(dataPoint){
-                                                graphLabels.push(loc(`hell_analysis_${settings.data[1]}_${dataPoint}`));
-                                                graphData.push([settings.data[0],settings.data[1],dataPoint]);
-                                            });
-                                            break;
-                                        case 'bar':
-                                            break;
-                                    }
-                                    let graphID = newGraph(settings.chartName,settings.chartType,graphLabels,graphData,{title: settings.chartName});
-                                    drawGraph(graphArea,global.portal.observe.graphs[graphID]);
-                                    //Exit the modal
-                                    document.dispatchEvent(new KeyboardEvent('keydown', {'key': 'Escape'}));
-                                    document.dispatchEvent(new KeyboardEvent('keyup', {'key': 'Escape'}));
-                                }
-                            }
-                        });
-                    }
-                }, 50);
-            }
-        }
-    });
-    
     //Draw existing graphs.
     Object.keys(global.portal.observe.graphs).forEach(function(id){
         drawGraph(graphArea,global.portal.observe.graphs[id]);
