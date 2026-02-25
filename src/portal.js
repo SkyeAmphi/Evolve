@@ -6408,7 +6408,6 @@ export function drawMechLab(){
         assemble.append(`<div>{{ desc(b.size) }}</div>`);
 
         let options = $(`<div class="bayOptions"></div>`);
-        assemble.append(options);
 
         let sizes = ``;
         let sizeTypes = global.race['warlord'] ? ['minion','fiend','cyberdemon','archfiend'] : ['small','medium','large','titan','collector'];
@@ -6417,10 +6416,12 @@ export function drawMechLab(){
         });
 
         options.append(`<b-dropdown :triggers="['hover', 'click']" aria-role="list">
-            <button class="button is-info" slot="trigger">
-                <span>${loc(`portal_mech_size`)}: {{ slabel(b.size) }}</span>
-                <b-icon icon="menu-down"></b-icon>
-            </button>${sizes}
+            <template #trigger>
+                <button class="button is-info">
+                    <span>${loc(`portal_mech_size`)}: {{ slabel(b.size) }}</span>
+                    <b-icon icon="menu-down"></b-icon>
+                </button>
+            </template>${sizes}
         </b-dropdown>`);
 
         let chassis = ``;
@@ -6446,10 +6447,12 @@ export function drawMechLab(){
         });
 
         options.append(`<b-dropdown :triggers="['hover', 'click']" aria-role="list">
-            <button class="button is-info" slot="trigger">
-                <span>${loc(`portal_mech_type`)}: {{ clabel(b.chassis) }}</span>
-                <b-icon icon="menu-down"></b-icon>
-            </button>${chassis}
+            <template #trigger>
+                <button class="button is-info">
+                    <span>${loc(`portal_mech_type`)}: {{ clabel(b.chassis) }}</span>
+                    <b-icon icon="menu-down"></b-icon>
+                </button>
+            </template>${chassis}
         </b-dropdown>`);
 
         for (let i=0; i<4; i++){
@@ -6460,10 +6463,12 @@ export function drawMechLab(){
             });
 
             options.append(`<b-dropdown :triggers="['hover', 'click']" aria-role="list" v-show="vis(${i})">
-                <button class="button is-info" slot="trigger">
-                    <span>${loc(`portal_mech_weapon`)}: {{ wlabel(b.hardpoint[i] || 'laser') }}</span>
-                    <b-icon icon="menu-down"></b-icon>
-                </button>${weapons}
+                <template #trigger>
+                    <button class="button is-info">
+                        <span>${loc(`portal_mech_weapon`)}: {{ wlabel(b.hardpoint[${i}] || 'laser') }}</span>
+                        <b-icon icon="menu-down"></b-icon>
+                    </button>
+                </template>${weapons}
             </b-dropdown>`);
         }
 
@@ -6476,12 +6481,16 @@ export function drawMechLab(){
             });
 
             options.append(`<b-dropdown :triggers="['hover', 'click']" aria-role="list" v-show="eVis(${i})">
-                <button class="button is-info" slot="trigger">
-                    <span>${loc(global.race['warlord'] ? `portal_mech_attribute` : `portal_mech_equipment`)}: {{ equipment(b.equip[i] || 'shields') }}</span>
-                    <b-icon icon="menu-down"></b-icon>
-                </button>${equip}
+                <template #trigger>
+                    <button class="button is-info">
+                        <span>${loc(global.race['warlord'] ? `portal_mech_attribute` : `portal_mech_equipment`)}: {{ equipment(b.equip[${i}] || 'shields') }}</span>
+                        <b-icon icon="menu-down"></b-icon>
+                    </button>
+                </template>${equip}
             </b-dropdown>`);
         }
+
+        assemble.append(options);
 
         assemble.append(`<div class="mechAssemble"><button class="button is-info" slot="trigger" v-on:click="build()"><span>${global.race['warlord'] ? loc('portal_mech_summon') : loc('portal_mech_construct')}</span></button></div>`);
 
@@ -6651,13 +6660,15 @@ export function drawMechLab(){
                         clearPopper();
                     }
                 },
-                setWep(w,i){
+                setWep(w, i) {
                     global.portal.mechbay.blueprint.hardpoint[i] = w;
-                    vBind({el: `#mechAssembly`},'update');
+                    // force reactivity by creating a new array reference
+                    global.portal.mechbay.blueprint.hardpoint = [...global.portal.mechbay.blueprint.hardpoint];
                 },
-                setEquip(e,i){
+                setEquip(e, i) {
                     global.portal.mechbay.blueprint.equip[i] = e;
-                    vBind({el: `#mechAssembly`},'update');
+                    // same as above
+                    global.portal.mechbay.blueprint.equip = [...global.portal.mechbay.blueprint.equip];
                 },
                 vis(hp){
                     if (global.portal.mechbay.blueprint.size === 'collector'){
