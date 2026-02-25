@@ -37,7 +37,7 @@ import { enableDebug, updateDebugData } from './debug.js';
                     current = $(icon).appendTo('head');
                 }
             }
-            match.addListener(swap);
+            match.addEventListener('change', swap);
             swap();
         });
     });
