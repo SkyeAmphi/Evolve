@@ -2,7 +2,7 @@ import { global, tmp_vars, save, message_logs, message_filters, webWorker } from
 import { loc, locales } from './locale.js';
 import { setupStats, alevel } from './achieve.js';
 import { vBind, initMessageQueue, clearElement, flib, tagEvent, gameLoop, popover, clearPopper, powerGrid, easterEgg, trickOrTreat, drawIcon } from './functions.js';
-import { tradeRatio, atomic_mass, supplyValue, marketItem, containerItem, loadEjector, loadSupply, loadAlchemy, initResourceTabs, drawResourceTab, tradeSummery } from './resources.js';
+import { initResourceTabs, drawResourceTab, tradeSummery } from './resources.js';
 import { defineJobs, } from './jobs.js';
 import { clearSpyopDrag } from './governor.js';
 import { defineIndustry, setPowerGrid, gridDefs, clearGrids } from './industry.js';
@@ -632,41 +632,22 @@ export function loadTab(tab){
                         s: global.settings
                     },
                     methods: {
-                        swapTab(tab){
-                            if (!global.settings.tabLoad){
+                        swapTab(tab) {
+                            if (!global.settings.tabLoad) {
+                                // clear and redraw each tab on demand with preload off
                                 clearElement($(`#market`));
                                 clearElement($(`#resStorage`));
                                 clearElement($(`#resEjector`));
                                 clearElement($(`#resCargo`));
                                 clearElement($(`#resAlchemy`));
-                                switch (tab){
-                                    case 0:
-                                        {
-                                            drawResourceTab('market');
-                                        }
-                                        break;
-                                    case 1:
-                                        {
-                                            drawResourceTab('storage');
-                                        }
-                                        break;
-                                    case 2:
-                                        {
-                                            drawResourceTab('ejector');
-                                        }
-                                        break;
-                                    case 3:
-                                        {
-                                            drawResourceTab('supply');
-                                        }
-                                        break;
-                                    case 4:
-                                        {
-                                            drawResourceTab('alchemy');
-                                        }
-                                        break;
+
+                                const tabMap = ['market', 'storage', 'ejector', 'supply', 'alchemy'];
+                                const tabName = tabMap[tab];
+                                if (tabName) {
+                                    drawResourceTab(tabName);
                                 }
                             }
+                            // do nothing for preload on, Vue will handle display with v-show
                             return tab;
                         },
                         label(lbl){
@@ -676,38 +657,6 @@ export function loadTab(tab){
                 });
 
                 initResourceTabs();
-                if (tmp_vars.hasOwnProperty('resource')){
-                    Object.keys(tmp_vars.resource).forEach(function(name){
-                        let color = tmp_vars.resource[name].color;
-                        let tradable = tmp_vars.resource[name].tradable;
-                        let stackable = tmp_vars.resource[name].stackable;
-
-                        if (stackable && global.resource[name].display) {
-                            var market_item = $(`<div id="stack-${name}" class="market-item"></div>`);
-                            $('#resStorage').append(market_item);
-                            containerItem(`#stack-${name}`, market_item, name, color, true);
-                        }
-
-                        if (tradable && global.resource[name].display) {
-                            var market_item = $(`<div id="market-${name}" class="market-item"></div>`);
-                            $('#market').append(market_item);
-                            marketItem(`#market-${name}`, market_item, name, color, true);
-                        }
-                    
-                        if (atomic_mass[name]){
-                            loadEjector(name,color);
-                        }
-                    
-                        if (supplyValue[name]){
-                            loadSupply(name,color);
-                        }
-                    
-                        if (tradeRatio[name] && global.race.universe === 'magic'){
-                            global['resource'][name]['basic'] = tradable;
-                            loadAlchemy(name,color,tradable);
-                        }
-                    });
-                }
                 tradeSummery();
             }
             break;
