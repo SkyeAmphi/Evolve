@@ -8432,7 +8432,7 @@ function sentience(){
     if (global.race['ocular_power']){
         global.settings.showWish = true;
         global.race['ocularPowerConfig'] = {
-            d: false, p: false, w: false, t: false, f: false, c: false, ds: 0
+            d: false, p: false, w: false, t: false, f: false, c: false, ds: 0, order: []
         };
         renderSupernatural();
     }

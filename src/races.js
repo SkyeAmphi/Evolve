@@ -7313,7 +7313,7 @@ export function cleanAddTrait(trait){
         case 'ocular_power':
             global.settings.showWish = true;
             global.race['ocularPowerConfig'] = {
-                d: false, p: false, w: false, t: false, f: false, c: false, ds: 0
+                d: false, p: false, w: false, t: false, f: false, c: false, ds: 0, order: []
             };
             renderSupernatural();
             break;
@@ -9053,42 +9053,56 @@ function ocularPower(parent){
     let powers = $(`<div class="flexWrap"></div>`);
     container.append(powers);
 
-    powers.append(`<div id="oculardisintegration" class="chk"><b-checkbox v-model="d" @input="pow('d')">${loc(`ocular_disintegration`)}</b-checkbox></div>`);
-    powers.append(`<div id="ocularpetrification" class="chk"><b-checkbox v-model="p" @input="pow('p')">${loc(`ocular_petrification`)}</b-checkbox></div>`);
-    powers.append(`<div id="ocularwound" class="chk"><b-checkbox v-model="w" @input="pow('w')">${loc(`ocular_wound`)}</b-checkbox></div>`);
-    powers.append(`<div id="oculartelekinesis" class="chk"><b-checkbox v-model="t" @input="pow('t')">${loc(`ocular_telekinesis`)}</b-checkbox></div>`);
-    powers.append(`<div id="ocularfear" class="chk"><b-checkbox v-model="f" @input="pow('f')">${loc(`ocular_fear`)}</b-checkbox></div>`);
-    powers.append(`<div id="ocularcharm" class="chk"><b-checkbox v-model="c" @input="pow('c')">${loc(`ocular_charm`)}</b-checkbox></div>`);
+    // Changed @input to @change on all checkboxes
+    powers.append(`<div id="oculardisintegration" class="chk"><b-checkbox v-model="d" @change="pow('d')">${loc(`ocular_disintegration`)}</b-checkbox></div>`);
+    powers.append(`<div id="ocularpetrification" class="chk"><b-checkbox v-model="p" @change="pow('p')">${loc(`ocular_petrification`)}</b-checkbox></div>`);
+    powers.append(`<div id="ocularwound" class="chk"><b-checkbox v-model="w" @change="pow('w')">${loc(`ocular_wound`)}</b-checkbox></div>`);
+    powers.append(`<div id="oculartelekinesis" class="chk"><b-checkbox v-model="t" @change="pow('t')">${loc(`ocular_telekinesis`)}</b-checkbox></div>`);
+    powers.append(`<div id="ocularfear" class="chk"><b-checkbox v-model="f" @change="pow('f')">${loc(`ocular_fear`)}</b-checkbox></div>`);
+    powers.append(`<div id="ocularcharm" class="chk"><b-checkbox v-model="c" @change="pow('c')">${loc(`ocular_charm`)}</b-checkbox></div>`);
 
     vBind({
         el: `#ocularPower`,
         data: global.race.ocularPowerConfig,
         methods: {
-            pow(v){
-                let active = 0;
-                ['d','p','w','t','f','c'].forEach(function(p){
-                    if (global.race.ocularPowerConfig[p]){ active++ }
-                    if (active > traits.ocular_power.vars()[0] && p !== v){
-                        global.race.ocularPowerConfig[p] = false;
+            pow(powerID) {
+                let maxPowers = traits.ocular_power.vars()[0];
+
+                // init tracking of the order powers were activated, if it doesn't already exist
+                if (!global.race.ocularPowerConfig.order) {
+                    global.race.ocularPowerConfig.order = [];
+                }
+
+                let powerEnabled = global.race.ocularPowerConfig[powerID];
+
+                if (powerEnabled) {
+                    // enabling power, add to list
+                    if (!global.race.ocularPowerConfig.order.includes(powerID)) {
+                        global.race.ocularPowerConfig.order.push(powerID);
                     }
-                });
-                if (active > traits.ocular_power.vars()[0]){
-                    active = 0;
-                    ['d','p','w','t','f','c'].reverse().forEach(function(p){
-                        if (global.race.ocularPowerConfig[p]){ active++ }
-                        if (active > traits.ocular_power.vars()[0] && p !== v){
-                            global.race.ocularPowerConfig[p] = false;
-                        }
-                    });
+                } else {
+                    // disabling power, remove from list
+                    let index = global.race.ocularPowerConfig.order.indexOf(powerID);
+                    if (index > -1) {
+                        global.race.ocularPowerConfig.order.splice(index, 1);
+                    }
+                    return;
+                }
+
+                // if already at cap, disable the oldest power to make room for new one
+                let overCap = global.race.ocularPowerConfig.order.length > maxPowers;
+                if (overCap) {
+                    let oldestPower = global.race.ocularPowerConfig.order.shift();
+                    global.race.ocularPowerConfig[oldestPower] = false;
                     renderSupernatural();
                 }
             },
             max(){
                 let active = 0;
-                ['d','p','w','t','f','c'].forEach(function(p){
-                    if (global.race.ocularPowerConfig[p]){ active++ }
+                ['d', 'p', 'w', 't', 'f', 'c'].forEach(function(p) {
+                    if (global.race.ocularPowerConfig[p]) { active++ }
                 });
-                return loc('ocular_max',[active,traits.ocular_power.vars()[0]]);
+                return loc('ocular_max', [active, traits.ocular_power.vars()[0]]);
             },
         }
     });
