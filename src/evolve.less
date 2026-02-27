@@ -1310,9 +1310,9 @@ Misc ---------> Main template
             border-top: .25rem solid transparent;
             border-left: .375rem solid @has-text-success;
             border-bottom: .25rem solid transparent;
-            transition: all 0.3s;
             -webkit-transition: all 0.3s;
             -moz-transition: all 0.3s;
+            transition: all 0.3s;
         }
         .pause {
             display: inline-block;
@@ -1324,9 +1324,9 @@ Misc ---------> Main template
             height: .625rem;;
             border-right: .125rem solid @has-text-danger;
             border-left: .125rem solid @has-text-danger;
-            transition: all 0.3s;
             -webkit-transition: all 0.3s;
             -moz-transition: all 0.3s;
+            transition: all 0.3s;
         }
 
         // .meter
@@ -1631,27 +1631,39 @@ Misc ---------> Main template
 
         .market-item,
         .resource {
+            // default (prime) zebra stripe
+            &.prime {
+                background-color: transparent;
+            }
+
+            // alternate zebra stripe
             &.alt {
                 background-color: @market-item-background;
             }
-        }
 
-        .resource.showBar {
-            &.prime {
-                background-image: linear-gradient(
-                to right, transparent 0%,
-                    transparent calc(var(--percent-full) - 1px),
-                    @resource-overlay-color calc(var(--percent-full) + 1px),
-                    @resource-overlay-color 100%
-                );
-            }
-            &.alt {
-                background-image: linear-gradient(
-                    to right, transparent 0%,
-                        transparent calc(var(--percent-full) - 1px),
-                        @resource-overlay-color-alt calc(var(--percent-full) + 1px),
-                        @resource-overlay-color-alt 100%
+            &.showBar {
+
+                // prime with showBar - gradient from transparent to filled
+                &.prime {
+                    background: linear-gradient(
+                        to right,
+                        transparent 0%,
+                        transparent var(--percent-full),
+                        #000 var(--percent-full),
+                        #000 100%
                     );
+                }
+
+                // alt with showBar - gradient from dark grey to black
+                &.alt {
+                    background: linear-gradient(
+                        to right,
+                        @market-item-background 0%,
+                        @market-item-background var(--percent-full),
+                        #000 var(--percent-full),
+                        #000 100%
+                    );
+                }
             }
         }
 
@@ -1805,7 +1817,11 @@ Misc ---------> Main template
         .resTabs>section,
         .resTabs>.tabs,
         .bldQueue {
-            scrollbar-color: @webkit-scrollbar-thumb-background @webkit-scrollbar-background;
+            // scrollbar-color is only supported in modern browsers
+            // older browsers will fall back to -webkit-scrollbar styling defined above
+            @supports (scrollbar-color: auto) {
+                scrollbar-color: @webkit-scrollbar-thumb-background @webkit-scrollbar-background;
+            }
         }
 
         .buttonList .is-selected {
@@ -4052,10 +4068,10 @@ a {
     .grad-from-left,
     .grad-from-left-warn,
     .grad-from-right {
-        background-clip: text;
         background-size: 100%;
         -webkit-background-clip: text;
         -moz-background-clip: text;
+        background-clip: text;
         -webkit-text-fill-color: transparent; 
         -moz-text-fill-color: transparent;
     }
@@ -5273,22 +5289,28 @@ div.bigbang {
     height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
-    scrollbar-width: thin;
+    @supports (scrollbar-width: auto) {
+        scrollbar-width: thin;
+    }
 }
 
 .vscroll {
     overflow-x: hidden;
     overflow-y: auto;
-    scrollbar-width: thin;
     top: 1rem;
     bottom: 0;
+    @supports (scrollbar-width: auto) {
+        scrollbar-width: thin;
+    }
 }
 
 .hscroll {
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
-    scrollbar-width: thin;
+    @supports (scrollbar-width: auto) {
+        scrollbar-width: thin;
+    }
 }
 
 #evolution {
@@ -5298,7 +5320,9 @@ div.bigbang {
 .resTabs>section,
 .resTabs>.tabs,
 .bldQueue {
-    scrollbar-width: thin;
+    @supports (scrollbar-width: auto) {
+        scrollbar-width: thin;
+    }
 }
 
 .modal .modal-content {
@@ -5374,11 +5398,11 @@ div.bigbang {
 }
 @keyframes gravity {
     to {
-        transform: translateY(200px);
         -moz-transform: translateY(200px);
         -webkit-transform: translateY(200px);
         -o-transform: translateY(200px);
         -ms-transform: translateY(200px);
+        transform: translateY(200px);
         opacity: 0;
     }
 }
