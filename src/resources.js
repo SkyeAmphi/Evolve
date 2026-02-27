@@ -590,7 +590,6 @@ export function initResourceTabs(tab) {
                 break;
             case 'alchemy':
                 resourceTabOrder.alchemy = [];
-                initAlchemy();
                 break;
         }
     });
