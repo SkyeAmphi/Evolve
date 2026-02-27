@@ -8925,24 +8925,6 @@ function sentience(){
         defineIndustry();
         initResourceTabs('market');
         initResourceTabs('storage');
-
-        if (tmp_vars.hasOwnProperty('resource')){
-            Object.keys(tmp_vars.resource).forEach(function(name){
-                let color = tmp_vars.resource[name].color;
-                let tradable = tmp_vars.resource[name].tradable;
-                let stackable = tmp_vars.resource[name].stackable;
-                if (stackable){
-                    var market_item = $(`<div id="stack-${name}" class="market-item" v-show="display"></div>`);
-                    $('#resStorage').append(market_item);
-                    containerItem(`#stack-${name}`,market_item,name,color,true);
-                }
-                if (tradable){
-                    var market_item = $(`<div id="market-${name}" class="market-item" v-show="r.display"></div>`);
-                    $('#market').append(market_item);
-                    marketItem(`#market-${name}`,market_item,name,color,true);
-                }
-            });
-        }
         tradeSummery();
 
         arpa('Genetics');

@@ -174,6 +174,14 @@ export const supplyValue = {
     Scarletite: { in: 35, out: 250 }
 };
 
+const resourceTabOrder = {
+    market: [],
+    storage: [],
+    ejector: [],
+    supply: [],
+    alchemy: []
+};
+
 export function craftCost(manual=false){
     let costs = {
         Plywood: [{ r: 'Lumber', a: 100 }],
@@ -558,115 +566,133 @@ export const craftingRatio = (function(){
     }
 })();
 
-export function initResourceTabs(tab){
-    if (tab){
-        switch (tab){
+export function initResourceTabs(tab) {
+    const tabsToInit = tab ? [tab] : ['market', 'storage', 'ejector', 'supply', 'alchemy'];
+
+    // clear each of the order arrays for tabs we're about to rebuild
+    tabsToInit.forEach(currentTab => {
+        switch (currentTab) {
             case 'market':
+                resourceTabOrder.market = [];
                 initMarket();
                 break;
             case 'storage':
+                resourceTabOrder.storage = [];
                 initStorage();
                 break;
             case 'ejector':
-                initEjector();
+                resourceTabOrder.ejector = [];
+                if (global.interstellar['mass_ejector']) initEjector();
                 break;
             case 'supply':
-                initSupply();
+                resourceTabOrder.supply = [];
+                if (global.portal['transport']) initSupply();
                 break;
             case 'alchemy':
+                resourceTabOrder.alchemy = [];
                 initAlchemy();
                 break;
         }
+    });
+
+    // create/update resource elements
+    if (tmp_vars.hasOwnProperty('resource')) {
+        Object.keys(tmp_vars.resource).forEach(name => {
+            if (!global.resource[name]) return;
+
+            const color = tmp_vars.resource[name].color;
+            const tradable = tmp_vars.resource[name].tradable;
+            const stackable = tmp_vars.resource[name].stackable;
+
+            // make sure we dynamically handle unlocking containers while crates already exist
+            if (stackable) {
+                const elementId = `stack-${name}`;
+                const exists = $(`#${elementId}`).length > 0;
+
+                if (!exists) {
+                    // first time; create the element
+                    resourceTabOrder.storage.push(name);
+                    containerItem('#resStorage', name, color);
+                } else {
+                    // element exists - check if we need to update for containers
+                    // Vue will handle showing/hiding the container controls with v-show
+                    // but if we just unlocked containers, we need to rebuild the template
+                    if (global.resource.Containers?.display && $(`#${elementId} .trade`).length < 2) {
+                        // containers just unlocked, gotta rebuild
+                        $(`#${elementId}`).remove();
+                        containerItem('#resStorage', name, color);
+                    }
+                }
+            } 
+            
+            if (tradable && $(`#market-${name}`).length === 0) {
+                resourceTabOrder.market.push(name);
+                marketItem('#market', name, color, true);
+            }
+
+            if (atomic_mass[name] && $(`#eject${name}`).length === 0) {
+                resourceTabOrder.ejector.push(name);
+                loadEjector(name, color);
+            }
+            if (supplyValue[name] && $(`#supply${name}`).length === 0) {
+                resourceTabOrder.supply.push(name);
+                loadSupply(name, color);
+            }
+            if (tradeRatio[name] && global.race.universe === 'magic' && name !== 'Crystal' && $(`#alchemy${name}`).length === 0) {
+                global['resource'][name]['basic'] = tradable;
+                resourceTabOrder.alchemy.push(name);  // u cannot alchemize crystal
+                loadAlchemy(name, color, tradable);
+            }
+        });
     }
-    else {
-        initMarket();
-        initStorage();
-        initEjector();
-        initSupply();
-        initAlchemy();
+
+    // initialize tab footers, IE counters and galactic trade
+    tabsToInit.forEach(currentTab => {
+        switch (currentTab) {
+            case 'market':
+                loadRouteCounter();
+                initGalaxyTrade();
+                break;
+            case 'storage':
+                loadContainerCounter();
+                break;
+        }
+    });
+
+    // update resource names
+    if (tmp_vars.hasOwnProperty('resource')) {
+        Object.keys(tmp_vars.resource).forEach(name => {
+            if (global.resource[name]) {
+                setResourceName(name);
+            }
+        });
     }
 }
 
-export function drawResourceTab(tab){
-    if (tab === 'market'){
-        if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 0)){
-            return;
-        }
-        initResourceTabs('market');
-        if (tmp_vars.hasOwnProperty('resource')){
-            Object.keys(tmp_vars.resource).forEach(function(name){
-                let color = tmp_vars.resource[name].color;
-                let tradable = tmp_vars.resource[name].tradable;
-                if (tradable) {
-                    var market_item = $(`<div id="market-${name}" class="market-item"></div>`);
-                    $('#market').append(market_item);
-                    marketItem(`#market-${name}`, market_item, name, color, true);
-                }
-            });
-        }
+export function drawResourceTab(tab) {
+    const tabSettings = {
+        market: { civTab: 4, marketTab: 0 },
+        storage: { civTab: 4, marketTab: 1 },
+        ejector: { civTab: 4, marketTab: 2 },
+        supply: { civTab: 4, marketTab: 3 },
+        alchemy: { civTab: 4, marketTab: 4 }
+    };
+
+    const settings = tabSettings[tab];
+    if (!settings) return;
+
+    // with preload off, only draw if we're on the right tab
+    if (!global.settings.tabLoad &&
+        (global.settings.civTabs !== settings.civTab || global.settings.marketTabs !== settings.marketTab)) {
+        return;
+    }
+
+    // initialize infrastructure and create elements
+    initResourceTabs(tab);
+
+    // update trade summary
+    if (tab === 'market' || tab === 'storage') {
         tradeSummery();
-    }
-    else if (tab === 'storage'){
-        if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 1)){
-            return;
-        }
-        initResourceTabs('storage');
-        if (tmp_vars.hasOwnProperty('resource')){
-            Object.keys(tmp_vars.resource).forEach(function(name){
-                let color = tmp_vars.resource[name].color;
-                let stackable = tmp_vars.resource[name].stackable;
-                if (stackable) {
-                    var market_item = $(`<div id="stack-${name}" class="market-item"></div>`);
-                    $('#resStorage').append(market_item);
-                    containerItem(`#stack-${name}`, market_item, name, color, true);
-                }
-            });
-        }
-        tradeSummery();
-    }
-    else if (tab === 'ejector'){
-        if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 2)){
-            return;
-        }
-        initResourceTabs('ejector');
-        if (tmp_vars.hasOwnProperty('resource')){
-            Object.keys(tmp_vars.resource).forEach(function(name){
-                let color = tmp_vars.resource[name].color;
-                if (atomic_mass[name]){
-                    loadEjector(name,color);
-                }
-            });
-        }
-    }
-    else if (tab === 'supply'){
-        if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 3)){
-            return;
-        }
-        initResourceTabs('supply');
-        if (tmp_vars.hasOwnProperty('resource')){
-            Object.keys(tmp_vars.resource).forEach(function(name){
-                let color = tmp_vars.resource[name].color;
-                if (supplyValue[name]){
-                    loadSupply(name,color);
-                }
-            });
-        }
-    }
-    else if (tab === 'alchemy'){
-        if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 4)){
-            return;
-        }
-        initResourceTabs('alchemy');
-        if (tmp_vars.hasOwnProperty('resource')){
-            Object.keys(tmp_vars.resource).forEach(function(name){
-                let color = tmp_vars.resource[name].color;
-                let tradable = tmp_vars.resource[name].tradable;
-                if (tradeRatio[name] && global.race.universe === 'magic'){
-                    global['resource'][name]['basic'] = tradable;
-                    loadAlchemy(name,color,tradable);
-                }
-            });
-        }
     }
 }
 
@@ -677,8 +703,8 @@ export function defineResources(wiki){
         if (global.stats.achieve['mass_extinction'] && global.stats.achieve['mass_extinction'].l > 1){
             base += 50 * (global.stats.achieve['mass_extinction'].l - 1);
         }
-        loadResource('RNA',wiki,base,1,false);
-        loadResource('DNA',wiki,base,1,false);
+        loadResource('RNA',wiki,base,1,false,false);
+        loadResource('DNA',wiki,base,1,false,false);
     }
     
     loadResource('Money',wiki,1000,1,false,false,'success');
@@ -832,11 +858,12 @@ function loadResource(name,wiki,max,rate,tradable,stackable,color){
     }
 
     var res_container;
-    if (global.resource[name].max === -1 || global.resource[name].max === -2){
+    if (global.resource[name].max === -1 || global.resource[name].max === -2) {
         res_container = $(`<div class="resource crafted" v-show="display"><div><h3 class="res has-text-${color}">{{ namespace(name) }}</h3><span id="cnt${name}" class="count">{{ diffSize(amount) }}</span></div></div>`);
-    }
-    else {
-        res_container = $(`<div class="resource${global.settings.resBar[name] ? ` showBar` : ``}" v-show="display" :style="{ '--percent-full': (bar && max > 0 ? (amount/max)*100 : 0) + '%' }"><div><h3 class="res has-text-${color} bar" @click="toggle('${name}')">{{ namespace(name) }}</h3><span id="cnt${name}" class="count">{{ size(amount) }} / {{ size(max) }}</span></div></div>`);
+    } else {
+        // zebra striping for left sidebar resources
+        // handle showBar in :style only instead of :class
+        res_container = $(`<div class="resource" v-show="display" :class="zebraClass" :style="barStyle"><div><h3 class="res has-text-${color} bar" @click="toggle('${name}')">{{ namespace(name) }}</h3><span id="cnt${name}" class="count">{{ size(amount) }} / {{ size(max) }}</span></div></div>`);
     }
     var bind_container = $(`<div id="res${name}"></div>`);
     bind_container.append(res_container);
@@ -875,6 +902,44 @@ function loadResource(name,wiki,max,rate,tradable,stackable,color){
     vBind({
         el: `#res${name}`,
         data: global['resource'][name],
+        computed: {
+            // computed zebra class for left sidebar, either 'prime' or 'alt', with optional 'showBar'
+            zebraClass() {
+                let classes = [];
+
+                // determine base stripe (prime = light, alt = dark)
+                let visibleIndex = 0;
+                const allResources = $('#resources .resource').toArray();
+                for (const el of allResources) {
+                    if (el === this.$el) break;
+                    if ($(el).is(':visible')) {
+                        visibleIndex++;
+                    }
+                }
+
+                if (visibleIndex % 2 === 1) {
+                    classes.push('alt');
+                } else {
+                    classes.push('prime');
+                }
+
+                // add showBar class if resource progress bars are enabled for this resource
+                if (this.bar) {
+                    classes.push('showBar');
+                }
+
+                return classes.join(' ');
+            },
+
+            barStyle() {
+                // only apply progress bar style when showBar is active
+                if (this.bar && this.max > 0) {
+                    return { '--percent-full': (this.amount / this.max * 100) + '%' };
+                }
+                return {};
+            }
+        },
+        
         methods: {
             size: function (value){
                 return value ? sizeApproximation(value,0) : value;
@@ -946,14 +1011,11 @@ function loadResource(name,wiki,max,rate,tradable,stackable,color){
                 }
                 return costs;
             },
-            toggle(res){
-                if (global.settings.resBar[res]){
+            toggle(res) {
+                if (global.settings.resBar[res]) {
                     global.settings.resBar[res] = false;
-                    $(`#res${name}`).removeClass('showBar');
-                }
-                else {
+                } else {
                     global.settings.resBar[res] = true;
-                    $(`#res${name}`).addClass('showBar');
                 }
                 global.resource[name]['bar'] = global.settings.resBar[name];
             }
@@ -1385,63 +1447,153 @@ function importRouteEnabled(route){
     return true;
 }
 
-export function marketItem(mount,market_item,name,color,full){
-    if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 0)){
+export function marketItem(container, name, color, full) {
+    if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 0)) {
         return;
     }
 
-    if ((global.race['artifical'] || global.race['fasting']) && name === 'Food'){
+    if ((global.race['artifical'] || global.race['fasting']) && name === 'Food') {
         return;
     }
 
-    let wrapper = $(`<div v-show="r.display"></div>`);
+    // create container element for this market item
+    const elementId = `market-${name}`;
+    $(`<div id="${elementId}"></div>`).appendTo(container);
 
-    if (full){
-        wrapper.append($(`<h3 class="res has-text-${color}">{{ namespace(r.name) }}</h3>`));
+    // build template string for Vue to manage
+    let template = '<div class="market-item" v-show="isDisplayed" :class="zebraClass">';
+
+    if (full) {
+        template += `<h3 class="res has-text-${color}">{{ displayName }}</h3>`;
     }
 
-    if (!global.race['no_trade']){
-        wrapper.append($(`<span class="buy"><span class="has-text-success">${loc('resource_market_buy')}</span></span>`));
-        wrapper.append($(`<span role="button" class="order" @click="purchase('${name}')">\${{ buy(r.value) }}</span>`));
-        
-        wrapper.append($(`<span class="sell"><span class="has-text-danger">${loc('resource_market_sell')}</span></span>`));
-        wrapper.append($(`<span role="button" class="order" @click="sell('${name}')">\${{ sell_f(r.value) }}</span>`));
+    if (!global.race['no_trade']) {
+        template += `<span class="buy"><span class="has-text-success">${loc('resource_market_buy')}</span></span>`;
+        template += `<span role="button" class="order" @click="purchase">\${{ buyPrice }}</span>`;
+        template += `<span class="sell"><span class="has-text-danger">${loc('resource_market_sell')}</span></span>`;
+        template += `<span role="button" class="order" @click="sell">\${{ sellPrice }}</span>`;
     }
 
-    if (full && ((global.race['banana'] && name === 'Food') || (global.tech['trade'] && !global.race['terrifying']))){
-        let trade = $(`<span class="trade" v-show="m.active"><span class="has-text-warning">${loc('resource_market_routes')}</span></span>`);
-        wrapper.append(trade);
-        trade.append($(`<b-tooltip :label="aSell('${name}')" position="is-bottom" size="is-small" multilined animated><span role="button" aria-label="export ${global.resource[name].name}" class="sub has-text-danger" @click="autoSell('${name}')"><span>-</span></span></b-tooltip>`));
-        trade.append($(`<span class="current" :class="tradeRouteColor(r.trade)" v-html="trade(r.trade)"></span>`));
-        trade.append($(`<b-tooltip :label="aBuy('${name}')" position="is-bottom" size="is-small" multilined animated><span role="button" aria-label="import ${global.resource[name].name}" class="add has-text-success" @click="autoBuy('${name}')"><span>+</span></span></b-tooltip>`));
-        trade.append($(`<span role="button" class="zero has-text-advanced" @click="zero('${name}')">${loc('cancel_routes')}</span>`));
+    if (full && ((global.tech['trade'] && !global.race['terrifying']) || (global.race['banana'] && name === 'Food'))) {
+        template += `<span class="trade" v-show="isMarketActive">`;
+        template += `<span class="has-text-warning">${loc('resource_market_routes')}</span>`;
+        template += `<b-tooltip :label="autoSellTooltip" position="is-bottom" size="is-small" multilined animated>`;
+        template += `<span role="button" aria-label="export ${global.resource[name].name}" class="sub has-text-danger" @click="autoSell"><span>-</span></span>`;
+        template += `</b-tooltip>`;
+        template += `<span class="current" :class="routeColor" v-html="tradeDisplay"></span>`;
+        template += `<b-tooltip :label="autoBuyTooltip" position="is-bottom" size="is-small" multilined animated>`;
+        template += `<span role="button" aria-label="import ${global.resource[name].name}" class="add has-text-success" @click="autoBuy"><span>+</span></span>`;
+        template += `</b-tooltip>`;
+        template += `<span role="button" class="zero has-text-advanced" @click="zero">${loc('cancel_routes')}</span>`;
+        template += `</span>`;
     }
 
-    market_item.append(wrapper);
-    
+    template += '</div>';
+
     vBind({
-        el: mount,
-        data: { 
-            r: global.resource[name],
-            m: global.city.market
-        },
-        methods: {
-            aSell(res){
-                let unit = tradeRatio[res] === 1 ? loc('resource_market_unit') : loc('resource_market_units');
-                let price = tradeSellPrice(res);
-                let rate = tradeRatio[res];
-                if (global.stats.achieve.hasOwnProperty('trade')){
+        el: `#${elementId}`,
+        data: global.resource[name],
+        computed: {
+            isDisplayed() {
+                return this.display === true;
+            },
+
+            // make keyMultiplier available as a computed property
+            currentKeyMultiplier() {
+                return keyMultiplier();
+            },
+
+            // reactive zebra striping, accounts for differring resource visibility in different tabs
+            zebraClass() {
+                if (!this.display) return 'prime';
+
+                let visibleIndex = 0;
+                for (const resName of resourceTabOrder.market) {
+                    if (resName === name) break;
+                    // only count visible resources before this one
+                    if (global.resource[resName]?.display) {
+                        visibleIndex++;
+                    }
+                }
+
+                return visibleIndex % 2 === 1 ? 'alt' : 'prime';
+            },
+
+            displayName() {
+                return this.name.replace("_", " ");
+            },
+
+            isMarketActive() {
+                return global.city.market.active;
+            },
+
+            buyPrice() {
+                let value = this.value;
+                if (global.race['arrogant']) {
+                    value *= 1 + (traits.arrogant.vars()[0] / 100);
+                }
+                if (global.race['conniving']) {
+                    value *= 1 - (traits.conniving.vars()[0] / 100);
+                }
+                let fathom = fathomCheck('imp');
+                if (fathom > 0) {
+                    value *= 1 - (traits.conniving.vars(1)[0] / 100 * fathom);
+                }
+                return sizeApproximation(value * global.city.market.qty, 0);
+            },
+
+            sellPrice() {
+                let divide = 4;
+                if (global.race['merchant']) {
+                    divide *= 1 - (traits.merchant.vars()[0] / 100);
+                }
+                let fathom = fathomCheck('goblin');
+                if (fathom > 0) {
+                    divide *= 1 - (traits.merchant.vars(1)[0] / 100 * fathom);
+                }
+                if (global.race['devious']) {
+                    divide *= 1 - (traits.devious.vars()[0] / 100);
+                }
+                if (global.race['asymmetrical']) {
+                    divide *= 1 + (traits.asymmetrical.vars()[0] / 100);
+                }
+                return sizeApproximation(this.value * global.city.market.qty / divide, 0);
+            },
+
+            routeColor() {
+                if (this.trade > 0) return 'has-text-success';
+                if (this.trade < 0) return 'has-text-danger';
+                return 'has-text-warning';
+            },
+
+            tradeDisplay() {
+                let val = this.trade;
+                if (name === 'Stone' && (val === 31 || val === -31)) {
+                    let trick = trickOrTreat(3, 12, false);
+                    if (trick.length > 0) return trick;
+                }
+                if (val < 0) return `-${Math.abs(val)}`;
+                if (val > 0) return `+${val}`;
+                return '0';
+            },
+
+            autoSellTooltip() {
+                let unit = tradeRatio[name] === 1 ? loc('resource_market_unit') : loc('resource_market_units');
+                let price = tradeSellPrice(name);
+                let rate = tradeRatio[name];
+                if (global.stats.achieve.hasOwnProperty('trade')) {
                     let rank = global.stats.achieve.trade.l;
-                    if (rank > 5){ rank = 5; }
+                    if (rank > 5) rank = 5;
                     rate *= 1 - (rank / 100);
                 }
                 rate = +(rate).toFixed(3);
-                return loc('resource_market_auto_sell_desc',[rate,unit,price]);
+                return loc('resource_market_auto_sell_desc', [rate, unit, price]);
             },
-            aBuy(res){
-                let rate = tradeRatio[res];
-                let dealVal = govActive('dealmaker',0);
-                if (dealVal){
+
+            autoBuyTooltip() {
+                let rate = tradeRatio[name];
+                let dealVal = govActive('dealmaker', 0);
+                if (dealVal) {
                     rate *= 1 + (dealVal / 100);
                 }
                 if (global.race['persuasive']){
@@ -1478,14 +1630,16 @@ export function marketItem(mount,market_item,name,color,full){
                 }
                 rate = +(rate).toFixed(3);
                 let unit = rate === 1 ? loc('resource_market_unit') : loc('resource_market_units');
-                let price = tradeBuyPrice(res);
-                return loc('resource_market_auto_buy_desc',[rate,unit,price]);
-            },
-            purchase(res){
-                if (!global.race['no_trade'] && !global.settings.pause){
+                let price = tradeBuyPrice(name);
+                return loc('resource_market_auto_buy_desc', [rate, unit, price]);
+            }
+        },
+        methods: {
+            purchase() {
+                if (!global.race['no_trade'] && !global.settings.pause) {
                     let qty = global.city.market.qty;
-                    let value = global.resource[res].value;
-                    if (global.race['arrogant']){
+                    let value = this.value;
+                    if (global.race['arrogant']) {
                         value *= 1 + (traits.arrogant.vars()[0] / 100);
                     }
                     if (global.race['conniving']){
@@ -1496,17 +1650,17 @@ export function marketItem(mount,market_item,name,color,full){
                         value *= 1 - (traits.conniving.vars(1)[0] / 100 * fathom);
                     }
                     let amount = Math.floor(Math.min(qty, global.resource.Money.amount / value,
-                      global.resource[res].max - global.resource[res].amount));
-                    if (amount > 0){
-                        global.resource[res].amount += amount;
+                        this.max - this.amount));
+                    if (amount > 0) {
+                        this.amount += amount;
                         global.resource.Money.amount -= Math.round(value * amount);
-
-                        global.resource[res].value += Number((amount / Math.rand(1000,10000)).toFixed(2));
+                        this.value += Number((amount / Math.rand(1000, 10000)).toFixed(2));
                     }
                 }
             },
-            sell(res){
-                if (!global.race['no_trade'] && !global.settings.pause){
+
+            sell() {
+                if (!global.race['no_trade'] && !global.settings.pause) {
                     let qty = global.city.market.qty;
                     let divide = 4;
                     if (global.race['merchant']){
@@ -1526,23 +1680,26 @@ export function marketItem(mount,market_item,name,color,full){
                     if (impFathom > 0){
                         divide *= 1 - (traits.conniving.vars(1)[1] / 100 * impFathom);
                     }
-                    let price = global.resource[res].value / divide;
-                    let amount = Math.floor(Math.min(qty, global.resource[res].amount,
-                      (global.resource.Money.max - global.resource.Money.amount) / price));
+                    let price = this.value / divide;
+                    let amount = Math.floor(Math.min(qty, this.amount,
+                        (global.resource.Money.max - global.resource.Money.amount) / price));
                     if (amount > 0) {
-                        global.resource[res].amount -= amount;
+                        this.amount -= amount;
                         global.resource.Money.amount += Math.round(price * amount);
-
-                        global.resource[res].value -= Number((amount / Math.rand(1000,10000)).toFixed(2));
-                        if (global.resource[res].value < Number(resource_values[res] / 2)){
-                            global.resource[res].value = Number(resource_values[res] / 2);
+                        this.value -= Number((amount / Math.rand(1000, 10000)).toFixed(2));
+                        if (this.value < Number(resource_values[name] / 2)) {
+                            this.value = Number(resource_values[name] / 2);
                         }
                     }
                 }
             },
-            autoBuy(res, keyMult = keyMultiplier()){
-                for (let i=0; i<keyMult; i++){
-                    if (govActive('dealmaker',0)){
+
+            autoBuy(keyMult) {
+                // use keyMult if provided by zero() calls, otherwise use user input multiplier keys
+                const multiplier = typeof keyMult === 'number' ? keyMult : keyMultiplier();
+
+                for (let i = 0; i < multiplier; i++) {
+                    if (govActive('dealmaker', 0)) {
                         let exporting = 0;
                         let importing = 0;
                         Object.keys(global.resource).forEach(function(res){
@@ -1557,10 +1714,10 @@ export function marketItem(mount,market_item,name,color,full){
                             break;
                         }
                     }
-                    if (global.resource[res].trade >= 0){
-                        if (importRouteEnabled(res) && global.city.market.trade < global.city.market.mtrade){
+                    if (this.trade >= 0) {
+                        if (importRouteEnabled(name) && global.city.market.trade < global.city.market.mtrade) {
                             global.city.market.trade++;
-                            global.resource[res].trade++;
+                            this.trade++;
                         }
                         else {
                             break;
@@ -1568,16 +1725,19 @@ export function marketItem(mount,market_item,name,color,full){
                     }
                     else {
                         global.city.market.trade--;
-                        global.resource[res].trade++;
+                        this.trade++;
                     }
                 }
             },
-            autoSell(res, keyMult = keyMultiplier()){
-                for (let i=0; i<keyMult; i++){
-                    if (global.resource[res].trade <= 0){
-                        if (exportRouteEnabled(res) && global.city.market.trade < global.city.market.mtrade){
+
+            autoSell(keyMult) {
+                const multiplier = typeof keyMult === 'number' ? keyMult : keyMultiplier();
+
+                for (let i = 0; i < multiplier; i++) {
+                    if (this.trade <= 0) {
+                        if (exportRouteEnabled(name) && global.city.market.trade < global.city.market.mtrade) {
                             global.city.market.trade++;
-                            global.resource[res].trade--;
+                            this.trade--;
                         }
                         else {
                             break;
@@ -1585,76 +1745,21 @@ export function marketItem(mount,market_item,name,color,full){
                     }
                     else {
                         global.city.market.trade--;
-                        global.resource[res].trade--;
+                        this.trade--;
                     }
                 }
             },
-            zero(res){
-                if (global.resource[res].trade > 0){
-                    this.autoSell(res, global.resource[res].trade);
-                }
-                else if (global.resource[res].trade < 0){
-                    this.autoBuy(res, -global.resource[res].trade);
-                }
-            },
-            buy(value){
-                if (global.race['arrogant']){
-                    value *= 1 + (traits.arrogant.vars()[0] / 100);
-                }
-                return sizeApproximation(value * global.city.market.qty,0);
-            },
-            sell_f(value){
-                let divide = 4;
-                if (global.race['merchant']){
-                    divide *= 1 - (traits.merchant.vars()[0] / 100);
-                }
-                let fathom = fathomCheck('goblin');
-                if (fathom > 0){
-                    divide *= 1 - (traits.merchant.vars(1)[0] / 100 * fathom);
-                }
-                if (global.race['devious']){
-                    divide *= 1 - (traits.devious.vars()[0] / 100);
-                }
-                if (global.race['asymmetrical']){
-                    divide *= 1 + (traits.asymmetrical.vars()[0] / 100);
-                }
-                return sizeApproximation(value * global.city.market.qty / divide,0);
-            },
-            trade(val){
-                if (name === 'Stone' && (val === 31 || val === -31)){
-                    let trick = trickOrTreat(3,12,false);
-                    if (trick.length > 0){
-                        return trick;
-                    }
-                }
-                if (val < 0){
-                    val = 0 - val;
-                    return `-${val}`;
-                }
-                else if (val > 0){
-                    return `+${val}`;
-                }
-                else {
-                    return 0;
-                }
-            },
 
-            tradeRouteColor(val) {
-                if (val > 0) { // importing
-                    return 'has-text-success';
+            zero() {
+                if (this.trade > 0) {
+                    this.autoSell(this.trade);
                 }
-                else if (val < 0) { // exporting
-                    return 'has-text-danger';
+                else if (this.trade < 0) {
+                    this.autoBuy(-this.trade);
                 }
-                else { // 0 routes
-                    return 'has-text-warning';
-                }
-            },
-
-            namespace(val){
-                return val.replace("_", " ");
             }
-        }
+        },
+        template: template
     });
 }
 
@@ -1724,8 +1829,10 @@ export function galacticTrade(modal){
         galaxyTrade.append($(`<div class="market-item trade-header"><span class="has-text-special">${loc('galaxy_trade')}</span></div>`));
 
         let offers = galaxyOffers();
-        for (let i=0; i<offers.length; i++){
-            let offer = $(`<div class="market-item trade-offer"></div>`);
+        for (let i = 0; i < offers.length; i++) {
+            // add zebra class based on index
+            let zebraClass = i % 2 === 1 ? ' alt' : '';
+            let offer = $(`<div class="market-item trade-offer${zebraClass}"></div>`);
             galaxyTrade.append(offer);
 
             offer.append($(`<span class="offer-item has-text-success">${global.resource[offers[i].buy.res].name}</span>`));
@@ -1745,7 +1852,9 @@ export function galacticTrade(modal){
             trade.append($(`<span role="button" class="zero has-text-advanced" @click="zero('${i}')">${loc('cancel_routes')}</span>`));
         }
 
-        let totals = $(`<div class="market-item trade-offer"><div id="galacticTradeTotal"><span class="tradeTotal"><span class="has-text-caution">${loc('resource_market_galactic_trade_routes')}</span> {{ g.cur }} / {{ g.max }}</span></div></div>`);
+        // tab footer with zebra striping
+        let footerZebra = offers.length % 2 === 1 ? ' alt' : '';
+        let totals = $(`<div class="market-item trade-offer${footerZebra}"><div id="galacticTradeTotal"><span class="tradeTotal"><span class="has-text-caution">${loc('resource_market_galactic_trade_routes')}</span> {{ g.cur }} / {{ g.max }}</span></div></div>`);
         totals.append($(`<span role="button" class="zero has-text-advanced" @click="zero()">${loc('cancel_all_routes')}</span>`));
         galaxyTrade.append(totals);
     }
@@ -1908,72 +2017,104 @@ function assignContainer(res){
     }
 }
 
-export function containerItem(mount,market_item,name,color){
-    if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 1)){
+export function containerItem(container, name, color) {
+    if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 1)) {
         return;
     }
 
-    let wrapper = $(`<div v-show="r.display"></div>`);
+    // create container element
+    const elementId = `stack-${name}`;
+    $(`<div id="${elementId}"></div>`).appendTo(container);
 
-    wrapper.append($(`<h3 class="res has-text-${color}">{{ r.name }}</h3>`));
+    // reactive build template
+    let template = '<div class="market-item" v-show="isDisplayed" :class="zebraClass">';
+    template += `<h3 class="res has-text-${color}">{{ name }}</h3>`;
 
-    if (global.resource.Crates.display){
-        let crate = $(`<span class="trade"><span class="has-text-warning">${global.resource.Crates.name}</span></span>`);
-        wrapper.append(crate);
-
-        crate.append($(`<span role="button" aria-label="remove ${global.resource[name].name} ${global.resource.Crates.name}" class="sub has-text-danger" @click="subCrate('${name}')"><span>&laquo;</span></span>`));
-        crate.append($(`<span class="current" v-html="cCnt(r.crates,'${name}')"></span>`));
-        crate.append($(`<span role="button" aria-label="add ${global.resource[name].name} ${global.resource.Crates.name}" class="add has-text-success" @click="addCrate('${name}')"><span>&raquo;</span></span>`));
+    if (global.resource.Crates.display) {
+        template += `<span class="trade"><span class="has-text-warning">${global.resource.Crates.name}</span>`;
+        template += `<span role="button" aria-label="remove ${global.resource[name].name} ${global.resource.Crates.name}" class="sub has-text-danger" @click="subCrate"><span>&laquo;</span></span>`;
+        template += `<span class="current" v-html="crateDisplay"></span>`;
+        template += `<span role="button" aria-label="add ${global.resource[name].name} ${global.resource.Crates.name}" class="add has-text-success" @click="addCrate"><span>&raquo;</span></span>`;
+        template += `</span>`;
     }
 
-    if (global.resource.Containers.display){
-        let container = $(`<span class="trade"><span class="has-text-warning">${global.resource.Containers.name}</span></span>`);
-        wrapper.append(container);
-
-        container.append($(`<span role="button" aria-label="remove ${global.resource[name].name} ${global.resource.Containers.name}" class="sub has-text-danger" @click="subCon('${name}')"><span>&laquo;</span></span>`));
-        container.append($(`<span class="current" v-html="trick(r.containers)"></span>`));
-        container.append($(`<span role="button" aria-label="add ${global.resource[name].name} ${global.resource.Containers.name}" class="add has-text-success" @click="addCon('${name}')"><span>&raquo;</span></span>`));
+    if (global.resource.Containers.display) {
+        template += `<span class="trade"><span class="has-text-warning">${global.resource.Containers.name}</span>`;
+        template += `<span role="button" aria-label="remove ${global.resource[name].name} ${global.resource.Containers.name}" class="sub has-text-danger" @click="subCon"><span>&laquo;</span></span>`;
+        template += `<span class="current" v-html="containerDisplay"></span>`;
+        template += `<span role="button" aria-label="add ${global.resource[name].name} ${global.resource.Containers.name}" class="add has-text-success" @click="addCon"><span>&raquo;</span></span>`;
+        template += `</span>`;
     }
 
-    market_item.append(wrapper);
+    template += '</div>';
 
     vBind({
-        el: mount,
-        data: {
-            r: global.resource[name]
-        },
-        methods: {
-            addCrate(res){
-                assignCrate(res);
+        el: `#${elementId}`,
+        data: global.resource[name],
+        computed: {
+            isDisplayed() {
+                return this.display === true;
             },
-            subCrate(res){
-                unassignCrate(res);
-            },
-            addCon(res){
-                assignContainer(res);
-            },
-            subCon(res){
-                unassignContainer(res);
-            },
-            trick(v){
-                if (name === 'Stone' && global.resource[name].crates === 10 && global.resource[name].containers === 31){
-                    let trick = trickOrTreat(4,13,true);
-                    if (trick.length > 0){
-                        return trick;
+
+            // reactive zebra striping for storage tab
+            zebraClass() {
+                if (!this.display) return 'prime';
+
+                let visibleIndex = 0;
+                for (const resName of resourceTabOrder.storage) {
+                    if (resName === name) break;
+                    // only count displayed resources
+                    if (global.resource[resName]?.display) {
+                        visibleIndex++;
                     }
                 }
-                return v;
+
+                return visibleIndex % 2 === 1 ? 'alt' : 'prime';
             },
-            cCnt(ct,res){
-                if ((res === 'Food' && !global.race['artifical']) || (global.race['artifical'] && res === 'Coal') || res === 'Souls'){
-                    let egg = easterEgg(13,10);
-                    if (ct === 10 && egg.length > 0){
-                        return '1'+egg;
+
+            crateDisplay() {
+                const ct = this.crates;
+                // easter egg
+                if ((name === 'Food' && !global.race['artifical']) ||
+                    (global.race['artifical'] && name === 'Coal') ||
+                    name === 'Souls') {
+                    let egg = easterEgg(13, 10);
+                    if (ct === 10 && egg.length > 0) {
+                        return '1' + egg;
                     }
                 }
                 return ct;
+            },
+
+            containerDisplay() {
+                // trick or treat
+                if (name === 'Stone' && this.crates === 10 && this.containers === 31) {
+                    let trick = trickOrTreat(4, 13, true);
+                    if (trick.length > 0) {
+                        return trick;
+                    }
+                }
+                return this.containers;
             }
-        }
+        },
+        methods: {
+            addCrate() {
+                assignCrate(name);
+            },
+
+            subCrate() {
+                unassignCrate(name);
+            },
+
+            addCon() {
+                assignContainer(name);
+            },
+
+            subCon() {
+                unassignContainer(name);
+            }
+        },
+        template: template
     });
 }
 
@@ -2350,18 +2491,34 @@ function loadRouteCounter(){
         return;
     }
 
-    // Just update and return
     if ($('#tradeTotal').length > 0) {
-        return;  // Already exists, Vue reactivity will handle updates
+        return;
     }
 
     let no_market = global.race['no_trade'] ? ' nt' : '';
-    var market_item = $(`<div id="tradeTotal" v-show="active" class="market-item"><div id="tradeTotalPopover"><span class="tradeTotal${no_market}"><span class="has-text-caution">${loc('resource_market_trade_routes')}</span> <span v-html="tdeCnt(trade)"></span> / {{ mtrade }}</span></div></div>`);
-    market_item.append($(`<span role="button" class="zero has-text-advanced" @click="zero()">${loc('cancel_all_routes')}</span>`));
-    $('#market').append(market_item);
+
+    // create a simple container div that Vue will manage
+    $('#market').append(`<div id="tradeTotal"></div>`);
+
     vBind({
         el: '#tradeTotal',
         data: global.city.market,
+        computed: {
+            // computed property using reactive data
+            footerZebraClass() {
+                let visibleCount = 0;
+
+                for (const resName of resourceTabOrder.market) {
+                    // only counts displayed resources for this tab, updates reactively
+                    if (global.resource[resName]?.display) {
+                        visibleCount++;
+                    }
+                }
+
+                // counter should alternate from last resource
+                return visibleCount % 2 === 1 ? 'alt' : 'prime';
+            }
+        },
         methods: {
             zero(){
                 Object.keys(global.resource).forEach(function(res){
@@ -2371,14 +2528,24 @@ function loadRouteCounter(){
                     }
                 });
             },
-            tdeCnt(ct){
-                let egg17 = easterEgg(17,11);
-                if (((ct === 100 && !global.tech['isolation'] && !global.race['cataclysm']) || (ct === 10 && (global.tech['isolation'] || global.race['cataclysm']))) && egg17.length > 0){
-                    return '10'+egg17;
+
+            tradeCount(count) {
+                let egg17 = easterEgg(17, 11);
+                if (((count === 100 && !global.tech['isolation'] && !global.race['cataclysm']) || (count === 10 && (global.tech['isolation'] || global.race['cataclysm']))) && egg17.length > 0) {
+                    return '10' + egg17;
                 }
-                return ct;
+                return count;
             }
-        }
+        },
+        template: `<div class="market-item" v-show="active" :class="footerZebraClass">
+            <div id="tradeTotalPopover">
+                <span class="tradeTotal${no_market}">
+                    <span class="has-text-caution">${loc('resource_market_trade_routes')}</span>&nbsp; 
+                    <span v-html="tradeCount(trade)"></span> / {{ mtrade }}
+                </span>
+            </div>
+            <span role="button" class="zero has-text-advanced" @click="zero()">${loc('cancel_all_routes')}</span>
+        </div>`
     });
 
     popover(`tradeTotalPopover`,function(){
@@ -2401,21 +2568,46 @@ function loadContainerCounter(){
     if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 1)){
         return;
     }
-    
-    // Check if already mounted - if so, just update and return
+
     if ($('#crateTotal').length > 0) {
-        return;  // Already exists, Vue reactivity will handle updates
+        return;
     }
 
-    var market_item = $(`<div id="crateTotal" class="market-item"><span v-show="cr.display" class="crtTotal"><span class="has-text-warning">${global.resource.Crates.name}</span><span>{{ cr.amount }} / {{ cr.max }}</span></span><span v-show="cn.display" class="cntTotal"><span class="has-text-warning">${global.resource.Containers.name}</span><span>{{ cn.amount }} / {{ cn.max }}</span></span></div>`);
-    $('#resStorage').append(market_item);
+    // create a simple container div for Vue to manage
+    $('#resStorage').append(`<div id="crateTotal"></div>`);
 
     vBind({
         el: '#crateTotal',
         data: {
             cr: global.resource.Crates,
             cn: global.resource.Containers
-        }
+        },
+        computed: {
+            footerZebraClass() {
+                let visibleCount = 0;
+
+                // use the same reactive array that storage resources use
+                for (const resName of resourceTabOrder.storage) {
+                    // only count displayed resources for this tab
+                    if (global.resource[resName]?.display) {
+                        visibleCount++;
+                    }
+                }
+
+                // counter should alternate from last resource
+                return visibleCount % 2 === 1 ? 'alt' : 'prime';
+            }
+        },
+        template: `<div class="market-item" :class="footerZebraClass">
+            <span v-show="cr.display" class="crtTotal">
+                <span class="has-text-warning">${global.resource.Crates.name}</span>
+                <span>{{ cr.amount }} / {{ cr.max }}</span>
+            </span>
+            <span v-show="cn.display" class="cntTotal">
+                <span class="has-text-warning">${global.resource.Containers.name}</span>
+                <span>{{ cn.amount }} / {{ cn.max }}</span>
+            </span>
+        </div>`
     });
 }
 
@@ -2710,8 +2902,13 @@ function initMarket(){
     if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 0)){
         return;
     }
+    
+    // avoid duplicates
+    if ($('#market-qty').length > 0) {
+        return;
+    }
+    
     let market = $(`<div id="market-qty" class="market-header"><h2 class="is-sr-only">${loc('resource_market')}</h2></div>`);
-    clearElement($('#market'));
     $('#market').append(market);
     loadMarket();
 }
@@ -2720,11 +2917,16 @@ function initStorage(){
     if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 1)){
         return;
     }
+    
+    // avoid duplicates
+    if ($('#createHead').length > 0) {
+        return;
+    }
+
     let store = $(`<div id="createHead" class="storage-header"><h2 class="is-sr-only">${loc('tab_storage')}</h2></div>`);
-    clearElement($('#resStorage'));
     $('#resStorage').append(store);
     
-    if (global.resource['Crates'] && global.resource['Containers']){
+    if (global.resource['Crates'] && global.resource['Containers']) {
         store.append($(`<b-tooltip :label="buildCrateDesc()" position="is-bottom" class="crate" animated multilined><button :aria-label="buildCrateDesc()" v-show="cr.display" class="button" @click="crate">${loc('resource_modal_crate_construct')}</button></b-tooltip>`));
         store.append($(`<b-tooltip :label="buildContainerDesc()" position="is-bottom" class="container" animated multilined><button :aria-label="buildContainerDesc()" v-show="cn.display" class="button" @click="container">${loc('resource_modal_container_construct')}</button></b-tooltip>`));
 
@@ -2809,8 +3011,13 @@ function initEjector(){
     if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 2)){
         return;
     }
-    clearElement($('#resEjector'));
-    if (global.interstellar['mass_ejector']){
+    
+    // avoid duplicates
+    if ($('#eject').length > 0) {
+        return;
+    }
+    
+    if (global.interstellar['mass_ejector']) {
         let ejector = $(`<div id="eject" class="market-item"><h3 class="res has-text-warning">${loc('interstellar_mass_ejector_vol')}</h3></div>`);
         $('#resEjector').append(ejector);
 
@@ -2823,18 +3030,14 @@ function initEjector(){
             el: `#eject`,
             data: global.interstellar.mass_ejector,
             methods: {
-                max(num){
-                    return num * 1000;
-                },
-                real(num){
-                    if (p_on['mass_ejector'] < num){
-                        return ` (${loc('interstellar_mass_ejector_active',[p_on['mass_ejector'] * 1000])})`;
+                max(num) { return num * 1000; },
+                real(num) {
+                    if (p_on['mass_ejector'] < num) {
+                        return ` (${loc('interstellar_mass_ejector_active', [p_on['mass_ejector'] * 1000])})`;
                     }
                     return '';
                 },
-                approx(tons){
-                    return sizeApproximation(tons,2);
-                }
+                approx(tons) { return sizeApproximation(tons, 2); }
             }
         });
     }
@@ -2851,58 +3054,95 @@ export function loadEjector(name,color){
         if (global.race.universe !== 'magic' && (name === 'Elerium' || name === 'Infernite')){
             color = 'caution';
         }
-        let ejector = $(`<div id="eject${name}" class="market-item" v-show="r.display"><h3 class="res has-text-${color}">${global.resource[name].name}</h3></div>`);
-        $('#resEjector').append(ejector);
 
-        let res = $(`<span class="trade"></span>`);
-        ejector.append(res);
+        // create container element
+        const elementId = `eject${name}`;
+        $(`<div id="${elementId}"></div>`).appendTo('#resEjector');
 
-        res.append($(`<span role="button" aria-label="eject less ${global.resource[name].name}" class="sub has-text-danger" @click="ejectLess('${name}')"><span>&laquo;</span></span>`));
-        res.append($(`<span class="current">{{ e.${name} }}</span>`));
-        res.append($(`<span role="button" aria-label="eject more ${global.resource[name].name}" class="add has-text-success" @click="ejectMore('${name}')"><span>&raquo;</span></span>`));
+        // build template with reactive elements
+        let template = '<div class="market-item" v-show="isDisplayed" :class="zebraClass">';
+        template += `<h3 class="res has-text-${color}">{{ displayName }}</h3>`;
+        template += `<span class="trade">`;
+        template += `<span role="button" aria-label="eject less {{ displayName }}" class="sub has-text-danger" @click="ejectLess"><span>&laquo;</span></span>`;
+        template += `<span class="current">{{ ejectAmount }}</span>`;
+        template += `<span role="button" aria-label="eject more {{ displayName }}" class="add has-text-success" @click="ejectMore"><span>&raquo;</span></span>`;
+        template += `<span class="mass">${loc('interstellar_mass_ejector_per')}: <span class="has-text-warning">${atomic_mass[name]}</span> kt</span>`;
+        template += `</span>`;
+        template += '</div>';
 
-        res.append($(`<span class="mass">${loc('interstellar_mass_ejector_per')}: <span class="has-text-warning">${atomic_mass[name]}</span> kt</span>`));
-
-        if (!global.interstellar.mass_ejector.hasOwnProperty(name)){
+        if (!global.interstellar.mass_ejector.hasOwnProperty(name)) {
             global.interstellar.mass_ejector[name] = 0;
         }
 
         vBind({
-            el: `#eject${name}`,
-            data: {
-                r: global.resource[name],
-                e: global.interstellar.mass_ejector
+            el: `#${elementId}`,
+            data: global.resource[name],
+            computed: {
+                isDisplayed() {
+                    return this.display === true;
+                },
+
+                // makes sure the displayed name is always accurate without the need to redraw
+                displayName() {
+                    return this.name;
+                },
+
+                // reactive zebra striping for ejector tab
+                zebraClass() {
+                    if (!this.display) return '';
+
+                    let visibleIndex = 0;
+                    for (const resName of resourceTabOrder.ejector) {
+                        if (resName === name) break;
+                        if (global.resource[resName]?.display) {
+                            visibleIndex++;
+                        }
+                    }
+
+                    return visibleIndex % 2 === 1 ? 'alt' : '';
+                },
+
+                ejectAmount() {
+                    return global.interstellar.mass_ejector[name];
+                }
             },
             methods: {
-                ejectMore(r){
-                    let keyMutipler = keyMultiplier();
-                    if (keyMutipler + global.interstellar.mass_ejector.total > p_on['mass_ejector'] * 1000){
-                        keyMutipler = p_on['mass_ejector'] * 1000 - global.interstellar.mass_ejector.total;
+                ejectMore() {
+                    let keyMult = keyMultiplier();
+                    if (keyMult + global.interstellar.mass_ejector.total > p_on['mass_ejector'] * 1000) {
+                        keyMult = p_on['mass_ejector'] * 1000 - global.interstellar.mass_ejector.total;
                     }
-                    global.interstellar.mass_ejector[r] += keyMutipler;
-                    global.interstellar.mass_ejector.total += keyMutipler;
+                    global.interstellar.mass_ejector[name] += keyMult;
+                    global.interstellar.mass_ejector.total += keyMult;
                 },
-                ejectLess(r){
-                    let keyMutipler = keyMultiplier();
-                    if (keyMutipler > global.interstellar.mass_ejector[r]){
-                        keyMutipler = global.interstellar.mass_ejector[r];
+
+                ejectLess() {
+                    let keyMult = keyMultiplier();
+                    if (keyMult > global.interstellar.mass_ejector[name]) {
+                        keyMult = global.interstellar.mass_ejector[name];
                     }
-                    if (global.interstellar.mass_ejector[r] > 0){
-                        global.interstellar.mass_ejector[r] -= keyMutipler;
-                        global.interstellar.mass_ejector.total -= keyMutipler;
+                    if (global.interstellar.mass_ejector[name] > 0) {
+                        global.interstellar.mass_ejector[name] -= keyMult;
+                        global.interstellar.mass_ejector.total -= keyMult;
                     }
-                },
-            }
+                }
+            },
+            template: template
         });
     }
 }
 
-function initSupply(){
-    if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 3)){
+function initSupply() {
+    if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 3)) {
         return;
     }
-    clearElement($('#resCargo'));
-    if (global.portal['transport']){
+
+    // no duplicates!!!!!!
+    if ($('#spireSupply').length > 0) {
+        return;
+    }
+
+    if (global.portal['transport']) {
         let supply = $(`<div id="spireSupply"><h3 class="res has-text-warning pad">${loc('portal_transport_supply')}</h3></div>`);
         $('#resCargo').append(supply);
 
@@ -2916,125 +3156,183 @@ function initSupply(){
     }
 }
 
-export function loadSupply(name,color){
-    if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 3)){
+export function loadSupply(name, color) {
+    if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 3)) {
         return;
     }
-    if (supplyValue[name] && global.portal['transport']){
-        let ejector = $(`<div id="supply${name}" class="market-item" v-show="r.display"><h3 class="res has-text-${color}">${global.resource[name].name}</h3></div>`);
-        $('#resCargo').append(ejector);
 
-        let res = $(`<span class="trade"></span>`);
-        ejector.append(res);
+    if (supplyValue[name] && global.portal['transport']) {
+        // create container element
+        const elementId = `supply${name}`;
+        $(`<div id="${elementId}"></div>`).appendTo('#resCargo');
 
-        res.append($(`<span role="button" aria-label="eject less ${loc('resource_'+name+'_name')}" class="sub has-text-danger" @click="supplyLess('${name}')"><span>&laquo;</span></span>`));
-        res.append($(`<span class="current">{{ e.${name} }}</span>`));
-        res.append($(`<span role="button" aria-label="eject more ${loc('resource_'+name+'_name')}" class="add has-text-success" @click="supplyMore('${name}')"><span>&raquo;</span></span>`));
-
+        // reactive build template
         let volume = sizeApproximation(supplyValue[name].out);
-        res.append($(`<span class="mass">${loc('portal_transport_item',[`<span class="has-text-caution">${volume}</span>`,`<span class="has-text-success">${supplyValue[name].in}</span>`])}</span>`));
+        let template = '<div class="market-item" v-show="isDisplayed" :class="zebraClass">';
+        template += `<h3 class="res has-text-${color}">{{ displayName }}</h3>`;
+        template += `<span class="trade">`;
+        template += `<span role="button" aria-label="eject less {{ displayName }}" class="sub has-text-danger" @click="supplyLess"><span>&laquo;</span></span>`;
+        template += `<span class="current">{{ supplyAmount }}</span>`;
+        template += `<span role="button" aria-label="eject more {{ displayName }}" class="add has-text-success" @click="supplyMore"><span>&raquo;</span></span>`;
+        template += `<span class="mass">${loc('portal_transport_item', [`<span class="has-text-caution">${volume}</span>`, `<span class="has-text-success">${supplyValue[name].in}</span>`])}</span>`;
+        template += `</span>`;
+        template += '</div>';
 
-        if (!global.portal.transport.cargo.hasOwnProperty(name)){
+        if (!global.portal.transport.cargo.hasOwnProperty(name)) {
             global.portal.transport.cargo[name] = 0;
         }
 
         vBind({
-            el: `#supply${name}`,
-            data: {
-                r: global.resource[name],
-                e: global.portal.transport.cargo
-            },
-            methods: {
-                supplyMore(r){
-                    let keyMutipler = keyMultiplier();
-                    if (keyMutipler + global.portal.transport.cargo.used > global.portal.transport.cargo.max){
-                        keyMutipler = global.portal.transport.cargo.max - global.portal.transport.cargo.used;
-                        if (global.portal.transport.cargo[r] + keyMutipler < 0){
-                            keyMutipler = -global.portal.transport.cargo[r];
+            el: `#${elementId}`,
+            data: global.resource[name],
+            computed: {
+                isDisplayed() {
+                    return this.display === true;
+                },
+
+                // another reactive display name
+                displayName() {
+                    return this.name;
+                },
+
+                // reactive zebra striping for supply tab
+                zebraClass() {
+                    if (!this.display) return 'prime';
+
+                    let visibleIndex = 0;
+                    for (const resName of resourceTabOrder.supply) {
+                        if (resName === name) break;
+                        // only count displayed resources
+                        if (global.resource[resName]?.display) {
+                            visibleIndex++;
                         }
                     }
-                    global.portal.transport.cargo[r] += keyMutipler;
-                    global.portal.transport.cargo.used += keyMutipler;
+
+                    return visibleIndex % 2 === 1 ? 'alt' : 'prime';
                 },
-                supplyLess(r){
-                    let keyMutipler = keyMultiplier();
-                    if (keyMutipler > global.portal.transport.cargo[r]){
-                        keyMutipler = global.portal.transport.cargo[r];
+
+                supplyAmount() {
+                    return global.portal.transport.cargo[name];
+                }
+            },
+            methods: {
+                supplyMore() {
+                    let keyMult = keyMultiplier();
+                    if (keyMult + global.portal.transport.cargo.used > global.portal.transport.cargo.max) {
+                        keyMult = global.portal.transport.cargo.max - global.portal.transport.cargo.used;
+                        if (global.portal.transport.cargo[name] + keyMult < 0) {
+                            keyMult = -global.portal.transport.cargo[name];
+                        }
                     }
-                    if (global.portal.transport.cargo[r] > 0){
-                        global.portal.transport.cargo[r] -= keyMutipler;
-                        global.portal.transport.cargo.used -= keyMutipler;
-                    }
+                    global.portal.transport.cargo[name] += keyMult;
+                    global.portal.transport.cargo.used += keyMult;
                 },
-            }
+
+                supplyLess() {
+                    let keyMult = keyMultiplier();
+                    if (keyMult > global.portal.transport.cargo[name]) {
+                        keyMult = global.portal.transport.cargo[name];
+                    }
+                    if (global.portal.transport.cargo[name] > 0) {
+                        global.portal.transport.cargo[name] -= keyMult;
+                        global.portal.transport.cargo.used -= keyMult;
+                    }
+                }
+            },
+            template: template
         });
     }
 }
 
-function initAlchemy(){
-    if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 4)){
+// handles init on it's own
+export function loadAlchemy(name, color, basic) {
+    if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 4)) {
         return;
     }
-    clearElement($('#resAlchemy'));
-}
-
-export function loadAlchemy(name,color,basic){
-    if (!global.settings.tabLoad && (global.settings.civTabs !== 4 || global.settings.marketTabs !== 4)){
+    else if (global.race['artifical'] && name === 'Food') {
         return;
     }
-    else if (global.race['artifical'] && name === 'Food'){
-        return;
-    }
-    if (global.tech['alchemy'] && (basic || global.tech.alchemy >= 2) && name !== 'Crystal'){
-        let alchemy = $(`<div id="alchemy${name}" class="market-item" v-show="r.display"><h3 class="res has-text-${color}">${global.resource[name].name}</h3></div>`);
-        $('#resAlchemy').append(alchemy);
 
-        let res = $(`<span class="trade"></span>`);
-        alchemy.append(res);
+    if (global.tech['alchemy'] && (basic || global.tech.alchemy >= 2) && name !== 'Crystal') {
+        const elementId = `alchemy${name}`;
+        $(`<div id="${elementId}"></div>`).appendTo('#resAlchemy');
 
-        res.append($(`<span role="button" aria-label="transmute less ${global.resource[name].name}" class="sub has-text-danger" @click="subSpell('${name}')"><span>&laquo;</span></span>`));
-        res.append($(`<span class="current">{{ a.${name} }}</span>`));
-        res.append($(`<span role="button" aria-label="transmute more ${global.resource[name].name}" class="add has-text-success" @click="addSpell('${name}')"><span>&raquo;</span></span>`));
+        // build template with reactive name binding
+        let template = '<div class="market-item" v-show="isDisplayed" :class="zebraClass">';
+        template += `<h3 class="res has-text-${color}">{{ displayName }}</h3>`; 
+        template += `<span class="trade">`;
+        template += `<span role="button" aria-label="transmute less {{ displayName }}" class="sub has-text-danger" @click="subSpell"><span>&laquo;</span></span>`;
+        template += `<span class="current">{{ alchemyAmount }}</span>`;
+        template += `<span role="button" aria-label="transmute more {{ displayName }}" class="add has-text-success" @click="addSpell"><span>&raquo;</span></span>`;
+        template += `</span>`;
+        template += '</div>';
 
         if (!global.race.alchemy.hasOwnProperty(name)){
             global.race.alchemy[name] = 0;
         }
 
         vBind({
-            el: `#alchemy${name}`,
-            data: {
-                r: global.resource[name],
-                a: global.race.alchemy
+            el: `#${elementId}`,
+            data: global.resource[name],
+            computed: {
+                isDisplayed() {
+                    return this.display === true;
+                },
+
+                displayName() {
+                    return this.name;
+                },
+
+                // reactive zebra striping for alchemy
+                zebraClass() {
+                    if (!this.display) return 'prime';
+
+                    let visibleIndex = 0;
+                    for (const resName of resourceTabOrder.alchemy) {
+                        if (resName === name) break;
+                        // only count displayed resources in the alchemy tab
+                        if (global.resource[resName]?.display) {
+                            visibleIndex++;
+                        }
+                    }
+
+                    return visibleIndex % 2 === 1 ? 'alt' : 'prime';
+                },
+
+                alchemyAmount() {
+                    return global.race.alchemy[name];
+                }
             },
             methods: {
-                addSpell(spell){
+                addSpell() {
                     let keyMult = keyMultiplier();
                     let change = Math.min(Math.floor(global.resource.Mana.diff), keyMult);
                     if (change > 0) {
-                        global.race.alchemy[spell] += change;
+                        global.race.alchemy[name] += change;
                         global.resource.Mana.diff -= change;
                     }
                 },
-                subSpell(spell){
+
+                subSpell() {
                     let keyMult = keyMultiplier();
-                    let change = Math.min(global.race.alchemy[spell], keyMult);
+                    let change = Math.min(global.race.alchemy[name], keyMult);
                     if (change > 0) {
-                        global.race.alchemy[spell] -= change;
+                        global.race.alchemy[name] -= change;
                         global.resource.Mana.diff += change;
                     }
-                },
-            }
+                }
+            },
+            template: template
         });
 
-        popover(`alchemy${name}`,function(){
+        popover(`alchemy${name}`, function () {
             let rate = basic && global.tech.alchemy >= 2 ? tradeRatio[name] * 8 : tradeRatio[name] * 2;
-            if (global.race['witch_hunter']){ rate *= 3; }
-            if (global.stats.achieve['soul_sponge'] && global.stats.achieve.soul_sponge['mg']){
+            if (global.race['witch_hunter']) rate *= 3;
+            if (global.stats.achieve['soul_sponge'] && global.stats.achieve.soul_sponge['mg']) {
                 rate *= global.stats.achieve.soul_sponge.mg + 1;
             }
-            return $(`<div>${loc('resource_alchemy',[1,loc(`resource_Mana_name`),0.15,loc(`resource_Crystal_name`),+rate.toFixed(2), global.resource[name].name])}</div>`);
-        },
-        {
+            return $(`<div>${loc('resource_alchemy', [1, loc(`resource_Mana_name`), 0.15, loc(`resource_Crystal_name`), +rate.toFixed(2), global.resource[name].name])}</div>`);
+        }, {
             elm: `#alchemy${name} h3`
         });
     }
