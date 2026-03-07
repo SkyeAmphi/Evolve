@@ -1252,6 +1252,9 @@
       showEvolve: true,
       showAchieve: false,
       animated: true,
+      // master toggle for all animations- not transparent
+      tabAnimations: true,
+      // separate user config option for tab switching animations
       disableReset: false,
       font: "standard",
       q_merge: "merge_nearby",
@@ -1260,6 +1263,9 @@
       locale: "en-US",
       icon: "star"
     };
+  }
+  if (!global.settings.hasOwnProperty("tabAnimations")) {
+    global.settings.tabAnimations = global.settings.animated;
   }
   if (!global.settings["space"]) {
     global.settings["space"] = {};
@@ -17012,13 +17018,50 @@ ${effect}`);
       clearGeneticsDrag();
       clearSpyopDrag();
       clearShipDrag();
-      clearElement($(`#mTabCivil`));
-      clearElement($(`#mTabCivic`));
-      clearElement($(`#mTabResearch`));
-      clearElement($(`#mTabResource`));
-      clearElement($(`#mTabArpa`));
-      clearElement($(`#mTabStats`));
-      clearElement($(`#mTabObserve`));
+      if (global.settings.tabAnimations) {
+        if (global.tabClearTimeout) {
+          clearTimeout(global.tabClearTimeout);
+        }
+        let tabsToClear = [`evolution`, `mTabCivil`, `mTabCivic`, `mTabResearch`, `mTabResource`, `mTabArpa`, `mTabStats`, `mTabObserve`];
+        let incoming = "mTabObserve";
+        switch (tab) {
+          case 0:
+            incoming = "evolution";
+            break;
+          case 1:
+            incoming = "mTabCivil";
+            break;
+          case 2:
+            incoming = "mTabCivic";
+            break;
+          case 3:
+            incoming = "mTabResearch";
+            break;
+          case 4:
+            incoming = "mTabResource";
+            break;
+          case 5:
+            incoming = "mTabArpa";
+            break;
+          case 6:
+            incoming = "mTabStats";
+            break;
+        }
+        clearElement($(`#${incoming}`));
+        tabsToClear.splice(tabsToClear.indexOf(incoming), 1);
+        global.tabClearTimeout = setTimeout(() => {
+          tabsToClear.forEach((t) => clearElement($(`#${t}`)));
+        }, 350);
+      } else {
+        clearElement($(`#evolution`));
+        clearElement($(`#mTabCivil`));
+        clearElement($(`#mTabCivic`));
+        clearElement($(`#mTabResearch`));
+        clearElement($(`#mTabResource`));
+        clearElement($(`#mTabArpa`));
+        clearElement($(`#mTabStats`));
+        clearElement($(`#mTabObserve`));
+      }
     } else {
       tagEvent("page_view", { page_title: `Evolve - All Tabs` });
     }
@@ -17035,7 +17078,7 @@ ${effect}`);
           if (!global.settings.tabLoad) {
             tagEvent("page_view", { page_title: `Evolve - Civilization` });
           }
-          $(`#mTabCivil`).append(`<b-tabs class="resTabs" v-model="s.spaceTabs" :animated="s.animated" @update:model-value="swapTab($event)">
+          $(`#mTabCivil`).append(`<b-tabs class="resTabs" v-model="s.spaceTabs" :animated="s.tabAnimations" @update:model-value="swapTab($event)">
                     <b-tab-item id="city" :visible="s.showCity" :label="label('city')"></b-tab-item>
                     <b-tab-item id="space" :visible="s.showSpace" :label="label('local_space')"></b-tab-item>
                     <b-tab-item id="interstellar" :visible="s.showDeep" :label="label('tab_interstellar')"></b-tab-item>
@@ -17054,14 +17097,23 @@ ${effect}`);
               swapTab(tab2) {
                 global.settings.spaceTabs = tab2;
                 if (!global.settings.tabLoad) {
-                  clearElement($(`#city`));
-                  clearElement($(`#space`));
-                  clearElement($(`#interstellar`));
-                  clearElement($(`#galaxy`));
-                  clearElement($(`#portal`));
-                  clearElement($(`#outerSol`));
-                  clearElement($(`#tauCeti`));
-                  clearElement($(`#eden`));
+                  if (global.settings.tabAnimations) {
+                    if (global.spaceTabClearTimeout) clearTimeout(global.spaceTabClearTimeout);
+                    let tabs = ["city", "space", "interstellar", "galaxy", "portal", "outerSol", "tauCeti", "eden"];
+                    tabs.splice(tab2, 1);
+                    global.spaceTabClearTimeout = setTimeout(() => {
+                      tabs.forEach((t) => clearElement($(`#${t}`)));
+                    }, 350);
+                  } else {
+                    clearElement($(`#city`));
+                    clearElement($(`#space`));
+                    clearElement($(`#interstellar`));
+                    clearElement($(`#galaxy`));
+                    clearElement($(`#portal`));
+                    clearElement($(`#outerSol`));
+                    clearElement($(`#tauCeti`));
+                    clearElement($(`#eden`));
+                  }
                   switch (tab2) {
                     case 0:
                       drawCity();
@@ -17117,7 +17169,7 @@ ${effect}`);
           if (!global.settings.tabLoad) {
             tagEvent("page_view", { page_title: `Evolve - Civics` });
           }
-          $(`#mTabCivic`).append(`<b-tabs class="resTabs" v-model="s.govTabs" :animated="s.animated" @update:model-value="swapTab(s.govTabs)">
+          $(`#mTabCivic`).append(`<b-tabs class="resTabs" v-model="s.govTabs" :animated="s.tabAnimations" @update:model-value="swapTab(s.govTabs)">
                     <b-tab-item id="civic" :label="label('tab_gov')"></b-tab-item>
                     <b-tab-item id="industry" class="industryTab" :visible="s.showIndustry" :label="label('tab_industry')"></b-tab-item>
                     <b-tab-item id="powerGrid" class="powerGridTab" :visible="s.showPowerGrid" :label="label('tab_power_grid')"></b-tab-item>
@@ -17139,14 +17191,23 @@ ${effect}`);
                   clearSpyopDrag();
                   clearMechDrag();
                   clearShipDrag();
-                  clearElement($(`#civic`));
-                  clearElement($(`#industry`));
-                  clearElement($(`#powerGrid`));
-                  clearElement($(`#military`));
-                  clearElement($(`#mechLab`));
-                  clearElement($(`#dwarfShipYard`));
-                  clearElement($(`#psychicPowers`));
-                  clearElement($(`#supernatural`));
+                  if (global.settings.tabAnimations) {
+                    if (global.civicTabClearTimeout) clearTimeout(global.civicTabClearTimeout);
+                    let tabs = ["civic", "industry", "powerGrid", "military", "mechLab", "dwarfShipYard", "psychicPowers", "supernatural"];
+                    tabs.splice(tab2, 1);
+                    global.civicTabClearTimeout = setTimeout(() => {
+                      tabs.forEach((t) => clearElement($(`#${t}`)));
+                    }, 350);
+                  } else {
+                    clearElement($(`#civic`));
+                    clearElement($(`#industry`));
+                    clearElement($(`#powerGrid`));
+                    clearElement($(`#military`));
+                    clearElement($(`#mechLab`));
+                    clearElement($(`#dwarfShipYard`));
+                    clearElement($(`#psychicPowers`));
+                    clearElement($(`#supernatural`));
+                  }
                   switch (tab2) {
                     case 0:
                       {
@@ -17252,7 +17313,7 @@ ${effect}`);
           }
           let queue = $(`<div id="resQueue" class="resQueue" v-show="rq.display"></div>`);
           $(`#mTabResearch`).append(queue);
-          let tabs = $(`<div id="resContent"><b-tabs class="resTabs" v-model="s.resTabs" :animated="s.animated">
+          let tabs = $(`<div id="resContent"><b-tabs class="resTabs" v-model="s.resTabs" :animated="s.tabAnimations">
                     <b-tab-item id="tech" :label="label_f('new')"></b-tab-item>
                     <b-tab-item id="oldTech" :label="label_f('old')"></b-tab-item>
                 </b-tabs></div>`);
@@ -17281,7 +17342,7 @@ ${effect}`);
           if (!global.settings.tabLoad) {
             tagEvent("page_view", { page_title: `Evolve - Resources` });
           }
-          $(`#mTabResource`).append(`<b-tabs class="resTabs" v-model="s.marketTabs" :animated="s.animated" @update:model-value="swapTab(s.marketTabs)">
+          $(`#mTabResource`).append(`<b-tabs class="resTabs" v-model="s.marketTabs" :animated="s.tabAnimations" @update:model-value="swapTab(s.marketTabs)">
                     <b-tab-item id="market" :visible="s.showMarket" :label="label('tab_market')"></b-tab-item>
                     <b-tab-item id="resStorage" :visible="s.showStorage" :label="label('tab_storage')"></b-tab-item>
                     <b-tab-item id="resEjector" :visible="s.showEjector" :label="label('tab_ejector')"></b-tab-item>
@@ -17296,11 +17357,20 @@ ${effect}`);
             methods: {
               swapTab(tab2) {
                 if (!global.settings.tabLoad) {
-                  clearElement($(`#market`));
-                  clearElement($(`#resStorage`));
-                  clearElement($(`#resEjector`));
-                  clearElement($(`#resCargo`));
-                  clearElement($(`#resAlchemy`));
+                  if (global.settings.tabAnimations) {
+                    if (global.resTabClearTimeout) clearTimeout(global.resTabClearTimeout);
+                    let tabs = ["market", "resStorage", "resEjector", "resCargo", "resAlchemy"];
+                    tabs.splice(tab2, 1);
+                    global.resTabClearTimeout = setTimeout(() => {
+                      tabs.forEach((t) => clearElement($(`#${t}`)));
+                    }, 350);
+                  } else {
+                    clearElement($(`#market`));
+                    clearElement($(`#resStorage`));
+                    clearElement($(`#resEjector`));
+                    clearElement($(`#resCargo`));
+                    clearElement($(`#resAlchemy`));
+                  }
                   const tabMap = ["market", "storage", "ejector", "supply", "alchemy"];
                   const tabName = tabMap[tab2];
                   if (tabName) {
@@ -17325,7 +17395,7 @@ ${effect}`);
             tagEvent("page_view", { page_title: `Evolve - Arpa` });
           }
           $(`#mTabArpa`).append(`<div id="apra" class="arpa">
-                    <b-tabs class="resTabs" v-model="s.arpa.arpaTabs" :animated="s.animated">
+                    <b-tabs class="resTabs" v-model="s.arpa.arpaTabs" :animated="s.tabAnimations">
                         <b-tab-item id="arpaPhysics" :visible="s.arpa.physics" label="${loc("tab_arpa_projects")}"></b-tab-item>
                         <b-tab-item id="arpaGenetics" :visible="s.arpa.genetics" label="${loc(global.race["artifical"] ? "tab_arpa_machine" : "tab_arpa_genetics")}"></b-tab-item>
                         <b-tab-item id="arpaCrispr" :visible="s.arpa.crispr" label="${loc("tab_arpa_crispr")}"></b-tab-item>
@@ -17355,7 +17425,7 @@ ${effect}`);
           if (!global.settings.tabLoad) {
             tagEvent("page_view", { page_title: `Evolve - Stats` });
           }
-          $(`#mTabStats`).append(`<b-tabs class="resTabs" v-model="s.statsTabs" :animated="s.animated">
+          $(`#mTabStats`).append(`<b-tabs class="resTabs" v-model="s.statsTabs" :animated="s.tabAnimations">
                     <b-tab-item id="stats" :label="label('tab_stats')"></b-tab-item>
                     <b-tab-item id="achieve" :label="label('tab_achieve')"></b-tab-item>
                     <b-tab-item id="perks" :label="label('tab_perks')"></b-tab-item>
@@ -17645,9 +17715,10 @@ ${effect}`);
     let content = $(`<div class="content"></div>`);
     mainColumn.append(content);
     content.append(`<h2 class="is-sr-only">Tab Navigation</h2>`);
-    let tabs = $(`<b-tabs id="mainTabs" v-model="s.civTabs" :animated="s.animated" @update:model-value="swapTab(s.civTabs)"></b-tabs>`);
+    let tabs = $(`<b-tabs id="mainTabs" class="resTabs" v-model="s.civTabs" :animated="s.tabAnimations" @update:model-value="swapTab($event)"></b-tabs>`);
     content.append(tabs);
-    let evolution = $(`<b-tab-item id="evolution" class="tab-item sticky" :visible="s.showEvolve" :label="label('tab_evolve')">
+    let evolution = $(`<b-tab-item class="tab-item sticky" :visible="s.showEvolve" :label="label('tab_evolve')">
+        <div id="evolution"></div>
     </b-tab-item>`);
     tabs.append(evolution);
     let city = $(`<b-tab-item :visible="s.showCiv" :label="label('tab_civil')">
@@ -17739,6 +17810,7 @@ ${effect}`);
       });
     }
     let settings = $(`<b-tab-item id="settings" class="settings sticky" :label="label('tab_settings')">
+        <div id="mTabSettings">
         <div class="theme">
             <span>{{ label('theme') }} </span>
             <b-dropdown aria-role="list">
@@ -17843,6 +17915,7 @@ ${effect}`);
         <b-switch class="setting" v-model="s.sPackOn" @input="stringPackOn"><span class="settings13" aria-label="${loc("settings13")}">{{ label('s_pack_on') }}</span></b-switch>
         <b-switch class="setting" v-model="s.expose"><span class="settings8" aria-label="${loc("settings8")}">{{ label('expose') }}</span></b-switch>
         <b-switch class="setting" v-model="s.tabLoad" @update:model-value="toggleTabLoad"><span class="settings11" aria-label="${loc("settings11")}">{{ label('tabLoad') }}</span></b-switch>
+        <b-switch class="setting" v-model="s.tabAnimations"><span class="settings2" aria-label="${loc("settings2")}">{{ label('settings2') }}</span></b-switch>
         <b-switch class="setting" v-model="s.boring"><span class="settings10" aria-label="${loc("settings10")}">{{ label('boring') }}</span></b-switch>
         <b-switch class="setting" v-model="s.touch"><span class="settings16" aria-label="${loc("settings16")}">{{ label('touch') }}</span></b-switch>
         <div>
@@ -17894,6 +17967,7 @@ ${effect}`);
                     </div>
                 </div>
             </b-collapse>
+        </div>
         </div>
     </b-tab-item>`);
     tabs.append(settings);
@@ -63333,7 +63407,7 @@ ${effect}`);
     }
     $(`#res${name}`).on("mouseover", function() {
       $(`.res-${name}`).each(function() {
-        if (global.resource[name].amount >= $(this).attr(`data-${name}`)) {
+        if ((global.resource[name]?.amount ?? 0) >= $(this).attr(`data-${name}`)) {
           $(this).addClass("hl-ca");
         } else {
           $(this).addClass("hl-cna");
@@ -91686,7 +91760,7 @@ ${effect}`);
     let traitName = traitSkin("name", trait, species);
     let traitDesc = traitSkin("desc", trait, species);
     if (tpage && ["genus", "major"].includes(traits[trait].type)) {
-      rank = `<span><span role="button" @click="down()">&laquo;</span><span class="has-text-warning">${loc(`wiki_trait_rank`)} {{ rank }}</span><span role="button" @click="up()">&raquo;</span></span>`;
+      rank = `<span><span role="button" @click="down()">&laquo;</span> <span class="has-text-warning trait-rank-label">${loc(`wiki_trait_rank`)} </span><span class="has-text-warning trait-rank-val">{{ rank }}</span> <span role="button" @click="up()">&raquo;</span></span>`;
     }
     if (tpage || rpage) {
       info.append(`<div class="type"><h2 class="has-text-warning">${traitName}</h2>${rank}</div>`);
@@ -91753,52 +91827,52 @@ ${effect}`);
             return loc(`wiki_trait_${key}_${trait}`, getTraitVals(trait, rk, species));
           },
           up() {
-            switch (data.rank) {
+            switch (this.rank) {
               case 0.1:
-                data.rank = 0.25;
+                this.rank = 0.25;
                 break;
               case 0.25:
-                data.rank = 0.5;
+                this.rank = 0.5;
                 break;
               case 0.5:
-                data.rank = 1;
+                this.rank = 1;
                 break;
               case 1:
-                data.rank = 2;
+                this.rank = 2;
                 break;
               case 2:
-                data.rank = 3;
+                this.rank = 3;
                 break;
               case 3:
-                data.rank = 4;
+                this.rank = 4;
                 break;
               case 4:
-                data.rank = 4;
+                this.rank = 4;
                 break;
             }
           },
           down() {
-            switch (data.rank) {
+            switch (this.rank) {
               case 0.1:
-                data.rank = 0.1;
+                this.rank = 0.1;
                 break;
               case 0.25:
-                data.rank = 0.1;
+                this.rank = 0.1;
                 break;
               case 0.5:
-                data.rank = 0.25;
+                this.rank = 0.25;
                 break;
               case 1:
-                data.rank = 0.5;
+                this.rank = 0.5;
                 break;
               case 2:
-                data.rank = 1;
+                this.rank = 1;
                 break;
               case 3:
-                data.rank = 2;
+                this.rank = 2;
                 break;
               case 4:
-                data.rank = 3;
+                this.rank = 3;
                 break;
             }
           }
