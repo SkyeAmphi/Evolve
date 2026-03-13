@@ -17100,6 +17100,8 @@ ${effect}`);
                   if (global.settings.tabAnimations) {
                     if (global.spaceTabClearTimeout) clearTimeout(global.spaceTabClearTimeout);
                     let tabs = ["city", "space", "interstellar", "galaxy", "portal", "outerSol", "tauCeti", "eden"];
+                    let incoming = tabs[tab2];
+                    clearElement($(`#${incoming}`));
                     tabs.splice(tab2, 1);
                     global.spaceTabClearTimeout = setTimeout(() => {
                       tabs.forEach((t) => clearElement($(`#${t}`)));
@@ -17194,6 +17196,8 @@ ${effect}`);
                   if (global.settings.tabAnimations) {
                     if (global.civicTabClearTimeout) clearTimeout(global.civicTabClearTimeout);
                     let tabs = ["civic", "industry", "powerGrid", "military", "mechLab", "dwarfShipYard", "psychicPowers", "supernatural"];
+                    let incoming = tabs[tab2];
+                    clearElement($(`#${incoming}`));
                     tabs.splice(tab2, 1);
                     global.civicTabClearTimeout = setTimeout(() => {
                       tabs.forEach((t) => clearElement($(`#${t}`)));
@@ -17715,7 +17719,7 @@ ${effect}`);
     let content = $(`<div class="content"></div>`);
     mainColumn.append(content);
     content.append(`<h2 class="is-sr-only">Tab Navigation</h2>`);
-    let tabs = $(`<b-tabs id="mainTabs" class="resTabs" v-model="s.civTabs" :animated="s.tabAnimations" @update:model-value="swapTab($event)"></b-tabs>`);
+    let tabs = $(`<b-tabs id="mainTabs" v-model="s.civTabs" :animated="s.tabAnimations" @update:model-value="swapTab($event)"></b-tabs>`);
     content.append(tabs);
     let evolution = $(`<b-tab-item class="tab-item sticky" :visible="s.showEvolve" :label="label('tab_evolve')">
         <div id="evolution"></div>
