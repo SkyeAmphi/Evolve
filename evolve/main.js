@@ -17389,7 +17389,7 @@ ${effect}`);
             }
           });
           initResourceTabs();
-          tradeSummery();
+          tradeSummary();
         }
         break;
       case 5:
@@ -63056,7 +63056,7 @@ ${effect}`);
     }
     initResourceTabs(tab);
     if (tab === "market" || tab === "storage") {
-      tradeSummery();
+      tradeSummary();
     }
   }
   function defineResources(wiki) {
@@ -63148,7 +63148,7 @@ ${effect}`);
     loadSpecialResource("Harmony");
     loadSpecialResource("AICore");
   }
-  function tradeSummery() {
+  function tradeSummary() {
     if (global.race.species !== "protoplasm") {
       loadRouteCounter();
       initGalaxyTrade();
@@ -75049,7 +75049,7 @@ ${effect}`);
       defineIndustry();
       initResourceTabs("market");
       initResourceTabs("storage");
-      tradeSummery();
+      tradeSummary();
       arpa("Genetics");
       arpa("Crispr");
       arpa("Blood");
