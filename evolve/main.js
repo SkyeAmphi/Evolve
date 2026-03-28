@@ -16737,7 +16737,7 @@ ${effect}`);
                   content.style.overflowY = "";
                 }
               });
-            }, 400);
+            }, 225);
           }
           if (!global.settings.tabLoad) {
             loadTab(tab);
