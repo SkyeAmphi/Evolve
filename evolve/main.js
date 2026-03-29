@@ -88504,7 +88504,7 @@ ${effect}`);
         if (content) {
           popper.append(typeof content === "function" ? content({ this: this, popper }) : content);
         }
-        popperRef = Popper.createPopper(
+        popperRef = window.Popper.createPopper(
           opts["self"] ? this : $(opts.elm)[0],
           document.querySelector(`#popper`),
           {
@@ -88519,6 +88519,14 @@ ${effect}`);
                 options: {
                   offset: opts["offset"] ? opts["offset"] : [0, 0]
                 }
+              },
+              {
+                // Disable scroll tracking - prevents the Firefox
+                // "scroll-linked positioning effect" warning.
+                // Safe because Evolve's popovers close on mouseleave
+                // and the main container has overflow-y: hidden.
+                name: "eventListeners",
+                options: { scroll: false }
               }
             ]
           }
@@ -88533,7 +88541,7 @@ ${effect}`);
       });
     }
     if (opts["unbind"]) {
-      if ("ontouchstart" in document.documentElement && navigator.userAgent.match(global.settings.touch) ? true : false) {
+      if ("ontouchstart" in document.documentElement && navigator.userAgent.match(/Mobi/) && global.settings.touch) {
         $(opts.elm).on("touchend", function(e) {
           clearPopper();
           if (opts.hasOwnProperty("out") && typeof opts["out"] === "function") {
@@ -88550,7 +88558,7 @@ ${effect}`);
       }
     }
   }
-  if ("ontouchstart" in document.documentElement && navigator.userAgent.match(global.settings.touch) ? true : false) {
+  if ("ontouchstart" in document.documentElement && navigator.userAgent.match(/Mobi/) && global.settings.touch) {
     $(document).on("touchend", function(e) {
       if ($(`.popper`).length === 1) {
         clearPopper();
