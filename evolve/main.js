@@ -18009,6 +18009,19 @@ ${effect}`);
     columns.append(`<div id="queueColumn" class="queueCol column"></div>`);
     let egg15 = easterEgg(15, 8);
     $("body").append(`
+        <div id="mobileNav">
+            <button class="mobile-nav-btn is-active" data-panel="resources">${loc("tab_resources")}</button>
+            <button class="mobile-nav-btn" data-panel="game">Game</button>
+            <button class="mobile-nav-btn" data-panel="queue">Queue</button>
+        </div>
+    `);
+    $("#mobileNav").on("click", ".mobile-nav-btn", function() {
+      const panel = $(this).data("panel");
+      $("#main").toggleClass("mobile-panel-game", panel === "game").toggleClass("mobile-panel-queue", panel === "queue");
+      $("#mobileNav .mobile-nav-btn").removeClass("is-active");
+      $(this).addClass("is-active");
+    });
+    $("body").append(`
         <div class="promoBar">
             <span class="left">
                 <h1>
@@ -108741,7 +108754,12 @@ ${effect}`);
         });
       });
     });
-    {
+    const isMobileLayout = window.innerWidth <= 768;
+    if (isMobileLayout) {
+      $(`#resources`).css("height", "");
+      $(`#msgQueue`).css("height", "");
+      $(`#buildQueue`).css("height", "");
+    } else {
       let msgHeight = $(`#msgQueue`).height();
       let buildHeight = $(`#buildQueue`).height();
       let totHeight = $(`.leftColumn`).height();
