@@ -98742,8 +98742,10 @@ ${effect}`);
       global.lastMsg[tag].reverse();
     });
   }
-  $(`#msgQueue`).height(global.settings.msgQueueHeight);
-  $(`#buildQueue`).height(global.settings.buildQueueHeight);
+  if (window.innerWidth > 768) {
+    $(`#msgQueue`).height(global.settings.msgQueueHeight);
+    $(`#buildQueue`).height(global.settings.buildQueueHeight);
+  }
   if (global.queue.rename === true) {
     updateQueueNames(true);
     global.queue.rename = false;
