@@ -18021,6 +18021,19 @@ ${effect}`);
       $("#mobileNav .mobile-nav-btn").removeClass("is-active");
       $(this).addClass("is-active");
     });
+    if ("visualViewport" in window) {
+      const $navBar = $("#mobileNav");
+      const $promoBar = $(".promoBar");
+      const syncFixedToViewport = () => {
+        const vv = window.visualViewport;
+        const offsetFromBottom = window.innerHeight - (vv.height + vv.offsetTop);
+        const translateY = -Math.max(0, offsetFromBottom);
+        $navBar.css("transform", `translateY(${translateY}px)`);
+        $promoBar.css("transform", `translateY(${translateY}px)`);
+      };
+      window.visualViewport.addEventListener("resize", syncFixedToViewport);
+      window.visualViewport.addEventListener("scroll", syncFixedToViewport);
+    }
     $("body").append(`
         <div class="promoBar">
             <span class="left">
