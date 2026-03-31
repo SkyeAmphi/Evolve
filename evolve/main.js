@@ -18027,7 +18027,7 @@ ${effect}`);
       const syncFixedToViewport = () => {
         const vv = window.visualViewport;
         const offsetFromBottom = window.innerHeight - (vv.height + vv.offsetTop);
-        const translateY = -Math.max(0, offsetFromBottom);
+        const translateY = -Math.round(Math.max(0, offsetFromBottom));
         $navBar.css("transform", `translateY(${translateY}px)`);
         $promoBar.css("transform", `translateY(${translateY}px)`);
       };
