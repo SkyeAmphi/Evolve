@@ -27005,6 +27005,7 @@ ${effect}`);
       wiki.append(lab);
     } else {
       $(`#city`).append(lab);
+      $("#main").addClass("custom-lab-active");
     }
     let labStatus = `<div><h3 class="has-text-danger">${loc("genelab_title")}</h3> - <span class="has-text-warning">${loc("genelab_genes")} {{ g.genes }}</span> - <span class="has-text-warning">${loc("trait_untapped_name")}: {{ untapped(g.genes) }}</span></div>`;
     lab.append(labStatus);
@@ -27049,15 +27050,15 @@ ${effect}`);
     if (hybrid) {
       dGenus = "hybrid";
       let genus = `<div class="genus_selection">`;
-      genus += `<div id="geneLabGenusA" class="genus"><div class="has-text-caution header">${loc("genelab_genus_a")}</div><button class="button" @click="genus(0)" v-html="genus_f(g.hybrid,0)"></button></div>`;
-      genus += `<div id="geneLabGenusB" class="genus"><div class="has-text-caution header">${loc("genelab_genus_b")}</div><button class="button" @click="genus(1)" v-html="genus_f(g.hybrid,1)"></button></div>`;
+      genus += `<div id="geneLabGenusA" class="genus"><div class="has-text-caution header">${loc("genelab_genus_a")}</div><button class="button" @click="openGenus(0)" v-html="genusLabel(g.hybrid,0)"></button></div>`;
+      genus += `<div id="geneLabGenusB" class="genus"><div class="has-text-caution header">${loc("genelab_genus_b")}</div><button class="button" @click="openGenus(1)" v-html="genusLabel(g.hybrid,1)"></button></div>`;
       genus += `${fanatic}`;
       genus += `<div class="resetLab"><button class="button" @click="reset()">${loc("genelab_reset")}</button></div>`;
       genus += `</div>`;
       genes.append($(genus));
     } else {
       let genus = `<div class="genus_selection">`;
-      genus += `<div id="geneLabGenus" class="genus"><div class="has-text-caution header">${loc("genelab_genus")}</div><button class="button" @click="genus()">{{ genus(g.genus) }}</button></div>`;
+      genus += `<div id="geneLabGenus" class="genus"><div class="has-text-caution header">${loc("genelab_genus")}</div><button class="button" @click="openGenus()" v-html="genusLabel(g.genus)"></button></div>`;
       genus += `${fanatic}`;
       genus += `<div class="resetLab"><button class="button" @click="reset()">${loc("genelab_reset")}</button></div>`;
       genus += `</div>`;
@@ -27130,21 +27131,21 @@ ${effect}`);
         genome.traitlist.splice(i, 1);
       }
     }
-    let trait_listing = $(`<b-tabs v-model="tt.t" @input="swapTab"></b-tabs>`);
+    let trait_listing = $(`<b-tabs v-model="tt.t" :animated="true" @update:model-value="swapTab"></b-tabs>`);
     let all_listing = ``;
     Object.keys(taxomized).sort().forEach(function(tax) {
       if (tax === "all") {
         return;
       }
       let negative = "";
-      let trait_list_header = `<b-tab-item><template slot="header"><h2 class="is-sr-only">${loc(`genelab_traits_${tax}`)}}</h2><span aria-hidden="true">${loc(`genelab_traits_${tax}`)}</span></template>`;
+      let trait_list_header = `<b-tab-item :label="'${loc(`genelab_traits_${tax}`)}'">`;
       let trait_list = ``;
       Object.keys(taxomized[tax]).sort().forEach(function(trait) {
         if (traits.hasOwnProperty(trait) && traits[trait].type === "major") {
           if (traits[trait].val >= 0) {
-            trait_list += `<div class="field t${trait}"><b-checkbox :disabled="allowed('${trait}')" @input="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-success">${loc(`trait_${trait}_name`)}</span> (<span class="has-text-advanced">{{ cost('${trait}') }}</span><span v-html="empower(g.traitlist,'${trait}')"></span>)</b-checkbox></div>`;
+            trait_list += `<div class="field t${trait}"><b-checkbox :disabled="allowed('${trait}')" @update:model-value="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-success">${loc(`trait_${trait}_name`)}</span> (<span class="has-text-advanced">{{ cost('${trait}') }}</span><span v-html="empower(g.traitlist,'${trait}')"></span>)</b-checkbox></div>`;
           } else {
-            negative += `<div class="field t${trait}"><b-checkbox :disabled="allowed('${trait}')" @input="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-danger">${loc(`trait_${trait}_name`)}</span> (<span class="has-text-caution">{{ cost('${trait}') }}</span><span v-html="empower(g.traitlist,'${trait}')"></span>)</b-checkbox></div>`;
+            negative += `<div class="field t${trait}"><b-checkbox :disabled="allowed('${trait}')" @update:model-value="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-danger">${loc(`trait_${trait}_name`)}</span> (<span class="has-text-caution">{{ cost('${trait}') }}</span><span v-html="empower(g.traitlist,'${trait}')"></span>)</b-checkbox></div>`;
           }
         }
       });
@@ -27152,9 +27153,9 @@ ${effect}`);
       trait_listing.append($(full_list));
       all_listing += `<h3>${loc(`genelab_traits_${tax}`)}</h3><div class="lame trait_selection">` + trait_list + negative + `</div>`;
     });
-    let summary = `<b-tab-item id="traitSummary"><template slot="header"><h2 class="is-sr-only">${loc(`genelab_traits_summary`)}}</h2><span aria-hidden="true">${loc(`genelab_traits_summary`)}</span></template></b-tab-item>`;
+    let summary = `<b-tab-item id="traitSummary" :label="'${loc(`genelab_traits_summary`)}'"></b-tab-item>`;
     trait_listing.append(summary);
-    let allListing = `<b-tab-item id="traitAll"><template slot="header"><h2 class="is-sr-only">${loc(`genelab_traits_all`)}}</h2><span aria-hidden="true">${loc(`genelab_traits_all`)}</span></template>${all_listing}<h3>${loc(`genelab_traits_summary`)}</h3><div id="allSum"></div></b-tab-item>`;
+    let allListing = `<b-tab-item id="traitAll" :label="'${loc(`genelab_traits_all`)}'"><div class="allTraitsContainer">${all_listing}<h3>${loc(`genelab_traits_summary`)}</h3><div id="allSum"></div></div></b-tab-item>`;
     trait_listing.append(allListing);
     genes.append(trait_listing);
     let buttons = `
@@ -27206,45 +27207,51 @@ ${effect}`);
           }
         },
         geneEdit() {
-          let newRanks = genome.traitlist.map((x) => tRanks[x] ? { [x]: tRanks[x] } : { [x]: 1 });
-          let ranks = {};
-          newRanks.forEach(function(k) {
-            Object.keys(k).forEach(function(t) {
-              ranks[t] = k[t];
+          this.$nextTick(() => {
+            let newRanks = this.g.traitlist.map((x) => tRanks[x] ? { [x]: tRanks[x] } : { [x]: 1 });
+            let ranks = {};
+            newRanks.forEach(function(k) {
+              Object.keys(k).forEach(function(t) {
+                ranks[t] = k[t];
+              });
             });
+            Object.keys(tRanks).forEach((k) => {
+              if (!ranks.hasOwnProperty(k)) delete tRanks[k];
+            });
+            Object.assign(tRanks, ranks);
+            this.g.genes = calcGenomeScore(this.g, isWiki ? wikiVars : false, tRanks);
+            if (this.tt.t === 5) {
+              summaryTab(5);
+            }
           });
-          tRanks = ranks;
-          genome.genes = calcGenomeScore(genome, isWiki ? wikiVars : false, tRanks);
-          if (activeTab.t === 5) {
-            summaryTab(5);
-          }
         },
         setRace() {
-          if (genome.fanaticism && !genome.traitlist.includes(genome.fanaticism)) {
+          if (this.g.fanaticism && !this.g.traitlist.includes(this.g.fanaticism)) {
             return false;
           }
-          if (calcGenomeScore(genome, false, tRanks) >= 0 && genome.name.length > 0 && genome.desc.length > 0 && genome.entity.length > 0 && genome.home.length > 0 && genome.red.length > 0 && genome.hell.length > 0 && genome.gas.length > 0 && genome.gas_moon.length > 0 && genome.dwarf.length > 0) {
+          if (calcGenomeScore(this.g, false, tRanks) >= 0 && this.g.name.length > 0 && this.g.desc.length > 0 && this.g.entity.length > 0 && this.g.home.length > 0 && this.g.red.length > 0 && this.g.hell.length > 0 && this.g.gas.length > 0 && this.g.gas_moon.length > 0 && this.g.dwarf.length > 0) {
             global.custom[slot] = {
-              name: genome.name,
-              desc: genome.desc,
-              entity: genome.entity,
-              home: genome.home,
-              red: genome.red,
-              hell: genome.hell,
-              gas: genome.gas,
-              gas_moon: genome.gas_moon,
-              dwarf: genome.dwarf,
-              titan: genome.titan,
-              enceladus: genome.enceladus,
-              triton: genome.triton,
-              eris: genome.eris,
-              genus: genome.genus,
-              traits: genome.traitlist,
-              fanaticism: genome.fanaticism,
+              name: this.g.name,
+              desc: this.g.desc,
+              entity: this.g.entity,
+              home: this.g.home,
+              red: this.g.red,
+              hell: this.g.hell,
+              gas: this.g.gas,
+              gas_moon: this.g.gas_moon,
+              dwarf: this.g.dwarf,
+              titan: this.g.titan,
+              enceladus: this.g.enceladus,
+              triton: this.g.triton,
+              eris: this.g.eris,
+              genus: this.g.genus,
+              traits: this.g.traitlist,
+              fanaticism: this.g.fanaticism,
               ranks: tRanks
             };
+            $("#main").removeClass("custom-lab-active");
             if (hybrid) {
-              global.custom[slot]["hybrid"] = genome.hybrid;
+              global.custom[slot]["hybrid"] = this.g.hybrid;
               apotheosis();
             } else {
               ascend();
@@ -27252,35 +27259,36 @@ ${effect}`);
           }
         },
         allowed(t) {
-          if (genome.traitlist.includes("catnip") && t === "anise" || genome.traitlist.includes("anise") && t === "catnip") {
+          if (this.g.traitlist.includes("catnip") && t === "anise" || this.g.traitlist.includes("anise") && t === "catnip") {
             return true;
-          } else if ((!["synthetic", "hybrid"].includes(genome.genus) || genome.hasOwnProperty("hybrid") && !genome.hybrid.includes("synthetic")) && ["deconstructor", "imitation"].includes(t)) {
-            if (genome.traitlist.includes(t)) {
-              genome.traitlist.splice(genome.traitlist.indexOf(t), 1);
+          } else if ((!["synthetic", "hybrid"].includes(this.g.genus) || this.g.hasOwnProperty("hybrid") && !this.g.hybrid.includes("synthetic")) && ["deconstructor", "imitation"].includes(t)) {
+            if (this.g.traitlist.includes(t)) {
+              this.g.traitlist.splice(this.g.traitlist.indexOf(t), 1);
             }
             return true;
           }
           return false;
         },
         reset() {
-          genome.name = "";
-          genome.desc = "";
-          genome.entity = "";
-          genome.home = "";
-          genome.red = "";
-          genome.hell = "";
-          genome.gas = "";
-          genome.gas_moon = "";
-          genome.dwarf = "";
-          genome.titan = "";
-          genome.enceladus = "";
-          genome.triton = "";
-          genome.eris = "";
-          genome.genus = dGenus;
-          genome.traitlist = [];
-          genome.ranks = {};
-          genome.genes = calcGenomeScore(genome, isWiki ? wikiVars : false, tRanks);
-          genome.fanaticism = false;
+          this.g.name = "";
+          this.g.desc = "";
+          this.g.entity = "";
+          this.g.home = "";
+          this.g.red = "";
+          this.g.hell = "";
+          this.g.gas = "";
+          this.g.gas_moon = "";
+          this.g.dwarf = "";
+          this.g.titan = "";
+          this.g.enceladus = "";
+          this.g.triton = "";
+          this.g.eris = "";
+          this.g.genus = dGenus;
+          this.g.traitlist = [];
+          this.g.ranks = {};
+          Object.keys(tRanks).forEach((k) => delete tRanks[k]);
+          this.g.genes = calcGenomeScore(this.g, isWiki ? wikiVars : false, tRanks);
+          this.g.fanaticism = false;
         },
         fanatic() {
           this.$buefy.modal.open({
@@ -27296,13 +27304,13 @@ ${effect}`);
               $("#modalBox").append($(`<p id="modalBoxTitle" class="has-text-warning modalTitle">${loc(`genelab_fanatic_set`)}</p>`));
               var body = $('<div id="specialModal" class="modalBody"></div>');
               $("#modalBox").append(body);
-              let traits2 = `<div class="fanatic"><template><section>`;
+              let traits2 = `<div class="fanatic">`;
               genome.traitlist.forEach(function(trait) {
                 if (trait !== "imitation") {
                   traits2 += `<div class="field ${trait}"><b-radio v-model="fanaticism" native-value="${trait}">${loc(`trait_${trait}_name`)}</b-radio></div>`;
                 }
               });
-              traits2 += `</section></template></div>`;
+              traits2 += `</div>`;
               body.append($(traits2));
               vBind({
                 el: "#specialModal",
@@ -27311,7 +27319,7 @@ ${effect}`);
             }
           }, 50);
         },
-        genus(slot2) {
+        openGenus(slot2) {
           this.$buefy.modal.open({
             hasModalCard: false,
             customClass: "evolve-modal",
@@ -27325,7 +27333,7 @@ ${effect}`);
               $("#modalBox").append($(`<p id="modalBoxTitle" class="has-text-warning modalTitle">${loc(`genelab_genus`)}</p>`));
               var body = $('<div id="specialModal" class="modalBody"></div>');
               $("#modalBox").append(body);
-              let genus = `<div class="genus_selection"><template><section>`;
+              let genus = `<div class="genus_selection">`;
               Object.keys(genus_def).forEach(function(type) {
                 if (type !== "hybrid") {
                   if (isWiki || global.stats.achieve[`genus_${type}`] && global.stats.achieve[`genus_${type}`].l > 0) {
@@ -27337,7 +27345,7 @@ ${effect}`);
                   }
                 }
               });
-              genus += `</section></template></div>`;
+              genus += `</div>`;
               body.append($(genus));
               vBind({
                 el: "#specialModal",
@@ -27372,9 +27380,18 @@ ${effect}`);
           }, 50);
         },
         swapTab(tab) {
+          let content = document.querySelector("#celestialLab .b-tabs .tab-content");
+          if (content) {
+            let rect = content.getBoundingClientRect();
+            content.style.minHeight = rect.height + "px";
+            setTimeout(() => {
+              content.style.minHeight = "";
+            }, 225);
+          }
           summaryTab(tab);
         },
         customImport() {
+          const vm = this;
           let file = document.getElementById("customFile").files[0];
           if (file) {
             let reader = new FileReader();
@@ -27384,7 +27401,7 @@ ${effect}`);
               try {
                 importCustom = JSON.parse(evt.target.result);
               } catch {
-                error.msg = loc(`string_pack_error`, [file.name]);
+                vm.err.msg = loc(`string_pack_error`, [file.name]);
                 return;
               }
               let formatError = false;
@@ -27398,49 +27415,52 @@ ${effect}`);
                 }
               });
               if (formatError) {
-                error.msg = loc(`string_pack_error`, [file.name]);
+                vm.err.msg = loc(`string_pack_error`, [file.name]);
                 console.log("format fail");
                 return;
               }
               Object.keys(genome).forEach(function(type) {
                 if (importCustom[type]) {
-                  genome[type] = importCustom[type];
+                  vm.g[type] = importCustom[type];
                 }
               });
               ["name", "home", "red", "hell", "gas", "gas_moon", "dwarf", "titan", "enceladus", "triton", "eris"].forEach(function(field) {
                 if (!importCustom[field] && ["titan", "enceladus", "triton", "eris"].includes(field)) {
-                  genome[field] = loc(`genus_${genome.genus}_solar_${field}`);
-                } else if (genome[field].length > 20) {
-                  genome[field] = genome[field].substring(0, 20);
+                  vm.g[field] = loc(`genus_${vm.g.genus}_solar_${field}`);
+                } else if (vm.g[field].length > 20) {
+                  vm.g[field] = vm.g[field].substring(0, 20);
                 }
               });
-              if (genome.entity.length > 40) {
-                genome.entity = genome.entity.substring(0, 40);
+              if (vm.g.entity.length > 40) {
+                vm.g.entity = vm.g.entity.substring(0, 40);
               }
-              if (genome.desc.length > 255) {
-                genome.desc = genome.desc.substring(0, 255);
+              if (vm.g.desc.length > 255) {
+                vm.g.desc = vm.g.desc.substring(0, 255);
               }
-              if (!isWiki && !(global.stats.achieve[`genus_${genome.genus}`] && global.stats.achieve[`genus_${genome.genus}`].l > 0)) {
-                genome.genus = dGenus;
+              if (!isWiki && !(global.stats.achieve[`genus_${vm.g.genus}`] && global.stats.achieve[`genus_${vm.g.genus}`].l > 0)) {
+                vm.g.genus = dGenus;
               }
               if (importCustom.genus !== "hybrid" && hybrid) {
-                genome["hybrid"] = [importCustom.genus, importCustom.genus === "humanoid" ? "small" : "humanoid"];
-                genome.genus = "hybrid";
+                vm.g["hybrid"] = [importCustom.genus, importCustom.genus === "humanoid" ? "small" : "humanoid"];
+                vm.g.genus = "hybrid";
               } else if (importCustom.genus === "hybrid" && !hybrid) {
-                genome.genus = importCustom.hybrid[0];
-                delete genome.hybrid;
+                vm.g.genus = importCustom.hybrid[0];
+                delete vm.g.hybrid;
               }
               let fixTraitlist = [];
-              for (let i = 0; i < genome.traitlist.length; i++) {
-                if (traits.hasOwnProperty(genome.traitlist[i]) && traits[genome.traitlist[i]].type === "major" && unlockedTraits[genome.traitlist[i]] && !fixTraitlist.includes(genome.traitlist[i])) {
-                  fixTraitlist.push(genome.traitlist[i]);
+              for (let i = 0; i < vm.g.traitlist.length; i++) {
+                if (traits.hasOwnProperty(vm.g.traitlist[i]) && traits[vm.g.traitlist[i]].type === "major" && unlockedTraits[vm.g.traitlist[i]] && !fixTraitlist.includes(vm.g.traitlist[i])) {
+                  fixTraitlist.push(vm.g.traitlist[i]);
                 }
               }
-              tRanks = importCustom.hasOwnProperty("ranks") ? importCustom.ranks : {};
-              genome.ranks = {};
-              genome.fanaticism = importCustom.hasOwnProperty("fanaticism") ? importCustom.fanaticism : false, genome.traitlist = fixTraitlist;
-              genome.genes = calcGenomeScore(genome, isWiki ? wikiVars : false, tRanks);
-              error.msg = "";
+              let importedRanks = importCustom.hasOwnProperty("ranks") ? importCustom.ranks : {};
+              Object.keys(tRanks).forEach((k) => delete tRanks[k]);
+              Object.assign(tRanks, importedRanks);
+              vm.g.ranks = {};
+              vm.g.fanaticism = importCustom.hasOwnProperty("fanaticism") ? importCustom.fanaticism : false;
+              vm.g.traitlist = fixTraitlist;
+              vm.g.genes = calcGenomeScore(vm.g, isWiki ? wikiVars : false, tRanks);
+              vm.err.msg = "";
             };
             reader.onerror = function(evt) {
               console.error("error reading file");
@@ -27464,8 +27484,8 @@ ${effect}`);
           return geneCost(genome, trait, tRanks);
         },
         untapped(genes2) {
-          if (!genome.traitlist.includes(genome.fanaticism)) {
-            genome.fanaticism = false;
+          if (!this.g.traitlist.includes(this.g.fanaticism)) {
+            this.g.fanaticism = false;
           }
           let num = genes2 > 0 ? +((genes2 / (genes2 + 20) / 10 + 24e-5) * 100).toFixed(3) : 0;
           return `+${num}%`;
@@ -27473,7 +27493,7 @@ ${effect}`);
         fanaticism(trait) {
           return trait ? loc(`trait_${trait}_name`) : loc(`genelab_unset`);
         },
-        genus_f(g, i) {
+        genusLabel(g, i) {
           return typeof i === "undefined" ? loc(`genelab_genus_${g}`) : loc(`genelab_genus_${g[i]}`);
         },
         empower(e, t) {
@@ -27557,7 +27577,7 @@ ${effect}`);
           if (traits.hasOwnProperty(trait) && traits[trait].type === "major") {
             if (traits[trait].val >= 0) {
               summary2 += `<div class="field t${trait}">`;
-              summary2 += `<b-checkbox :input="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-success">${loc(`trait_${trait}_name`)}</span></b-checkbox>`;
+              summary2 += `<b-checkbox @update:model-value="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-success">${loc(`trait_${trait}_name`)}</span></b-checkbox>`;
               summary2 += `<span>[<span class="rc"><span class="has-text-warning">${loc(`wiki_calc_cost`)}</span> <span>{{ cost('${trait}') }}</span>, <span class="has-text-warning">${loc(`genelab_rank`)}</span> <span>{{ tRank('${trait}') }}</span>`;
               summary2 += `<span v-html="empower(t.empowered,'${trait}')"></span></span>]`;
               summary2 += `<span role="button" aria-label="${loc(`genelab_rank_lower`, [loc(`trait_${trait}_name`)])}" class="sub has-text-danger" @click="reduce('${trait}')"><span>-</span></span>`;
@@ -27565,7 +27585,7 @@ ${effect}`);
               summary2 += `</span></div>`;
             } else {
               negative_sum += `<div class="field t${trait}">`;
-              negative_sum += `<b-checkbox :input="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-danger">${loc(`trait_${trait}_name`)}</span></b-checkbox>`;
+              negative_sum += `<b-checkbox @update:model-value="geneEdit()" v-model="g.traitlist" native-value="${trait}"><span class="has-text-danger">${loc(`trait_${trait}_name`)}</span></b-checkbox>`;
               negative_sum += `<span>[<span class="rc"><span class="has-text-warning">${loc(`wiki_calc_cost`)}</span> <span>{{ cost('${trait}') }}</span>, <span class="has-text-warning">${loc(`genelab_rank`)}</span> <span>{{ tRank('${trait}') }}</span>`;
               negative_sum += `<span v-html="empower(t.empowered,'${trait}')"></span></span>]`;
               negative_sum += `<span role="button" aria-label="${loc(`genelab_rank_lower`, [loc(`trait_${trait}_name`)])}" class="sub has-text-danger" @click="reduce('${trait}')"><span>-</span></span>`;
@@ -27584,94 +27604,91 @@ ${effect}`);
           },
           methods: {
             geneEdit() {
-              let newRanks = genome.traitlist.map((x) => tRanks[x] ? { [x]: tRanks[x] } : { [x]: 1 });
-              let ranks = {};
-              newRanks.forEach(function(k) {
-                Object.keys(k).forEach(function(t) {
-                  ranks[t] = k[t];
+              this.$nextTick(() => {
+                let newRanks = this.g.traitlist.map((x) => tRanks[x] ? { [x]: tRanks[x] } : { [x]: 1 });
+                let ranks = {};
+                newRanks.forEach(function(k) {
+                  Object.keys(k).forEach(function(t) {
+                    ranks[t] = k[t];
+                  });
                 });
+                Object.keys(tRanks).forEach((k) => {
+                  if (!ranks.hasOwnProperty(k)) delete tRanks[k];
+                });
+                Object.assign(tRanks, ranks);
+                this.g.genes = calcGenomeScore(this.g, isWiki ? wikiVars : false, tRanks);
               });
-              tRanks = ranks;
-              genome.genes = calcGenomeScore(genome, isWiki ? wikiVars : false, tRanks);
             },
             reduce(t) {
               let unlock = global.stats.achieve[`extinct_${traits[t].origin}`] && global.stats.achieve[`extinct_${traits[t].origin}`].l || 0;
-              switch (tRanks[t]) {
+              switch (this.t[t]) {
                 case 0.25:
                   if (unlock >= 5) {
-                    tRanks[t] = 0.1;
+                    this.t[t] = 0.1;
                   }
                   break;
                 case 0.5:
                   if (unlock >= 4) {
-                    tRanks[t] = 0.25;
+                    this.t[t] = 0.25;
                   }
                   break;
                 case 1:
                   if (unlock >= 3) {
-                    tRanks[t] = 0.5;
+                    this.t[t] = 0.5;
                   }
                   break;
                 case 2:
-                  tRanks[t] = 1;
+                  this.t[t] = 1;
                   break;
                 case 3:
-                  tRanks[t] = 2;
+                  this.t[t] = 2;
                   break;
                 case 4:
-                  tRanks[t] = 3;
+                  this.t[t] = 3;
                   break;
               }
-              if (tab === 4) {
-                vBind({ el: `#traitSummary .trait_selection` }, "update");
-              } else {
-                vBind({ el: `#allSum .trait_selection` }, "update");
-              }
+              this.g.genes = calcGenomeScore(this.g, isWiki ? wikiVars : false, tRanks);
               let desc = $(`#traitLabActiveDesc`);
               clearElement(desc);
               let opts = {
-                trank: tRanks[t] || 1,
+                trank: this.t[t] || 1,
                 wiki: isWiki
               };
               getTraitDesc(desc, t, opts);
             },
             increase(t) {
               let unlock = global.stats.achieve[`extinct_${traits[t].origin}`] && global.stats.achieve[`extinct_${traits[t].origin}`].l || 0;
-              switch (tRanks[t]) {
+              switch (this.t[t]) {
                 case 0.1:
-                  tRanks[t] = 0.25;
+                  this.t[t] = 0.25;
                   break;
                 case 0.25:
-                  tRanks[t] = 0.5;
+                  this.t[t] = 0.5;
                   break;
                 case 0.5:
-                  tRanks[t] = 1;
+                  this.t[t] = 1;
                   break;
                 case 1:
                   if (unlock >= 3) {
-                    tRanks[t] = 2;
+                    this.t[t] = 2;
                   }
                   break;
                 case 2:
                   if (unlock >= 4) {
-                    tRanks[t] = 3;
+                    this.t[t] = 3;
                   }
                   break;
                 case 3:
                   if (unlock >= 5) {
-                    tRanks[t] = 4;
+                    this.t[t] = 4;
                   }
                   break;
               }
-              if (tab === 4) {
-                vBind({ el: `#traitSummary .trait_selection` }, "update");
-              } else {
-                vBind({ el: `#allSum .trait_selection` }, "update");
-              }
+              this.g.genes = calcGenomeScore(this.g, isWiki ? wikiVars : false, tRanks);
               let desc = $(`#traitLabActiveDesc`);
               clearElement(desc);
               let opts = {
-                trank: tRanks[t] || 1,
+                trank: this.t[t] || 1,
                 wiki: isWiki
               };
               getTraitDesc(desc, t, opts);
