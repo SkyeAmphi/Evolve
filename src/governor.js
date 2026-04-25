@@ -2,7 +2,7 @@ import { global, seededRandom, p_on, breakdown } from './vars.js';
 import { vBind, popover, tagEvent, calcQueueMax, calcRQueueMax, clearElement, adjustCosts, decodeStructId, timeCheck, arpaTimeCheck, hoovedRename } from './functions.js';
 import { races } from './races.js';
 import { actions, checkCityRequirements, housingLabel, wardenLabel, updateQueueNames, checkAffordable, drawTech, drawCity } from './actions.js';
-import { govCivics, govTitle } from './civics.js';
+import { hireMerc, spyCost, trainSpy, spyAction, govTitle } from './civics.js';
 import { crateGovHook, atomic_mass } from './resources.js';
 import { checkHellRequirements, mechSize, mechCost, validWeapons, validEquipment } from './portal.js';
 import { loc } from './locale.js';
@@ -640,10 +640,10 @@ export function drawnGovernOffice(){
             global.race.governor.config['replicate'] = {};
         }
         if (!global.race.governor.config.replicate.hasOwnProperty('pow')){
-            global.race.governor.config.replicate['pow'] = { on: false, cap: 10000, buffer: 0 };
+            global.race.governor.config.replicate['pow'] = { on: true, cap: 100000, buffer: 0 };
         }
         if (!global.race.governor.config.replicate.hasOwnProperty('res')){
-            global.race.governor.config.replicate['res'] = { que: true, neg: true, cap: true };
+            global.race.governor.config.replicate['res'] = { que: false, neg: false, cap: false };
         }
 
         let contain = $(`<div class="tConfig" v-show="showTask('replicate')"><div class="has-text-warning" role="heading" aria-level="3">${loc(`gov_task_replicate`)}</div></div>`);
@@ -881,17 +881,19 @@ export const gov_tasks = {
                         add_morale -= 0.5;
                     }
                 }
-                let max = govCivics('tax_cap',false);
-                if (global.city.morale.current < 100 && global.civic.taxes.tax_rate > (global.civic.govern.type === 'oligarchy' ? 45 : 25)){
-                    while (global.city.morale.current < 100 && global.civic.taxes.tax_rate > (global.civic.govern.type === 'oligarchy' ? 45 : 25)){
-                        govCivics('adj_tax','sub');
-                    }
+
+                let caps = taxCap();
+                if (caps.min < global.race.governor.config.tax.min)
+                    caps.min = global.race.governor.config.tax.min;
+                while (global.city.morale.current < 100 && global.civic.taxes.tax_rate > (global.civic.govern.type === 'oligarchy' ? 45 : 25)) {
+                    adjustTax('sub', 1);
+					 
                 }
-                else if (global.city.morale.potential >= global.city.morale.cap + add_morale && global.civic.taxes.tax_rate < max){
-                    govCivics('adj_tax','add');
+                while (global.city.morale.potential >= global.city.morale.cap + add_morale && global.civic.taxes.tax_rate < caps.max){
+                    adjustTax('add', 1);
                 }
-                else if (global.city.morale.current < global.city.morale.cap && global.civic.taxes.tax_rate > global.race.governor.config.tax.min){
-                    govCivics('adj_tax','sub');
+                while (global.city.morale.current < global.city.morale.cap && global.civic.taxes.tax_rate > global.race.governor.config.tax.min){
+                    adjustTax('sub', 1);
                 }
             }
         }
@@ -1084,8 +1086,11 @@ export const gov_tasks = {
         },
         task(){
             if ( $(this)[0].req() ){
-                if (global['resource'][global.race.species].max > global['resource'][global.race.species].amount){
-                    actions.city.assembly.action();
+                for (let i = 0; i < 25; i++) {
+                    if (global['resource'][global.race.species].max > global['resource'][global.race.species].amount)
+                        actions.city.assembly.action();
+                    else
+                        break;
                 }
             }
         }
@@ -1097,8 +1102,11 @@ export const gov_tasks = {
         },
         task(){
             if ( $(this)[0].req() ){
-                if (global['resource'][global.race.species].max > global['resource'][global.race.species].amount){
-                    actions.tauceti.tau_home.cloning_facility.action();
+                for (let i = 0; i < 25; i++) {
+                    if (global['resource'][global.race.species].max > global['resource'][global.race.species].amount)
+                        actions.tauceti.tau_home.cloning_facility.action();
+                    else
+                        break;
                 }
             }
         }
@@ -1111,8 +1119,8 @@ export const gov_tasks = {
         task(){
             if ( $(this)[0].req() ){
                 let cashCap = global.resource.Money.max * (global.race.governor.config.merc.reserve / 100);
-                while (global.civic.garrison.max > global.civic.garrison.workers + global.race.governor.config.merc.buffer && global.resource.Money.amount >= govCivics('m_cost') && (global.resource.Money.amount + global.resource.Money.diff >= cashCap || global.resource.Money.diff >= govCivics('m_cost')) ){
-                    govCivics('m_buy');
+                while (global.civic.garrison.max > global.civic.garrison.workers + global.race.governor.config.merc.buffer && global.resource.Money.amount >= mercCost() && (global.resource.Money.amount + global.resource.Money.diff >= cashCap || global.resource.Money.diff >= mercCost()) ){
+                    hireMerc(1);
                 }
             }
         }
@@ -1134,9 +1142,9 @@ export const gov_tasks = {
                 let max = global.race['truepath'] && global.tech['rival'] ? 4 : 3;
                 let min = global.tech['world_control'] ? 3 : 0;
                 for (let i=min; i<max; i++){
-                    let cost = govCivics('s_cost',i);
+                    let cost = spyCost(i);
                     if (!global.civic.foreign[`gov${i}`].anx && !global.civic.foreign[`gov${i}`].buy && !global.civic.foreign[`gov${i}`].occ && global.civic.foreign[`gov${i}`].trn === 0 && global.resource.Money.amount >= cost && (global.resource.Money.diff >= cost || global.resource.Money.amount + global.resource.Money.diff >= cashCap)){
-                        govCivics('t_spy',i);
+                        trainSpy(i);
                     }
                 }
             }
@@ -1163,19 +1171,19 @@ export const gov_tasks = {
                             switch (mission){
                                 case 'influence':
                                     if (global.civic.foreign[`gov${gov}`].hstl > 0 && global.civic.foreign[`gov${gov}`].spy > 1){
-                                        govCivics('s_influence',gov);
+                                        spyAction('influence', gov);
                                         return false;
                                     }
                                     break;
                                 case 'sabotage':
                                     if (global.civic.foreign[`gov${gov}`].mil > 50){
-                                        govCivics('s_sabotage',gov);
+                                        spyAction('sabotage', gov);
                                         return false;
                                     }
                                     break;
                                 case 'incite':
                                     if (global.civic.foreign[`gov${gov}`].unrest < 100 && global.civic.foreign[`gov${gov}`].spy > 2 && gov < 3){
-                                        govCivics('s_incite',gov);
+                                        spyAction('incite', gov);
                                         return false;
                                     }
                                     break;
@@ -1205,19 +1213,30 @@ export const gov_tasks = {
             return !global.race['orbit_decayed'] && checkCityRequirements('slave_market') && global.race['slaver'] && global.city['slave_pen'] ? true : false;
         },
         task(){
-            let cashCap = global.resource.Money.max * (global.race.governor.config.slave.reserve / 100);
-            let slaveCost = 25000;
-            if (global.race['inflation']){
-                slaveCost *= 1 + (global.race.inflation / 100);
-            }
-            let extraVal = govActive('extravagant',0);
-            if (extraVal){
-                slaveCost *= 1 + (extraVal / 100);
-            }
-            if ( $(this)[0].req() && global.resource.Money.amount >= slaveCost && (global.resource.Money.diff >= slaveCost || global.resource.Money.amount + global.resource.Money.diff >= cashCap) ){
+            if ( $(this)[0].req() ) {
+                let cashCap = global.resource.Money.max * (global.race.governor.config.slave.reserve / 100);
+                let slaveCost = 25000;
+                if (global.race['inflation']){
+                    slaveCost *= 1 + (global.race.inflation / 100);
+                }
+                let extraVal = govActive('extravagant',0);
+                if (extraVal){
+                    slaveCost *= 1 + (extraVal / 100);
+                }
+
                 let max = global.city.slave_pen.count * 4;
-                if (max > global.resource.Slave.amount){
-                    actions.city.slave_market.action();
+                for (let i = 0; i < 25; i++) {
+                    let canBuy = global.resource.Money.amount >= slaveCost && 
+                        (
+                            global.resource.Money.diff >= slaveCost || 
+                            global.resource.Money.amount + global.resource.Money.diff >= cashCap
+                        ) && 
+                        max > global.resource.Slave.amount;
+
+                    if (canBuy)
+                        actions.city.slave_market.action();
+                    else
+                        break;
                 }
             }
         }

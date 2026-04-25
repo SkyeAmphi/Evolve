@@ -4,7 +4,7 @@ import { unlockAchieve, alevel, universeAffix } from './achieve.js';
 import { traits, races, fathomCheck, traitCostMod, orbitLength } from './races.js';
 import { spatialReasoning, unlockContainers, drawResourceTab } from './resources.js';
 import { loadFoundry, jobScale, limitCraftsmen } from './jobs.js';
-import { armyRating, govCivics, garrisonSize, mercCost, soldierDeath } from './civics.js';
+import { armyRating, mercCost, garrisonSize, mercCost, soldierDeath } from './civics.js';
 import { payCosts, powerOnNewStruct, setAction, drawTech, bank_vault, updateDesc, actions, initStruct, storageMultipler, casinoEffect, structName, absorbRace, buildTemplate } from './actions.js';
 import { checkRequirements, incrementStruct, astrialProjection, ascendLab, planetName } from './space.js';
 import { asphodelResist } from './edenic.js';
@@ -4243,7 +4243,7 @@ function fortressData(dt){
             }
         case 'hireLabel':
             {
-                let cost = Math.round(govCivics('m_cost')).toLocaleString();
+                let cost = Math.round(mercCost()).toLocaleString();
                 return loc('civics_garrison_hire_mercenary_cost',[cost]);
             }
     }

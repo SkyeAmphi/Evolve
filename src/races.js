@@ -4,7 +4,7 @@ import { defineIndustry } from './industry.js';
 import { setJobName, jobScale, loadFoundry } from './jobs.js';
 import { vBind, clearElement, popover, removeFromQueue, removeFromRQueue, calc_mastery, gameLoop, getEaster, getHalloween, randomKey, modRes, messageQueue } from './functions.js';
 import { setResourceName, drawResourceTab, atomic_mass } from './resources.js';
-import { buildGarrison, govEffect, govTitle, armyRating, govCivics } from './civics.js';
+import { buildGarrison, govEffect, govTitle, armyRating, taxCap } from './civics.js';
 import { govActive, removeTask, defineGovernor } from './governor.js';
 import { unlockAchieve, unlockFeat, alevel } from './achieve.js';
 import { highPopAdjust, teamster } from './prod.js';
@@ -8257,7 +8257,7 @@ function minorWish(parent){
                         case 'taxes':
                         {
                             global.race.wishStats.tax = 5;
-                            global.civic.taxes.rax_rate = govCivics('tax_cap');
+                            global.civic.taxes.rax_rate = taxCap().max;
                             messageQueue(loc('wish_taxes'),'warning',false,['events']);
                             break;
                         }

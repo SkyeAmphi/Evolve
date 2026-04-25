@@ -6,7 +6,7 @@ import { races, traits, racialTrait, orbitLength, servantTrait, randomMinorTrait
 import { defineResources, resource_values, spatialReasoning, craftCost, plasmidBonus, faithBonus, faithTempleCount, tradeRatio, craftingRatio, crateValue, containerValue, tradeSellPrice, tradeBuyPrice, atomic_mass, supplyValue, galaxyOffers } from './resources.js';
 import { defineJobs, job_desc, loadFoundry, farmerValue, jobName, jobScale, workerScale, limitCraftsmen, loadServants} from './jobs.js';
 import { defineIndustry, f_rate, manaCost, setPowerGrid, gridEnabled, gridDefs, nf_resources, replicator, luxGoodPrice, smelterUnlocked, smelterFuelConfig, setupRituals, maxRitualNum, ritual_types } from './industry.js';
-import { checkControlling, garrisonSize, armyRating, govTitle, govCivics, govEffect, weaponTechModifer } from './civics.js';
+import { checkControlling, garrisonSize, armyRating, govTitle, taxCap, govEffect, weaponTechModifer } from './civics.js';
 import { actions, updateDesc, checkTechRequirements, drawEvolution, BHStorageMulti, storageMultipler, checkAffordable, checkPowerRequirements, drawCity, drawTech, gainTech, housingLabel, updateQueueNames, wardenLabel, planetGeology, resQueue, bank_vault, start_cataclysm, orbitDecayed, postBuild, skipRequirement, structName, templeCount, initStruct, casino_vault, casinoEarn, doCallbacks, cLabels } from './actions.js';
 import { renderSpace, convertSpaceSector, fuel_adjust, int_fuel_adjust, zigguratBonus, planetName, genPlanets, setUniverse, universe_types, gatewayStorage, piracy, spaceTech, universe_affixes, galaxyRegions, gatewayArmada, galaxy_ship_types } from './space.js';
 import { renderFortress, bloodwar, soulForgeSoldiers, hellSupression, genSpireFloor, mechRating, mechCollect, updateMechbay, hellguard, buildMechQueue, mechCost } from './portal.js';
@@ -7626,7 +7626,7 @@ function fastLoop(){
                 let mult = income_base / citizens;
                 let pop = p_on['apartment'] * actions.city.apartment.citizens();
                 pop = Math.min(citizens, pop);
-                extra_income = pop * mult * (govCivics('tax_cap') / 20); //citizens in mansions pay max taxes always.
+                extra_income = pop * mult * (taxCap().max / 20); //citizens in mansions pay max taxes always.
                 income_base -= pop * mult;
             }
             income_base *= (global.civic.taxes.tax_rate / 20);
@@ -12616,14 +12616,9 @@ function longLoop(){
         }
 
         {
-            let tax_cap = govCivics('tax_cap');
-            let tax_min = govCivics('tax_cap',true);
-            if (global.civic.taxes.tax_rate > tax_cap){
-                global.civic.taxes.tax_rate = tax_cap;
-            }
-            else if (global.civic.taxes.tax_rate < tax_min){
-                global.civic.taxes.tax_rate = tax_min;
-            }
+            let cap = taxCap();
+            global.civic.taxes.tax_rate = Math.max(global.civic.taxes.tax_rate, cap.min);
+			global.civic.taxes.tax_rate = Math.min(global.civic.taxes.tax_rate, cap.max);
         }
 
         if (global.queue.display){
