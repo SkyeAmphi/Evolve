@@ -5,7 +5,7 @@ import { spatialReasoning, unlockContainers } from './resources.js';
 import { armyRating, garrisonSize, soldierDeath } from './civics.js';
 import { jobScale, job_desc, loadFoundry, limitCraftsmen } from './jobs.js';
 import { production, highPopAdjust } from './prod.js';
-import { actions, payCosts, powerOnNewStruct, setAction, drawTech, bank_vault, buildTemplate, casinoEffect, housingLabel, structName, initStruct } from './actions.js';
+import { actions, payCosts, powerOnNewStruct, setAction, drawTech, bank_vault, buildTemplate, casinoEffect, housingLabel, structName, initStruct, closeModalAnim } from './actions.js';
 import { fuel_adjust, int_fuel_adjust, spaceTech, renderSpace, checkRequirements, incrementStruct, planetName } from './space.js';
 import { defineGovernor, removeTask, govActive } from './governor.js';
 import { defineIndustry, nf_resources, addSmelter, setupRituals, cancelRituals } from './industry.js';
@@ -4289,7 +4289,8 @@ export function drawShipYard(){
                 trigModal(){
                     this.$buefy.modal.open({
                         hasModalCard: false,
-                        content: '<div id="modalBox" class="modalBox"></div>'
+                        content: '<div id="modalBox" class="modalBox"></div>',
+                        onCancel: () => closeModalAnim()
                     });
 
                     let checkExist = setInterval(function(){

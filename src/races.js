@@ -9275,6 +9275,7 @@ function psychicKill(parent){
                     }
                     if (global.stats.psykill === 10){
                         renderPsychicPowers();
+                        drawTech();
                     }
                 }
             },
@@ -9373,7 +9374,7 @@ function psychicFinance(parent){
     if (global.tech.psychic >= 4){
         let channel = $(`<div class="gap">${loc('psychic_channel')}</div>`);
         let psy = $(`<span class="current">{{ cash }}</span>`);
-        let sub = $(`<span role="button" class="sub" @click="sub" aria-label="Decresae Energy reserved for ${loc(`psychic_profit`)}"><span>&laquo;</span></span>`);
+        let sub = $(`<span role="button" class="sub" @click="sub" aria-label="Decrease Energy reserved for ${loc(`psychic_profit`)}"><span>&laquo;</span></span>`);
         let add = $(`<span role="button" class="add" @click="add" aria-label="Increase Energy reserved for ${loc(`psychic_profit`)}"><span>&raquo;</span></span>`);
         channel.append(sub);
         channel.append(psy);
@@ -9438,7 +9439,7 @@ function psychicMindBreak(parent){
     parent.append(container);
 
     container.append($(`<div class="header">${loc('psychic_mind_break_title')}</div>`));
-    container.append(`<div><b-button v-html="break()" @click="breakMind()"></b-button></div>`);
+    container.append(`<div><b-button v-html="mindBreakLabel()" @click="breakMind()"></b-button></div>`);
 
     let cost = global.tech.psychic >= 5 ? 64 : 80;
     vBind({
@@ -9465,7 +9466,7 @@ function psychicMindBreak(parent){
                     }
                 }
             },
-            break(){
+            mindBreakLabel(){
                 return loc(`psychic_mind_break_button`,[cost]);
             }
         }
@@ -9485,7 +9486,7 @@ function psychicCapture(parent){
     parent.append(container);
 
     container.append($(`<div class="header">${loc('psychic_stun_title')}</div>`));
-    container.append(`<div><b-button v-html="break()" @click="stun()"></b-button></div>`);
+    container.append(`<div><b-button v-html="stunLabel()" @click="stun()"></b-button></div>`);
 
     let cost = global.tech.psychic >= 5 ? 80 : 100;
     vBind({
@@ -9510,7 +9511,7 @@ function psychicCapture(parent){
                     }
                 }
             },
-            break(){
+            stunLabel() {
                 return loc(`psychic_stun_button`,[cost]);
             }
         }

@@ -5,7 +5,7 @@ import { traits, races, fathomCheck, traitCostMod, orbitLength } from './races.j
 import { spatialReasoning, unlockContainers, drawResourceTab } from './resources.js';
 import { loadFoundry, jobScale, limitCraftsmen } from './jobs.js';
 import { armyRating, mercCost, garrisonSize, soldierDeath } from './civics.js';
-import { payCosts, powerOnNewStruct, setAction, drawTech, bank_vault, updateDesc, actions, initStruct, storageMultipler, casinoEffect, structName, absorbRace, buildTemplate } from './actions.js';
+import { payCosts, powerOnNewStruct, setAction, drawTech, bank_vault, updateDesc, actions, initStruct, storageMultipler, casinoEffect, structName, absorbRace, buildTemplate, closeModalAnim } from './actions.js';
 import { checkRequirements, incrementStruct, astrialProjection, ascendLab, planetName } from './space.js';
 import { asphodelResist } from './edenic.js';
 import { production, highPopAdjust } from './prod.js';
@@ -7829,9 +7829,7 @@ function drawHellAnalysis(){
                     hasModalCard: false,
                     customClass: 'evolve-modal',
                     content: '<div id="modalBox" class="modalBox"></div>',
-                    onCancel: () => {
-                        // Modal closed
-                    }
+                    onCancel: () => closeModalAnim() // Modal closed
                 });
 
                 let checkExist = setInterval(function () {

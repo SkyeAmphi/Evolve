@@ -460,7 +460,7 @@ export function drawnGovernOffice(){
         global.race.governor['config'] = {};
     }
 
-    let options = $(`<div class="options"><div>`);
+    let options = $(`<div class="options"></div>`);
     govern.append(options);
 
     //Configs

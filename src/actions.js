@@ -40,7 +40,7 @@ export const actions = {
             id: 'evolution-dna',
             title: loc('evo_dna_title'),
             desc: loc('evo_dna_desc'),
-            condition(){ return global.resource.hasOwnProperty('DNA') && global.resource.DNA.display && global.resource.DNA.amount < global.resource.DNA.max && !global.race['evoFinalMenu']; },
+            condition(){ return global.resource.hasOwnProperty('DNA') && global.resource.DNA.display && !global.race['evoFinalMenu']; },
             cost: { RNA(){ return 2; } },
             action(args){
                 if (global['resource']['RNA'].amount >= 2 && global['resource']['DNA'].amount < global['resource']['DNA'].max){
@@ -5195,7 +5195,7 @@ raceList.forEach(function(race){
             action(args){
                 if (global.race['warlord'] && ['custom','hybrid','nano'].includes(race)){ return false; }
                 if (payCosts($(this)[0])){
-                    if (['synth','custom'].includes(race)){
+                    if (['synth','custom','hybrid'].includes(race)){
                         return evoExtraState(race);
                     }
                     else {
@@ -6355,7 +6355,8 @@ export function setAction(c_action,action,type,old,prediction){
                 else {
                     this.$buefy.modal.open({
                         hasModalCard: false,
-                        content: '<div id="modalBox" class="modalBox"></div>'
+                        content: '<div id="modalBox" class="modalBox"></div>',
+                        onCancel: () => closeModalAnim()
                     });
 
                     let checkExist = setInterval(function(){
@@ -7934,6 +7935,17 @@ function drawModal(c_action,type){
     }
 }
 
+export function closeModalAnim() {
+    const modalEl = document.querySelector('.modal.is-active');
+    if (!modalEl) return;
+
+    const ghost = modalEl.cloneNode(true);
+    ghost.classList.add('is-leaving');
+    ghost.style.pointerEvents = 'none';
+    document.body.appendChild(ghost);
+    setTimeout(() => ghost.remove(), 200);
+}
+
 function starDockModal(modal){
     if (global.tech['genesis'] < 4){
         let warn = $(`<div><span class="has-text-warning">${loc('stardock_warn')}</span></div>`);
@@ -8327,7 +8339,13 @@ export function initStruct(c_action){
     }
 }
 
+// flag to prevent duplicate calls of sentience that can lead to extra ranks of traits
+// (or anything else gained on evolution) being granted upon evolution by just clicking really fast
+let evolving = false;
+
 function evoExtraState(race){
+    if (evolving) return false;
+
     if ((race === 'synth' || (race === 'custom' && global.custom.race0.traits.includes('imitation')) || (race === 'hybrid' && global.custom.race1.traits.includes('imitation'))) && Object.keys(global.stats.synth).length > 1){
         global.race['evoFinalMenu'] = race;
         drawEvolution();
@@ -8340,6 +8358,9 @@ function evoExtraState(race){
 }
 
 function sentience(){
+    if (evolving) return;
+    evolving = true; // sentience only ever runs once per page lifetime so we don't need to ever reset it
+
     if (global.race['simulation']){
         simulation();
     }
@@ -8933,7 +8954,7 @@ function sentience(){
         arpa('Blood');
     }
     else {
-        loadTab('mTabCivil');
+        loadTab(1);
     }
 
     if (global.queue.hasOwnProperty('queue')){

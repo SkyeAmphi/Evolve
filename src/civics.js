@@ -7,7 +7,7 @@ import { defineGovernor, govActive } from './governor.js';
 import { drawTech } from  './actions.js';
 import { soulForgeSoldiers } from './portal.js';
 import { jobScale } from './jobs.js';
-import { templeCount } from './actions.js';
+import { templeCount, closeModalAnim } from './actions.js';
 import { astrologySign, astroVal } from './seasons.js';
 import { warhead } from './resets.js';
 
@@ -321,9 +321,7 @@ function government(govern){
                     hasModalCard: false,
                     customClass: 'evolve-modal',
                     content: '<div id="modalBox" class="modalBox"></div>',
-                    onCancel: () => {
-                        // Modal closed
-                    }
+                    onCancel: () => closeModalAnim() // Modal closed
                 });
 
                 var checkExist = setInterval(function() {
@@ -654,9 +652,7 @@ export function foreignGov(){
                         hasModalCard: false,
                         customClass: 'evolve-modal',
                         content: '<div id="modalBox" class="modalBox"></div>',
-                        onCancel: () => {
-                            // Modal closed
-                        }
+                        onCancel: () => closeModalAnim()
                     });
 
                     var checkExist = setInterval(function() {
@@ -1341,7 +1337,7 @@ export function buildGarrison(garrison,full){
                 return eventActive('fool',2021) ? garrisonSize() - w : w;
             },
             trainTime(r,p){
-                return r === 0 ? timeFormat(-1) : timeFormat((100 - p) / (r * 4));
+                return !r ? timeFormat(-1) : timeFormat((100 - p) / (r * 4));
             }
         }
     });

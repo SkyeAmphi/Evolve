@@ -12256,6 +12256,10 @@ function longLoop(){
                 force_scavenger: false
             };
             messageQueue((womlings + skilled) === 1 ? loc('civics_servants_msg1') : loc('civics_servants_msg2',[womlings + skilled]),'caution',false,['events','major_events']);
+
+            if (skilled > 0) {
+                loadFoundry(true);
+            }
         }
 
         if (global.race['truepath'] && global.tech['focus_cure'] && global.tech.focus_cure >= 2 && global.tauceti['infectious_disease_lab']){

@@ -846,7 +846,10 @@ export function loadFoundry(servants){
         }
         for (let i=0; i<list.length; i++){
             let res = list[i];
-            if ((servants && !global.race.servants.sjobs.hasOwnProperty(res)) || (!servants && !global.city.foundry.hasOwnProperty(res))){
+            if (
+                (servants && !global.race?.servants?.sjobs?.hasOwnProperty(res)) || 
+                (!servants && !global.city?.foundry?.hasOwnProperty(res))
+            ) {
                 if (servants){
                     global.race.servants.sjobs[res] = 0;
                 }

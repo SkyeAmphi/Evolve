@@ -7688,7 +7688,7 @@ export function ascendLab(hybrid,wiki){
         }
     }
 
-    let taxomized = { utility: {}, resource: {}, production: {}, combat: {}, all: {} };;
+    let taxomized = { utility: {}, resource: {}, production: {}, combat: {}, all: {} };
     Object.keys(races).forEach(function (race){
         let type = races[race].type;
         if (
@@ -7722,7 +7722,8 @@ export function ascendLab(hybrid,wiki){
             return;
         }
         let negative = '';
-        let trait_list_header = `<b-tab-item :label="'${loc(`genelab_traits_${tax}`)}'">`;
+        let trait_list_header = `<b-tab-item :label="'${loc(`genelab_traits_${tax}`)}'">`;
+
         let trait_list = ``;
         Object.keys(taxomized[tax]).sort().forEach(function (trait){
             if (traits.hasOwnProperty(trait) && traits[trait].type === 'major'){
@@ -7803,44 +7804,44 @@ export function ascendLab(hybrid,wiki){
             },
             geneEdit(){
                 this.$nextTick(() => {
-                    let newRanks = this.g.traitlist.map(x => tRanks[x] ? { [x]: tRanks[x] } : { [x]: 1 });
+                    let newRanks = genome.traitlist.map(x => tRanks[x] ? { [x]: tRanks[x] } : { [x]: 1 });
                     let ranks = {};
                     newRanks.forEach(function(k){ Object.keys(k).forEach(function(t){ ranks[t] = k[t] }) });
                     Object.keys(tRanks).forEach(k => { if (!ranks.hasOwnProperty(k)) delete tRanks[k]; });
                     Object.assign(tRanks, ranks);
-                    this.g.genes = calcGenomeScore(this.g,(isWiki ? wikiVars : false),tRanks);
-                    if (this.tt.t === 5){
+                    genome.genes = calcGenomeScore(genome,(isWiki ? wikiVars : false),tRanks);
+                    if (activeTab.t === 5){
                         summaryTab(5);
                     }
                 });
             },
             setRace(){
-                if (this.g.fanaticism && !this.g.traitlist.includes(this.g.fanaticism)){ return false; }
-                if (calcGenomeScore(this.g,false,tRanks) >= 0 && this.g.name.length > 0 && this.g.desc.length > 0 && this.g.entity.length > 0 && this.g.home.length > 0
-                    && this.g.red.length > 0 && this.g.hell.length > 0 && this.g.gas.length > 0 && this.g.gas_moon.length > 0 && this.g.dwarf.length > 0){
+                if (genome.fanaticism && !genome.traitlist.includes(genome.fanaticism)){ return false; }
+                if (calcGenomeScore(genome,false,tRanks) >= 0 && genome.name.length > 0 && genome.desc.length > 0 && genome.entity.length > 0 && genome.home.length > 0
+                    && genome.red.length > 0 && genome.hell.length > 0 && genome.gas.length > 0 && genome.gas_moon.length > 0 && genome.dwarf.length > 0){
 
                     global.custom[slot] = {
-                        name: this.g.name,
-                        desc: this.g.desc,
-                        entity: this.g.entity,
-                        home: this.g.home,
-                        red: this.g.red,
-                        hell: this.g.hell,
-                        gas: this.g.gas,
-                        gas_moon: this.g.gas_moon,
-                        dwarf: this.g.dwarf,
-                        titan: this.g.titan,
-                        enceladus: this.g.enceladus,
-                        triton: this.g.triton,
-                        eris: this.g.eris,
-                        genus: this.g.genus,
-                        traits: this.g.traitlist,
-                        fanaticism: this.g.fanaticism,
+                        name: genome.name,
+                        desc: genome.desc,
+                        entity: genome.entity,
+                        home: genome.home,
+                        red: genome.red,
+                        hell: genome.hell,
+                        gas: genome.gas,
+                        gas_moon: genome.gas_moon,
+                        dwarf: genome.dwarf,
+                        titan: genome.titan,
+                        enceladus: genome.enceladus,
+                        triton: genome.triton,
+                        eris: genome.eris,
+                        genus: genome.genus,
+                        traits: genome.traitlist,
+                        fanaticism: genome.fanaticism,
                         ranks: tRanks
                     };
                     $('#main').removeClass('custom-lab-active');
                     if (hybrid){
-                        global.custom[slot]['hybrid'] = this.g.hybrid;
+                        global.custom[slot]['hybrid'] = genome.hybrid;
                         apotheosis();
                     }
                     else {
@@ -7849,37 +7850,37 @@ export function ascendLab(hybrid,wiki){
                 }
             },
             allowed(t){
-                if ((this.g.traitlist.includes('catnip') && t === 'anise') || (this.g.traitlist.includes('anise') && t === 'catnip')){
+                if ((genome.traitlist.includes('catnip') && t === 'anise') || (genome.traitlist.includes('anise') && t === 'catnip')){
                     return true;
                 }
-                else if ((!['synthetic','hybrid'].includes(this.g.genus) || (this.g.hasOwnProperty('hybrid') && !this.g.hybrid.includes('synthetic'))) && ['deconstructor','imitation'].includes(t)){
-                    if (this.g.traitlist.includes(t)){
-                        this.g.traitlist.splice(this.g.traitlist.indexOf(t), 1);
+                else if ((!['synthetic','hybrid'].includes(genome.genus) || (genome.hasOwnProperty('hybrid') && !genome.hybrid.includes('synthetic'))) && ['deconstructor','imitation'].includes(t)){
+                    if (genome.traitlist.includes(t)){
+                        genome.traitlist.splice(genome.traitlist.indexOf(t), 1);
                     }
                     return true;
                 }
                 return false;
             },
             reset(){
-                this.g.name = "";
-                this.g.desc = "";
-                this.g.entity = "";
-                this.g.home = "";
-                this.g.red = "";
-                this.g.hell = "";
-                this.g.gas = "";
-                this.g.gas_moon = "";
-                this.g.dwarf = "";
-                this.g.titan = "";
-                this.g.enceladus = "";
-                this.g.triton = "";
-                this.g.eris = "";
-                this.g.genus = dGenus;
-                this.g.traitlist = [];
-                this.g.ranks = {};
+                genome.name = "";
+                genome.desc = "";
+                genome.entity = "";
+                genome.home = "";
+                genome.red = "";
+                genome.hell = "";
+                genome.gas = "";
+                genome.gas_moon = "";
+                genome.dwarf = "";
+                genome.titan = "";
+                genome.enceladus = "";
+                genome.triton = "";
+                genome.eris = "";
+                genome.genus = dGenus;
+                genome.traitlist = [];
+                genome.ranks = {};
                 Object.keys(tRanks).forEach(k => delete tRanks[k]);
-                this.g.genes = calcGenomeScore(this.g,(isWiki ? wikiVars : false), tRanks);
-                this.g.fanaticism = false;
+                genome.genes = calcGenomeScore(genome,(isWiki ? wikiVars : false), tRanks);
+                genome.fanaticism = false;
             },
             fanatic(){
                 this.$buefy.modal.open({
@@ -7994,18 +7995,17 @@ export function ascendLab(hybrid,wiki){
                 summaryTab(tab);
             },
             customImport(){
-                const vm = this;
                 let file = document.getElementById("customFile").files[0];
                 if (file){
                     let reader = new FileReader();
                     reader.readAsText(file, "UTF-8");
-                    reader.onload = function (evt) {
+                    reader.onload = (evt) => {
                         let importCustom = "";
                         try {
                             importCustom = JSON.parse(evt.target.result);
                         }
                         catch {
-                            vm.err.msg = loc(`string_pack_error`,[file.name]);
+                            error.msg = loc(`string_pack_error`,[file.name]);
                             return;
                         }
                         let formatError = false;
@@ -8019,56 +8019,56 @@ export function ascendLab(hybrid,wiki){
                             }
                         });
                         if (formatError){
-                            vm.err.msg = loc(`string_pack_error`,[file.name]);
+                            error.msg = loc(`string_pack_error`,[file.name]);
                             console.log('format fail');
                             return;
                         }
 
                         Object.keys(genome).forEach(function (type){
                             if (importCustom[type]){
-                                vm.g[type] = importCustom[type];
+                                genome[type] = importCustom[type];
                             }
                         });
                         ['name','home','red','hell','gas','gas_moon','dwarf','titan','enceladus','triton','eris'].forEach(function(field){
                             if (!importCustom[field] && ['titan','enceladus','triton','eris'].includes(field)){
-                                vm.g[field] = loc(`genus_${vm.g.genus}_solar_${field}`);
+                                genome[field] = loc(`genus_${genome.genus}_solar_${field}`);
                             }
-                            else if (vm.g[field].length > 20){
-                                vm.g[field] = vm.g[field].substring(0, 20);
+                            else if (genome[field].length > 20){
+                                genome[field] = genome[field].substring(0, 20);
                             }
                         });
-                        if (vm.g.entity.length > 40){
-                            vm.g.entity = vm.g.entity.substring(0, 40);
+                        if (genome.entity.length > 40){
+                            genome.entity = genome.entity.substring(0, 40);
                         }
-                        if (vm.g.desc.length > 255){
-                            vm.g.desc = vm.g.desc.substring(0, 255);
+                        if (genome.desc.length > 255){
+                            genome.desc = genome.desc.substring(0, 255);
                         }
-                        if (!isWiki && !(global.stats.achieve[`genus_${vm.g.genus}`] && global.stats.achieve[`genus_${vm.g.genus}`].l > 0)){
-                            vm.g.genus = dGenus;
+                        if (!isWiki && !(global.stats.achieve[`genus_${genome.genus}`] && global.stats.achieve[`genus_${genome.genus}`].l > 0)){
+                            genome.genus = dGenus;
                         }
                         if (importCustom.genus !== 'hybrid' && hybrid){
-                            vm.g['hybrid'] = [importCustom.genus, importCustom.genus === 'humanoid' ? 'small' : 'humanoid'];
-                            vm.g.genus = 'hybrid';
+                            genome['hybrid'] = [importCustom.genus, importCustom.genus === 'humanoid' ? 'small' : 'humanoid'];
+                            genome.genus = 'hybrid';
                         }
                         else if (importCustom.genus === 'hybrid' && !hybrid){
-                            vm.g.genus = importCustom.hybrid[0];
-                            delete vm.g.hybrid;
+                            genome.genus = importCustom.hybrid[0];
+                            delete genome.hybrid;
                         }
                         let fixTraitlist = [];
-                        for (let i=0; i < vm.g.traitlist.length; i++){
-                            if (traits.hasOwnProperty(vm.g.traitlist[i]) && traits[vm.g.traitlist[i]].type === 'major' && unlockedTraits[vm.g.traitlist[i]] && !fixTraitlist.includes(vm.g.traitlist[i])){
-                                fixTraitlist.push(vm.g.traitlist[i]);
+                        for (let i=0; i < genome.traitlist.length; i++){
+                            if (traits.hasOwnProperty(genome.traitlist[i]) && traits[genome.traitlist[i]].type === 'major' && unlockedTraits[genome.traitlist[i]] && !fixTraitlist.includes(genome.traitlist[i])){
+                                fixTraitlist.push(genome.traitlist[i]);
                             }
                         }
                         let importedRanks = importCustom.hasOwnProperty('ranks') ? importCustom.ranks : {};
                         Object.keys(tRanks).forEach(k => delete tRanks[k]);
                         Object.assign(tRanks, importedRanks);
-                        vm.g.ranks = {};
-                        vm.g.fanaticism = importCustom.hasOwnProperty('fanaticism') ? importCustom.fanaticism : false;
-                        vm.g.traitlist = fixTraitlist;
-                        vm.g.genes = calcGenomeScore(vm.g,(isWiki ? wikiVars : false),tRanks);
+                        genome.ranks = {};
+                        genome.fanaticism = importCustom.hasOwnProperty('fanaticism') ? importCustom.fanaticism : false;
+                        genome.traitlist = fixTraitlist;
+                        genome.genes = calcGenomeScore(genome,(isWiki ? wikiVars : false),tRanks);
 
-                        vm.err.msg = "";
+                        error.msg = "";
                     }
                     reader.onerror = function (evt) {
                         console.error("error reading file");
@@ -8092,7 +8092,7 @@ export function ascendLab(hybrid,wiki){
                 return geneCost(genome,trait,tRanks);
             },
             untapped(genes){
-                if (!this.g.traitlist.includes(this.g.fanaticism)){ this.g.fanaticism = false; }
+                if (!genome.traitlist.includes(genome.fanaticism)){ genome.fanaticism = false; }
                 let num = genes > 0 ? +((genes / (genes + 20) / 10 + 0.00024) * 100).toFixed(3) : 0;
                 return `+${num}%`;
             },
@@ -8218,87 +8218,87 @@ export function ascendLab(hybrid,wiki){
                 methods: {
                     geneEdit(){
                         this.$nextTick(() => {
-                            let newRanks = this.g.traitlist.map(x => tRanks[x] ? { [x]: tRanks[x] } : { [x]: 1 });
+                            let newRanks = genome.traitlist.map(x => tRanks[x] ? { [x]: tRanks[x] } : { [x]: 1 });
                             let ranks = {};
                             newRanks.forEach(function(k){ Object.keys(k).forEach(function(t){ ranks[t] = k[t] }) });
                             Object.keys(tRanks).forEach(k => { if (!ranks.hasOwnProperty(k)) delete tRanks[k]; });
                             Object.assign(tRanks, ranks);
-                            this.g.genes = calcGenomeScore(this.g,(isWiki ? wikiVars : false),tRanks);
+                            genome.genes = calcGenomeScore(genome,(isWiki ? wikiVars : false),tRanks);
                         });
                     },
-                    reduce(t){
-                        let unlock = global.stats.achieve[`extinct_${traits[t].origin}`] && global.stats.achieve[`extinct_${traits[t].origin}`].l || 0;
-                        switch (this.t[t]){
+                    reduce(trait){
+                        let unlock = global.stats.achieve[`extinct_${traits[trait].origin}`] && global.stats.achieve[`extinct_${traits[trait].origin}`].l || 0;
+                        switch (tRanks[trait]){
                             case 0.25:
                                 if (unlock >= 5){
-                                    this.t[t] = 0.1;
+                                    tRanks[trait] = 0.1;
                                 }
                                 break;
                             case 0.5:
                                 if (unlock >= 4){
-                                    this.t[t] = 0.25;
+                                    tRanks[trait] = 0.25;
                                 }
                                 break;
                             case 1:
                                 if (unlock >= 3){
-                                    this.t[t] = 0.5;
+                                    tRanks[trait] = 0.5;
                                 }
                                 break;
                             case 2:
-                                this.t[t] = 1;
+                                tRanks[trait] = 1;
                                 break;
                             case 3:
-                                this.t[t] = 2;
+                                tRanks[trait] = 2;
                                 break;
                             case 4:
-                                this.t[t] = 3;
+                                tRanks[trait] = 3;
                                 break;
                         }
-                        this.g.genes = calcGenomeScore(this.g,(isWiki ? wikiVars : false),tRanks);
+                        genome.genes = calcGenomeScore(genome,(isWiki ? wikiVars : false),tRanks);
                         let desc = $(`#traitLabActiveDesc`);
                         clearElement(desc);
                         let opts = {
-                            trank: this.t[t] || 1,
+                            trank: tRanks[trait] || 1,
                             wiki: isWiki
                         }
-                        getTraitDesc(desc, t, opts);
+                        getTraitDesc(desc, trait, opts);
                     },
-                    increase(t){
-                        let unlock = global.stats.achieve[`extinct_${traits[t].origin}`] && global.stats.achieve[`extinct_${traits[t].origin}`].l || 0;
-                        switch (this.t[t]){
+                    increase(trait){
+                        let unlock = global.stats.achieve[`extinct_${traits[trait].origin}`] && global.stats.achieve[`extinct_${traits[trait].origin}`].l || 0;
+                        switch (tRanks[trait]){
                             case 0.1:
-                                this.t[t] = 0.25;
+                                tRanks[trait] = 0.25;
                                 break;
                             case 0.25:
-                                this.t[t] = 0.5;
+                                tRanks[trait] = 0.5;
                                 break;
                             case 0.5:
-                                this.t[t] = 1;
+                                tRanks[trait] = 1;
                                 break;
                             case 1:
                                 if (unlock >= 3){
-                                    this.t[t] = 2;
+                                    tRanks[trait] = 2;
                                 }
                                 break;
                             case 2:
                                 if (unlock >= 4){
-                                    this.t[t] = 3;
+                                    tRanks[trait] = 3;
                                 }
                                 break;
                             case 3:
                                 if (unlock >= 5){
-                                    this.t[t] = 4;
+                                    tRanks[trait] = 4;
                                 }
                                 break;
                         }
-                        this.g.genes = calcGenomeScore(this.g,(isWiki ? wikiVars : false),tRanks);
+                        genome.genes = calcGenomeScore(genome,(isWiki ? wikiVars : false),tRanks);
                         let desc = $(`#traitLabActiveDesc`);
                         clearElement(desc);
                         let opts = {
-                            trank: this.t[t] || 1,
+                            trank: tRanks[trait] || 1,
                             wiki: isWiki
                         }
-                        getTraitDesc(desc, t, opts);
+                        getTraitDesc(desc, trait, opts);
                     },
                     cost(trait){
                         return geneCost(genome,trait,tRanks);
@@ -8306,8 +8306,8 @@ export function ascendLab(hybrid,wiki){
                     tRank(trait){
                         return tRanks[trait];
                     },
-                    empower(e,t){
-                        let valid_empower = traits[t].val >= traits.empowered.vars(tRanks['empowered'] || 1)[0] && traits[t].val <= traits.empowered.vars(tRanks['empowered'] || 1)[1] && !['empowered','catnip','anise'].includes(t) && genome.traitlist.includes('empowered');
+                    empower(e,trait){
+                        let valid_empower = traits[trait].val >= traits.empowered.vars(tRanks['empowered'] || 1)[0] && traits[trait].val <= traits.empowered.vars(tRanks['empowered'] || 1)[1] && !['empowered','catnip','anise'].includes(trait) && genome.traitlist.includes('empowered');
                         return valid_empower ? `, <span class="has-text-caution">E</span>` : ``;
                     }
                 }

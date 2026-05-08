@@ -2451,6 +2451,86 @@ a {
     overflow: hidden;
 }
 
+// Buefy 3.x overrides for modal animations
+// enter: Vue3 renamed .enter to .enter-from
+.zoom-out-enter-from {
+    opacity: 0;
+
+    .animation-content {
+        transform: scale(1.05);
+    }
+}
+.zoom-in-enter-from {
+    opacity: 0;
+
+    .animation-content {
+        transform: scale(0.95);
+    }
+}
+.fade-enter-from {
+    opacity: 0;
+}
+// leave: old Vue2 CSS used leave-active for final state; Vue3 uses leave-to
+// override leave-active to clear stale values, then define end state with leave-to
+.zoom-out-leave-active {
+    opacity: 1;
+
+    .animation-content {
+        transform: none;
+    }
+}
+.zoom-out-leave-to {
+    opacity: 0;
+
+    .animation-content {
+        transform: scale(1.05);
+    }
+}
+.zoom-in-leave-active {
+    opacity: 1;
+
+    .animation-content {
+        transform: none;
+    }
+}
+.zoom-in-leave-to {
+    opacity: 0;
+
+    .animation-content {
+        transform: scale(0.95);
+    }
+}
+
+// programmatic modal fade out animation (ghost technique, since s.unmount() bypasses Vue transitions)
+.modal.is-active.is-leaving {
+    animation: modal-ghost-leave 150ms ease-out forwards;
+    pointer-events: none;
+
+    .animation-content {
+        animation: modal-ghost-leave-content 150ms ease-out forwards;
+    }
+}
+
+@keyframes modal-ghost-leave {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes modal-ghost-leave-content {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.05);
+    }
+}
+
 .actionWidth {
     @media only screen and (max-width: 113rem) {
         max-width: 38rem;
