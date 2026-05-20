@@ -1443,7 +1443,7 @@ function coresQuantumCalc(info){
     }
     formula.append(`
         <div>
-            <span>1 - (0.99^{{ calc(generic(i.cores.val, 'cores') }})</span><span v-show="s.result.vis"> = {{ false) }} = +{{ calc(true) }}%</span>
+            <span>1 - (0.99^{{ calc(generic(i.cores.val, 'cores')) }})</span><span v-show="s.result.vis"> = {{ calc(false) }} = +{{ calc(true) }}%</span>
         </div>
     `);
     

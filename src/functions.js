@@ -2921,7 +2921,7 @@ export function flib(func,val,val2){
             if (eventActive('fool',2021)){
                 return flib('reverse',races[global.race.species].name);
             }
-            return races[global.race.species].name;
+            return global.race.species//races[global.race.species].name;
         }
         case 'curve':
         {   

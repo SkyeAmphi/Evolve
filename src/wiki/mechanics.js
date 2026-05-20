@@ -171,7 +171,7 @@ export function mechanicsPage(content){
             },
             data_color: {
                 2: ['danger'],
-                3: ['caution'],
+                3: ['alert'],
                 5: ['danger'],
             }
         });
@@ -3030,10 +3030,10 @@ function tpShipsCostsCalc(info){
                 <h3 class="has-text-info">${loc('resource_Money_name')}:</h3><span> {{ getBase(i['class'].val, 'class', 'Money') }}</span><span v-show="i['class'].val !== 'explorer'">^{{ getExponent(i.sensor.val, 'sensor', 'Money') }}</span><span v-show="r.Money.preVis"> = {{ calcPre('Money') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Aluminium_name')}:</h3><span> {{ calcPre(getBase(i['class'].val, 'class', 'Aluminium')) }}</span><span v-show="r.Aluminium.preVis"> = {{ calcPre('Aluminium') }}</span>
+                <h3 class="has-text-info">${loc('resource_Aluminium_name')}:</h3><span> {{ getBase(i['class'].val, 'class', 'Aluminium') }}</span><span v-show="r.Aluminium.preVis"> = {{ calcPre('Aluminium') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Adamantite_name')}:</h3><span> {{ calcPre(getBase(i['class'].val, 'class', 'Adamantite')) }}</span><span v-show="r.Adamantite.preVis"> = {{ calcPre('Adamantite') }}</span>
+                <h3 class="has-text-info">${loc('resource_Adamantite_name')}:</h3><span> {{ getBase(i['class'].val, 'class', 'Adamantite') }}</span><span v-show="r.Adamantite.preVis"> = {{ calcPre('Adamantite') }}</span>
             </div>
             <div>
                 <h3 class="has-text-info">${loc('resource_Steel_name')}:</h3><span> {{ getBase(i.armor.val, 'armor', 'Steel') }}^{{ generic(s.exp1.val, 'exp1') }}</span><span v-show="r.Steel.preVis"> = {{ calcPre('Steel') }}</span>

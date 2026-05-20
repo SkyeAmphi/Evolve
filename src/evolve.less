@@ -49,889 +49,256 @@ Misc ---------> Main template
 @bulma-link-hover: #363636;
 @bulma-label: #363636;
 @bulma-checkbox-hover: #363636;
+//all the variables
+:root{
+    --theme-html-background: #fff;
+    --theme-primary-border: #000;
+    --theme-secondary-border: #000;
+    --theme-primary-color: #000;
+    --theme-secondary-color: #000;
+
+    --theme-link: #000;
+    --theme-link-hover: #fff;
+    --theme-enabled: #fff;
+    --theme-disabled: #fff;
+
+    // .has-text-xxx
+    --theme-has-text-advanced: #000;
+    --theme-has-text-alert: #000;
+    --theme-has-text-caution: #000;
+    --theme-has-text-danger: #000;
+    --theme-has-text-fade: #000;
+    --theme-has-text-flair: #000;
+    --theme-has-text-label: #000;
+    --theme-has-text-special: #000;
+    --theme-has-text-info: #000;
+    --theme-has-text-success: #000;
+    --theme-has-text-warning: #000;
+
+    // .popper
+    
+    --theme-popper: #fff;
+    --theme-popper-has-text-label: #fff;
+    --theme-popper-has-text-success: #fff;
+    --theme-popper-has-text-warning: #fff;
+    --theme-modal-child-popper-background: #fff;
+    --theme-modal-child-popper-border: #fff;
+
+    /* AFP 2021
+    // .fool
+    --theme-fool-has-text-danger: #fff;
+    --theme-fool-has-text-success: #fff;
+    --theme-fool-popper-has-text-danger: #fff;
+    --theme-fool-span-on: #fff;
+    --theme-fool-span-off: #fff;
+    */
+
+    // .tabs
+    --theme-tabs-li-is-active-link-border: #fff;
+    --theme-tabs-li-is-active-link: #fff;
+
+    // .button
+    --theme-button-background: #fff;
+    --theme-button: #fff;
+    --theme-button-hover-background: #fff;
+    --theme-button-hover: #fff;
+    --theme-button-focus-border: #fff;
+
+    // .basic-button
+    --theme-basic-button-border-hover-background: #fff;
+    --theme-basic-button-border-hover: #fff;
+
+    // .label
+    --theme-label: #fff;
+
+    // .checkbox
+    --theme-checkbox-hover: #fff;
+
+    // .dropdown
+    --theme-dropdown-content-background: #fff;
+
+    // .b-tooltip
+    --theme-b-tooltip-accent: #fff;
+    --theme-b-tooltip-is-primary-background: #fff;
+    --theme-b-tooltip-is-primary-border: #fff;
+    --theme-b-tooltip-is-primary: #fff;
+
+    // UI Bars
+    --theme-bars-background: #fff;
+
+    // .meter
+    --theme-meter-low: #fff;
+    --theme-meter-neutral: #fff;
+    --theme-meter-high: #fff;
+
+    // .main
+    --theme-div-special-border: #fff;
+    --theme-div-special-gear-fill: #fff;
+    --theme-div-special-hover-border: #fff;
+    --theme-div-special-hover-gear-fill: #fff;
+    --theme-span-on-border: #fff;
+    --theme-span-on: #fff;
+    --theme-span-on-warn: #fff;
+    --theme-span-off-border: #fff;
+    --theme-span-off: #fff;
+    --theme-span-on-off-hover-border: #fff;
+    --theme-hl-button-border: #fff;
+    --theme-link-button-background: #fff;
+    --theme-special-on-off-border: #fff;
+    --theme-oldTech: #fff;
+    --theme-cnam-aTitle: #fff;
+
+    // .fort
+    --theme-fort-patrol-check-background: #fff;
+
+    // .market-item
+    --theme-market-item-background: #fff;
+    --theme-market-item-order-hover-background: #fff;
+    --theme-market-item-order-hover-border: #fff;
+
+    // .resource
+    --theme-resource-overlay-color: #fff;
+    --theme-resource-overlay-color-alt: #fff;
+
+    // .modalBox
+    --theme-modalBox-background: #fff;
+
+    // Stars
+    --theme-star-2-fill: #fff;
+    --theme-star-3-fill: #fff;
+    --theme-star-4-fill: #fff;
+    --theme-star-5-fill: #fff;
+
+    // -webkit-scrollbar
+    --theme-webkit-scrollbar-background: #fff;
+    --theme-webkit-scrollbar-thumb-background: #fff;
+}
 
 // Library containing all theme colors
 #lib {
-    .themes() {
-
-        // Dark theme
-        .dark() {
-            // Theme colors {
-            @html-background: #1f2424;
-            @primary-border: #ccc;
-            @secondary-border: @primary-border;
-            @primary-color: @white;
-            @secondary-color: #3a4344;
-
-            @link: #1abc9c;
-            @link-hover: #f2f2f2;
-            @enabled: #00af0f;
-            @disabled: #c20000;
-            // }
-
-            // .has-text-xxx
-            @has-text-advanced: #00ac95;
-            @has-text-alert: #af5d00;
-            @has-text-caution: #ffa500;
-            @has-text-danger: @bulma-danger;
-            @has-text-fade: #5e5e5e;
-            @has-text-flair: @has-text-special;
-            @has-text-label: #ffff9e;
-            @has-text-special: #91006c;
-            @has-text-info: @bulma-info;
-            @has-text-success: @bulma-success;
-            @has-text-warning: @bulma-warning;
-
-            // .popper
-            @popper: #363636;
-            @popper-has-text-label: #1100ff;
-            @popper-has-text-success: #1c7e21;
-            @popper-has-text-warning: #776425;
-            @modal-child-popper-background: #f5f5f5;
-            @modal-child-popper-border: @black;
-
-            /* AFP 2021
-            // .fool
-            @fool-has-text-danger: #23d160;
-            @fool-has-text-success: #ff3860;
-            @fool-popper-has-text-danger: @popper-has-text-success;
-            @fool-span-on: @disabled;
-            @fool-span-off: @enabled;
-            */
-
-            // .tabs
-            @tabs-li-is-active-link-border: @link;
-            @tabs-li-is-active-link: @link;
-
-            // .button
-            @button-background: #282f2f;
-            @button: @primary-color;
-            @button-hover-background: @secondary-color;
-            @button-hover: @link-hover;
-            @button-focus-border: #dbdbdb;
-
-            // .basic-button
-            @basic-button-border-hover-background: @secondary-color;
-            @basic-button-border-hover: #eee;
-
-            // .label
-            @label: #dbdee0;
-
-            // .checkbox
-            @checkbox-hover: @link;
-
-            // .dropdown
-            @dropdown-content-background: #1f2424;
-
-            // .b-tooltip
-            @b-tooltip-accent: @link-hover;
-            @b-tooltip-is-primary-background: @b-tooltip-accent;
-            @b-tooltip-is-primary-border: #f5f5f5;
-            @b-tooltip-is-primary: @black;
-
-            // UI Bars
-            @bars-background: @secondary-color;
-
-            // .meter
-            @meter-low: #cc0000;
-            @meter-neutral: #c0ce00;
-            @meter-high: #00af0f;
-
-            // .main
-            @div-special-border: #282f2f;
-            @div-special-gear-fill: #ad5f12;
-            @div-special-hover-border: @secondary-color;
-            @div-special-hover-gear-fill: #d4af37;
-            @span-on-border: #282f2f;
-            @span-on: @enabled;
-            @span-on-warn: #af5d00;
-            @span-off-border: #282f2f;
-            @span-off: @disabled;
-            @span-on-off-hover-border: @secondary-color;
-            @hl-button-border: @enabled;
-            @link-button-background: #181818;
-            @special-on-off-border: #181818;
-            @oldTech: @primary-color;
-            @cnam-aTitle: #975f5f;
-
-            // .fort
-            @fort-patrol-check-background: @black ;
-
-            // .market-item
-            @market-item-background: #0f1414;
-            @market-item-order-hover-background: @secondary-color;
-            @market-item-order-hover-border: #eee;
-
-            // .resource
-            @resource-overlay-color: darken(@html-background, 15%);
-            @resource-overlay-color-alt: darken(@market-item-background, 15%);
-
-            // .modalBox
-            @modalBox-background: #282f2f;
-
-            // Stars
-            @star-2-fill: @white;
-            @star-3-fill: #cd7f32;
-            @star-4-fill: #c0c0c0;
-            @star-5-fill: #d4af37;
-
-            // -webkit-scrollbar
-            @webkit-scrollbar-background: @html-background;
-            @webkit-scrollbar-thumb-background: #F5F5F5;
-        }
-
-        // Light theme
-        .light() {
-            // Theme colors {
-            @html-background: @white;
-            @primary-border: @black;
-            @secondary-border: #4e4e4e;
-            @primary-color: @black;
-            @secondary-color: #3a4344;
-
-            @link: @bulma-link;
-            @link-hover: @bulma-link-hover;
-            @enabled: #008f0c;
-            @disabled: #800000;
-            // }
-
-            // .has-text-xxx
-            @has-text-advanced: #0098a3;
-            @has-text-alert: #743e00;
-            @has-text-caution: #966100;
-            @has-text-danger: #470303;
-            @has-text-fade: #5e5e5e;
-            @has-text-flair: @has-text-special;
-            @has-text-info: @bulma-info;
-            @has-text-label: #1100ff;
-            @has-text-special: #91006c;
-            @has-text-success: #082412;
-            @has-text-warning: #7a6304;
-
-            // .popper
-            @popper: #363636;
-            @popper-has-text-label: @has-text-label;
-            @popper-has-text-success: #1c7e21;
-            @popper-has-text-warning: @has-text-warning;
-            @modal-child-popper-background: #f5f5f5;
-            @modal-child-popper-border: @black;
-
-            /* AFP 2021
-            // .fool
-            @fool-has-text-danger: @has-text-success;
-            @fool-has-text-success: @has-text-danger;
-            @fool-popper-has-text-danger: @fool-has-text-danger;
-            @fool-span-on: @disabled;
-            @fool-span-off: @enabled;
-            */
-
-            // .tabs
-            @tabs-li-is-active-link-border: @bulma-link-active;
-            @tabs-li-is-active-link: @bulma-link-active;
-
-            // .button
-            @button-background: @html-background;
-            @button: @primary-color;
-            @button-hover-background: #ccc;
-            @button-hover: @primary-color;
-            @button-focus-border: @primary-color;
-
-            // .basic-button
-            @basic-button-border-hover-background: #ccc;
-            @basic-button-border-hover: #333;
-
-            // .label
-            @label: @bulma-label;
-
-            // .checkbox
-            @checkbox-hover: @bulma-checkbox-hover;
-
-            // .dropdown
-            @dropdown-content-background: @html-background;
-
-            // .b-tooltip
-            @b-tooltip-accent: #f2f2f2;
-            @b-tooltip-is-primary-background: @b-tooltip-accent;
-            @b-tooltip-is-primary-border: #f5f5f5;
-            @b-tooltip-is-primary: @black;
-
-            // UI Bars
-            @bars-background: #c7c7c7;
-
-            // .meter
-            @meter-low: #cc0000;
-            @meter-neutral: #c0ce00;
-            @meter-high: #00af0f;
-
-            // .main
-            @div-special-border: #3a4344;
-            @div-special-gear-fill: #3a4344;
-            @div-special-hover-border: @primary-border;
-            @div-special-hover-gear-fill: #4a5354;
-            @span-on-border: @primary-border;
-            @span-on: @enabled;
-            @span-on-warn: #743e00;
-            @span-off-border: @primary-border;
-            @span-off: @disabled;
-            @span-on-off-hover-border: @primary-border;
-            @hl-button-border: @disabled;
-            @link-button-background: #ddd;
-            @special-on-off-border: @primary-border;
-            @oldTech: @primary-color;
-            @cnam-aTitle: #900;
-
-            // .fort
-            @fort-patrol-check-background: @white ;
-
-            // .market-item
-            @market-item-background: #ddd;
-            @market-item-order-hover-background: #ccc;
-            @market-item-order-hover-border: #333;
-
-            // .resource
-            @resource-overlay-color: darken(@html-background, 25%);
-            @resource-overlay-color-alt: darken(@market-item-background, 25%);
-
-            // .modalBox
-            @modalBox-background: @white;
-
-            // Stars
-            @star-2-fill: @black;
-            @star-3-fill: #cd7f32;
-            @star-4-fill: #c0c0c0;
-            @star-5-fill: #d4af37;
-
-            // -webkit-scrollbar
-            @webkit-scrollbar-background: #F5F5F5;
-            @webkit-scrollbar-thumb-background: @black;
-        }
-
-        // Night theme
-        .night() {
-            // Theme colors {
-            @html-background: @black;
-            // }
-
-            // .has-text-xxx
-            @has-text-flair: #d39753;
-            @has-text-special: #e500b4;
-
-            // .popper
-            @popper: @white ;
-            @popper-has-text-label: #ffff9e;
-            @popper-has-text-success: #23d160;
-            @popper-has-text-warning: #ffdd57;
-            @modal-child-popper-background: #0f0f0f;
-            @modal-child-popper-border: #999;
-
-            // .b-tooltip
-            @b-tooltip-accent: #999;
-            @b-tooltip-is-primary-background: #0f0f0f;
-            @b-tooltip-is-primary-border: #999;
-            @b-tooltip-is-primary: @white;
-
-            // .market-item
-            @market-item-background: #1b1b1b;
-
-            // .resource
-            @resource-overlay-color: lighten(@html-background, 10%);
-            @resource-overlay-color-alt: darken(@market-item-background, 15%);
-
-            // -webkit-scrollbar
-            @webkit-scrollbar-thumb-background: #727272;
-        }
-
-        // Red Green CB theme
-        .redgreen() {
-            // .has-text-xxx
-            @has-text-danger: #9900cc;
-            @has-text-flair: @has-text-success;
-            @has-text-special: #ffff9e;
-            @has-text-success: #00ff00;
-            @has-text-warning: #ffcc00;
-
-            // .popper
-            @tabs-li-is-active-link: #167df0;
-
-            /* AFP 2021
-            // .fool
-            @fool-has-text-danger: @has-text-success;
-            @fool-has-text-success: @has-text-danger;
-            @fool-span-on: @has-text-danger;
-            @fool-span-off: @has-text-success;
-            */
-
-            // .meter
-            @meter-low: #167df0;
-            @meter-neutral: #00af0f;
-            @meter-high: @white;
-
-            // .main
-            @span-on: @has-text-success;
-            @span-off: @has-text-danger;
-        }
-
-        // Dark Night theme
-        .darkNight() {
-            // Theme colors {
-            @primary-color: #b8b8b8;
-            // }
-
-            // .popper
-            @popper: @primary-color ;
-
-            // .button
-            @button: #ccc;
-
-            // .b-tooltip
-            @b-tooltip-is-primary: @primary-color;
-        }
-
-        // GruvBox Light
-        .gruvboxLight() {
-            // Theme colors {
-            @html-background: #fbf1c7;
-            @primary-border: #3c3836;
-            @secondary-border: @primary-border;
-            @primary-color: #3c3836;
-            @secondary-color: #d5c4a1;
-
-            @link: #427b58;
-            @link-hover: #689d6a;
-            @enabled: #79740e;
-            @disabled: #9d0006;
-            // }
-
-            // .has-text-xxx
-            @has-text-advanced: #458588;
-            @has-text-alert: #af5d00;
-            @has-text-caution: #af3a03;
-            @has-text-danger: @disabled ;
-            @has-text-fade: #898B87;
-            @has-text-flair: @has-text-special;
-            @has-text-info: #076678;
-            @has-text-label: #076678;
-            @has-text-special: #8f3f71;
-            @has-text-success: @enabled ;
-            @has-text-warning: #b57614 ;
-
-            // .popper
-            @popper: @primary-color ;
-            @popper-has-text-label: @has-text-label ;
-            @popper-has-text-success: @has-text-success ;
-            @popper-has-text-warning: @has-text-warning ;
-            @modal-child-popper-background: #fbf1c7;
-            @modal-child-popper-border: @secondary-border;
-
-            /* AFP 2021
-            // .fool
-            @fool-has-text-danger: @has-text-success;
-            @fool-has-text-success: @has-text-danger;
-            @fool-popper-has-text-danger: @popper-has-text-success;
-            @fool-span-on: @disabled;
-            @fool-span-off: @enabled;
-            */
-
-            // .tabs
-            @tabs-li-is-active-link-border: @link;
-            @tabs-li-is-active-link: @link;
-
-            // .button
-            @button-background: #d5c4a1;
-            @button: @primary-color;
-            @button-hover-background: @secondary-color;
-            @button-hover: @link-hover;
-            @button-focus-border: @secondary-border;
-
-            // .basic-button
-            @basic-button-border-hover-background: #f2e5bc;
-            @basic-button-border-hover: @link;
-
-            // .label
-            @label: @primary-color;
-
-            // .checkbox
-            @checkbox-hover: @link;
-
-            // .dropdown
-            @dropdown-content-background: @button-background;
-
-            // .b-tooltip
-            @b-tooltip-accent: #fbf1c7;
-            @b-tooltip-is-primary-background: @b-tooltip-accent;
-            @b-tooltip-is-primary-border: @primary-border;
-            @b-tooltip-is-primary: @black;
-
-            // UI Bars
-            @bars-background: @secondary-color;
-
-            // .meter
-            @meter-low: @disabled;
-            @meter-neutral: @has-text-caution;
-            @meter-high: @has-text-info;
-
-            // .main
-            @div-special-border: @primary-border;
-            @div-special-gear-fill: @link;
-            @div-special-hover-border: @secondary-color;
-            @div-special-hover-gear-fill: #F09D51;
-            @span-on-border: @primary-border;
-            @span-on: @enabled;
-            @span-on-warn: #af5d00;
-            @span-off-border: @primary-border;
-            @span-off: @disabled;
-            @span-on-off-hover-border: @secondary-color;
-            @hl-button-border: @enabled;
-            @link-button-background: #a89984;
-            @special-on-off-border: @primary-border;
-            @oldTech: @primary-color;
-            @cnam-aTitle: @disabled;
-
-            // .fort
-            @fort-patrol-check-background: @black ;
-
-            // .market-item
-            @market-item-background: #f9f5d7;
-            @market-item-order-hover-background: @secondary-color;
-            @market-item-order-hover-border: @link-hover;
-
-            // .resource
-            @resource-overlay-color: darken(@html-background, 15%);
-            @resource-overlay-color-alt: darken(@market-item-background, 15%);
-
-            // .modalBox
-            @modalBox-background: @html-background;
-
-            // Stars
-            @star-2-fill: @black;
-            @star-3-fill: #cd7f32;
-            @star-4-fill: #c0c0c0;
-            @star-5-fill: #d4af37;
-
-            // -webkit-scrollbar
-            @webkit-scrollbar-background: @html-background;
-            @webkit-scrollbar-thumb-background: @primary-border;
-        }
-
-        // GruvBox Dark
-        .gruvboxDark() {
-            // Theme colors {
-            @html-background: #282828;
-            @primary-border: #3c3836;
-            @secondary-border: #665c54;
-            @primary-color: #ebdbb2;
-            @secondary-color: #504945;
-
-            @link: #8ec07c;
-            @link-hover: #689d6a;
-            @enabled: #b8bb26;
-            @disabled: #fb4934;
-            // }
-
-            // .has-text-xxx
-            @has-text-advanced: #458588;
-            @has-text-alert: #af5d00;
-            @has-text-caution: #fe8019;
-            @has-text-danger: @disabled ;
-            @has-text-fade: #898B87;
-            @has-text-flair: @has-text-special;
-            @has-text-info: #83a598;
-            @has-text-label: #458588;
-            @has-text-special: #d3869b;
-            @has-text-success: @enabled ;
-            @has-text-warning: #fabd2f ;
-
-            // .popper
-            @popper: @primary-color ;
-            @popper-has-text-label: @has-text-label ;
-            @popper-has-text-success: @has-text-success ;
-            @popper-has-text-warning: @has-text-warning ;
-            @modal-child-popper-background: #282828;
-            @modal-child-popper-border: @secondary-border;
-
-            /* AFP 2021
-            // .fool
-            @fool-has-text-danger: @has-text-success;
-            @fool-has-text-success: @has-text-danger;
-            @fool-popper-has-text-danger: @popper-has-text-success;
-            @fool-span-on: @disabled;
-            @fool-span-off: @enabled;
-            */
-
-            // .tabs
-            @tabs-li-is-active-link-border: @link;
-            @tabs-li-is-active-link: @link;
-
-            // .button
-            @button-background: #3c3836;
-            @button: @primary-color;
-            @button-hover-background: @secondary-color;
-            @button-hover: @link-hover;
-            @button-focus-border: @secondary-border;
-
-            // .basic-button
-            @basic-button-border-hover-background: #1d2021;
-            @basic-button-border-hover: @link;
-
-            // .label
-            @label: @primary-color;
-
-            // .checkbox
-            @checkbox-hover: @link;
-
-            // .dropdown
-            @dropdown-content-background: @button-background;
-
-            // .b-tooltip
-            @b-tooltip-accent: #282828;
-            @b-tooltip-is-primary-background: @b-tooltip-accent;
-            @b-tooltip-is-primary-border: @primary-border;
-            @b-tooltip-is-primary: @primary-color;
-
-            // UI Bars
-            @bars-background: @secondary-color;
-
-            // .meter
-            @meter-low: @disabled;
-            @meter-neutral: @has-text-caution;
-            @meter-high: @has-text-info;
-
-            // .main
-            @div-special-border: @primary-border;
-            @div-special-gear-fill: #f09d51;
-            @div-special-hover-border: @secondary-color;
-            @div-special-hover-gear-fill: @link;
-            @span-on-border: @primary-border;
-            @span-on: @enabled;
-            @span-on-warn: #af5d00;
-            @span-off-border: @primary-border;
-            @span-off: @disabled;
-            @span-on-off-hover-border: @secondary-color;
-            @hl-button-border: @enabled;
-            @link-button-background: #1d2021;
-            @special-on-off-border: @primary-border;
-            @oldTech: @primary-color;
-            @cnam-aTitle: @disabled;
-
-            // .fort
-            @fort-patrol-check-background: @black ;
-
-            // .market-item
-            @market-item-background: #1d2021;
-            @market-item-order-hover-background: @secondary-color;
-            @market-item-order-hover-border: @link-hover;
-
-            // .resource
-            @resource-overlay-color: darken(@html-background, 15%);
-            @resource-overlay-color-alt: darken(@market-item-background, 15%);
-
-            //@html-background: #282828;
-
-            // .modalBox
-            @modalBox-background: @html-background;
-
-            // Stars
-            @star-2-fill: @white;
-            @star-3-fill: #cd7f32;
-            @star-4-fill: #c0c0c0;
-            @star-5-fill: #d4af37;
-
-            // -webkit-scrollbar
-            @webkit-scrollbar-background: @html-background;
-            @webkit-scrollbar-thumb-background: @primary-border;
-        }
-
-        // GruvBox Dark Red Green CB theme
-        .gruvboxDarkRG() {
-            // .has-text-xxx
-            @has-text-danger: #c409bb;
-            @has-text-flair: @has-text-success;
-            @has-text-special: #ffff9e;
-            @has-text-success: #00ff00;
-            @has-text-warning: #ffcc00;
-            @has-text-caution: #9ab8ff;
-            @has-text-info: #83a598;
-            @disabled: #ffe940;
-
-            // .popper
-            @tabs-li-is-active-link: #82bdff;
-
-            .switch input[type=checkbox]:checked+.check {
-                background: #a28cdf;
-            }
-
-            /* AFP 2021
-            // .fool
-            @fool-has-text-danger: @has-text-success;
-            @fool-has-text-success: @has-text-danger;
-            @fool-span-on: @has-text-danger;
-            @fool-span-off: @has-text-success;
-            */
-
-            // .meter
-            @meter-low: @disabled;
-            @meter-neutral: @has-text-caution;
-            @meter-high: @has-text-info;
-
-            // .main
-            @span-on: @has-text-success;
-            @span-off: @has-text-danger;
-
-            @cnam-aTitle: @disabled;
-        }
-
-        // Orange Soda theme
-        .orangeSoda() {
-            // Theme colors {
-            @html-background: #131516;
-            @primary-border: #313638;
-            @secondary-border: @primary-border;
-            @primary-color: #EBDBB2;
-            @secondary-color: #313638;
-
-            @link: #F06543;
-            @link-hover: #D09376;
-            @enabled: #35A7FF;
-            @disabled: #C21E83;
-            // }
-
-            // .has-text-xxx
-            @has-text-advanced: #00ac95;
-            @has-text-alert: #af5d00;
-            @has-text-caution: #F09D51;
-            @has-text-danger: @disabled ;
-            @has-text-fade: #898B87;
-            @has-text-flair: @has-text-special;
-            @has-text-info: @bulma-info;
-            @has-text-label: #35A7FF;
-            @has-text-special: #91006c;
-            @has-text-success: @enabled ;
-            @has-text-warning: @link ;
-
-            // .popper
-            @popper: @primary-color ;
-            @popper-has-text-label: @has-text-label ;
-            @popper-has-text-success: @has-text-success ;
-            @popper-has-text-warning: @has-text-warning ;
-            @modal-child-popper-background: #292929;
-            @modal-child-popper-border: @secondary-border;
-
-            /* AFP 2021
-            // .fool
-            @fool-has-text-danger: @has-text-success;
-            @fool-has-text-success: @has-text-danger;
-            @fool-popper-has-text-danger: @popper-has-text-success;
-            @fool-span-on: @disabled;
-            @fool-span-off: @enabled;
-            */
-
-            // .tabs
-            @tabs-li-is-active-link-border: @link;
-            @tabs-li-is-active-link: @link;
-
-            // .button
-            @button-background: #1C2021;
-            @button: @primary-color;
-            @button-hover-background: @secondary-color;
-            @button-hover: @link-hover;
-            @button-focus-border: @secondary-border;
-
-            // .basic-button
-            @basic-button-border-hover-background: #292929;
-            @basic-button-border-hover: @link;
-
-            // .label
-            @label: @primary-color;
-
-            // .checkbox
-            @checkbox-hover: @link;
-
-            // .dropdown
-            @dropdown-content-background: @button-background;
-
-            // .b-tooltip
-            @b-tooltip-accent: @link-hover;
-            @b-tooltip-is-primary-background: @b-tooltip-accent;
-            @b-tooltip-is-primary-border: @primary-border;
-            @b-tooltip-is-primary: @black;
-
-            // UI Bars
-            @bars-background: @secondary-color;
-
-            // .meter
-            @meter-low: @disabled;
-            @meter-neutral: #38618C;
-            @meter-high: #35A7FF;
-
-            // .main
-            @div-special-border: @primary-border;
-            @div-special-gear-fill: @link;
-            @div-special-hover-border: @secondary-color;
-            @div-special-hover-gear-fill: #F09D51;
-            @span-on-border: @primary-border;
-            @span-on: @enabled;
-            @span-on-warn: #af5d00;
-            @span-off-border: @primary-border;
-            @span-off: @disabled;
-            @span-on-off-hover-border: @secondary-color;
-            @hl-button-border: @enabled;
-            @link-button-background: #181818;
-            @special-on-off-border: @primary-border;
-            @oldTech: @primary-color;
-            @cnam-aTitle: @disabled;
-
-            // .fort
-            @fort-patrol-check-background: @black ;
-
-            // .market-item
-            @market-item-background: #292929;
-            @market-item-order-hover-background: @secondary-color;
-            @market-item-order-hover-border: @link-hover;
-
-            // .resource
-            @resource-overlay-color: darken(@html-background, 13%);
-            @resource-overlay-color-alt: darken(@market-item-background, 15%);
-
-            // .modalBox
-            @modalBox-background: @html-background;
-
-            // Stars
-            @star-2-fill: @white;
-            @star-3-fill: #cd7f32;
-            @star-4-fill: #c0c0c0;
-            @star-5-fill: #d4af37;
-
-            // -webkit-scrollbar
-            @webkit-scrollbar-background: @html-background;
-            @webkit-scrollbar-thumb-background: @primary-border;
-        }
-
-        // Dracula
-        .dracula() {
-            // Theme colors {
-            @html-background: #282a36;
-            @primary-border: #44475a;
-            @secondary-border: #44475a;
-            @primary-color: #f8f8f2;
-            @secondary-color: #6272a4;
-            @dark-background: #1a1c24;
-
-            @link: #bd93f9;
-            @link-hover: #9573c5;
-            @enabled: #50fa7b;
-            @disabled: #ff5555;
-            // }
-
-            // .has-text-xxx
-            @has-text-advanced: #8be9fd;
-            @has-text-alert: #e0a361;
-            @has-text-caution: #ffa26c;
-            @has-text-danger: @disabled ;
-            @has-text-fade: #6272a4;
-            @has-text-flair: @has-text-special;
-            @has-text-info: #bd93f9;
-            @has-text-label: #7dcbdd;
-            @has-text-special: #ff79c6;
-            @has-text-success: @enabled ;
-            @has-text-warning: #f1fa8c ;
-
-            // .popper
-            @popper: @primary-color ;
-            @popper-has-text-label: @has-text-label ;
-            @popper-has-text-success: @has-text-success ;
-            @popper-has-text-warning: @has-text-warning ;
-            @modal-child-popper-background: @dark-background;
-            @modal-child-popper-border: @secondary-border;
-
-            /* AFP 2021
-            // .fool
-            @fool-has-text-danger: @has-text-success;
-            @fool-has-text-success: @has-text-danger;
-            @fool-popper-has-text-danger: @popper-has-text-success;
-            @fool-span-on: @disabled;
-            @fool-span-off: @enabled;
-            */
-
-            // .tabs
-            @tabs-li-is-active-link-border: @link;
-            @tabs-li-is-active-link: @link;
-
-            // .button
-            @button-background: #3f4253;
-            @button: @primary-color;
-            @button-hover-background: @secondary-border;
-            @button-hover: @link-hover;
-            @button-focus-border: @secondary-border;
-
-            // .basic-button
-            @basic-button-border-hover-background: @dark-background;
-            @basic-button-border-hover: @link;
-
-            // .label
-            @label: @primary-color;
-
-            // .checkbox
-            @checkbox-hover: @link;
-
-            // .dropdown
-            @dropdown-content-background: @button-background;
-
-            // .b-tooltip
-            @b-tooltip-accent: #282828;
-            @b-tooltip-is-primary-background: @b-tooltip-accent;
-            @b-tooltip-is-primary-border: @primary-border;
-            @b-tooltip-is-primary: @primary-color;
-
-            // UI Bars
-            @bars-background: @secondary-color;
-
-            // .meter
-            @meter-low: @disabled;
-            @meter-neutral: @has-text-caution;
-            @meter-high: @has-text-info;
-
-            // .main
-            @div-special-border: @primary-border;
-            @div-special-gear-fill: #f09d51;
-            @div-special-hover-border: @secondary-color;
-            @div-special-hover-gear-fill: @link;
-            @span-on-border: @primary-border;
-            @span-on: @enabled;
-            @span-on-warn: #af5d00;
-            @span-off-border: @primary-border;
-            @span-off: @disabled;
-            @span-on-off-hover-border: @secondary-color;
-            @hl-button-border: @enabled;
-            @link-button-background: @dark-background;
-            @special-on-off-border: @primary-border;
-            @oldTech: @primary-color;
-            @cnam-aTitle: @disabled;
-
-            // .fort
-            @fort-patrol-check-background: @black ;
-
-            // .market-item
-            @market-item-background: #1d2021;
-            @market-item-order-hover-background: @secondary-color;
-            @market-item-order-hover-border: @link-hover;
-
-            // .resource
-            @resource-overlay-color: darken(@html-background, 15%);
-            @resource-overlay-color-alt: darken(@market-item-background, 15%);
-
-            // .modalBox
-            @modalBox-background: @html-background;
-
-            // Stars
-            @star-2-fill: @white;
-            @star-3-fill: #cd7f32;
-            @star-4-fill: #c0c0c0;
-            @star-5-fill: #d4af37;
-
-            // -webkit-scrollbar
-            @webkit-scrollbar-background: @html-background;
-            @webkit-scrollbar-thumb-background: @primary-border;
-        }
+    //the one theme
+    .theme(){
+        @html-background: var(--theme-html-background);
+        @primary-border: var(--theme-primary-border);
+        @secondary-border: var(--theme-secondary-border);
+        @primary-color: var(--theme-primary-color);
+        @secondary-color: var(--theme-secondary-color);
+
+        @link: var(--theme-link);
+        @link-hover: var(--theme-link-hover);
+        @enabled: var(--theme-enabled);
+        @disabled: var(--theme-disabled);
+
+        // .has-text-xxx
+        @has-text-advanced: var(--theme-has-text-advanced);
+        @has-text-alert: var(--theme-has-text-alert);
+        @has-text-caution: var(--theme-has-text-caution);
+        @has-text-danger: var(--theme-has-text-danger);
+        @has-text-fade: var(--theme-has-text-fade);
+        @has-text-flair: var(--theme-has-text-flair);
+        @has-text-label: var(--theme-has-text-label);
+        @has-text-special: var(--theme-has-text-special);
+        @has-text-info: var(--theme-has-text-info);
+        @has-text-success: var(--theme-has-text-success);
+        @has-text-warning: var(--theme-has-text-warning);
+
+        // .popper
+        
+        @popper: var(--theme-popper);
+        @popper-has-text-label: var(--theme-popper-has-text-label);
+        @popper-has-text-success: var(--theme-popper-has-text-success);
+        @popper-has-text-warning: var(--theme-popper-has-text-warning);
+        @modal-child-popper-background: var(--theme-modal-child-popper-background);
+        @modal-child-popper-border: var(--theme-modal-child-popper-border);
+
+        /* AFP 2021
+        // .fool
+        @fool-has-text-danger: var(--theme-fool-has-text-danger);
+        @fool-has-text-success: var(--theme-fool-has-text-success);
+        @fool-popper-has-text-danger: var(--theme-fool-popper-has-text-danger);
+        @fool-span-on: var(--theme-fool-span-on);
+        @fool-span-off: var(--theme-fool-span-off);
+        */
+
+        // .tabs
+        @tabs-li-is-active-link-border: var(--theme-tabs-li-is-active-link-border);
+        @tabs-li-is-active-link: var(--theme-tabs-li-is-active-link);
+
+        // .button
+        @button-background: var(--theme-button-background);
+        @button: var(--theme-button);
+        @button-hover-background: var(--theme-button-hover-background);
+        @button-hover: var(--theme-button-hover);
+        @button-focus-border: var(--theme-button-focus-border);
+
+        // .basic-button
+        @basic-button-border-hover-background: var(--theme-basic-button-border-hover-background);
+        @basic-button-border-hover: var(--theme-basic-button-border-hover);
+
+        // .label
+        @label: var(--theme-label);
+
+        // .checkbox
+        @checkbox-hover: var(--theme-checkbox-hover);
+
+        // .dropdown
+        @dropdown-content-background: var(--theme-dropdown-content-background);
+
+        // .b-tooltip
+        @b-tooltip-accent: var(--theme-b-tooltip-accent);
+        @b-tooltip-is-primary-background: var(--theme-b-tooltip-is-primary-background);
+        @b-tooltip-is-primary-border: var(--theme-b-tooltip-is-primary-border);
+        @b-tooltip-is-primary: var(--theme-b-tooltip-is-primary);
+
+        // UI Bars
+        @bars-background: var(--theme-bars-background);
+
+        // .meter
+        @meter-low: var(--theme-meter-low);
+        @meter-neutral: var(--theme-meter-neutral);
+        @meter-high: var(--theme-meter-high);
+
+        // .main
+        @div-special-border: var(--theme-div-special-border);
+        @div-special-gear-fill: var(--theme-div-special-gear-fill);
+        @div-special-hover-border: var(--theme-div-special-hover-border);
+        @div-special-hover-gear-fill: var(--theme-div-special-hover-gear-fill);
+        @span-on-border: var(--theme-span-on-border);
+        @span-on: var(--theme-span-on);
+        @span-on-warn: var(--theme-span-on-warn);
+        @span-off-border: var(--theme-span-off-border);
+        @span-off: var(--theme-span-off);
+        @span-on-off-hover-border: var(--theme-span-on-off-hover-border);
+        @hl-button-border: var(--theme-hl-button-border);
+        @link-button-background: var(--theme-link-button-background);
+        @special-on-off-border: var(--theme-special-on-off-border);
+        @oldTech: var(--theme-oldTech);
+        @cnam-aTitle: var(--theme-cnam-aTitle);
+
+        // .fort
+        @fort-patrol-check-background: var(--theme-fort-patrol-check-background);
+
+        // .market-item
+        @market-item-background: var(--theme-market-item-background);
+        @market-item-order-hover-background: var(--theme-market-item-order-hover-background);
+        @market-item-order-hover-border: var(--theme-market-item-order-hover-border);
+
+        // .resource
+        @resource-overlay-color: var(--theme-resource-overlay-color);
+        @resource-overlay-color-alt: var(--theme-resource-overlay-color-alt);
+
+        // .modalBox
+        @modalBox-background: var(--theme-modalBox-background);
+
+        // Stars
+        @star-2-fill: var(--theme-star-2-fill);
+        @star-3-fill: var(--theme-star-3-fill);
+        @star-4-fill: var(--theme-star-4-fill);
+        @star-5-fill: var(--theme-star-5-fill);
+
+        // -webkit-scrollbar
+        @webkit-scrollbar-background: var(--theme-webkit-scrollbar-background);
+        @webkit-scrollbar-thumb-background: var(--theme-webkit-scrollbar-thumb-background);
     }
 
     // Main template
@@ -1866,499 +1233,325 @@ Misc ---------> Main template
     }
 }
 
-// Dark theme
-html.dark {
-    #lib.themes.dark(); // Highest priority
-    #lib.mainTemplate();
-
-    // Theme specific
-    .modal .action {
-        #lib.mainTemplate.main.content.action();
-    }
-
-    .pop-desc {
-        .has-text-caution {
-            color: #a30500;
-        }
-    }
-
-    .popper {
-        .grad-from-left {
-            background-image: linear-gradient(90deg, @has-text-danger 45%, @popper 55%);
-        }
-        .grad-from-left-warn {
-            background-image: linear-gradient(90deg, @has-text-alert 45%, @has-text-danger 55%);
-        }
-        .grad-from-right {
-            background-image: linear-gradient(90deg, @popper 45%, @has-text-danger 55%);
-        }
-    }
-
-    .modal .buttonList .is-selected {
-        border-color: @enabled;
-    }
-}
-
-// Light theme
-html.light {
-    #lib.themes.light(); // Highest priority
-    #lib.mainTemplate();
-
-    // Theme specific
-    .modal .action {
-        #lib.mainTemplate.main.content.action();
-    }
-
-    body {
-        font-weight: 500;
-    }
-
-    // .button
-    .button,
-    .button:hover {
-        border: solid .0625rem @black;
-    }
-
-    // UI Bars
-    .topBar {
-        .calendar {
-            .wi-thermometer-exterior {
-                color: #00d6b2;
-            }
-
-            .wi-day-sunny,
-            .wi-day-windy {
-                color: #fffb00;
-            }
-
-            .wi-cloud,
-            .wi-cloudy-gusts {
-                color: #dfe2d3;
-            }
-
-            .wi-rain,
-            .wi-storm-showers {
-                color: #00b0e6;
-            }
-
-            .wi-snow,
-            .wi-snow-wind {
-                color: #fff;
-            }
-        }
-    }
-
-    // .main
-    .main {
-        .content {
-            .action {
-                a.button {
-                    span.count {
-                        border-bottom: .0625rem solid #000;
-                        border-left: .0625rem solid #000;
-                    }
-                }
-            }
-
-            .action.cna:not(.cnam) {
-                span.aTitle {
-                    color: #282828;
-                }
-            }
-        }
-    }
-
-    // .industry
-    .industry {
-        background: none;
-
-        .smelting {
-            border-top: 0;
-        }
-
-        .header {
-            border-bottom: #4e4e4e solid .0625rem;
-        }
-    }
-
-    .progress::-webkit-progress-value,
-    .progress::-moz-progress-bar {
-        background-color: #898989;
-    }
-
-    .popper {
-        .grad-from-left {
-            background-image: linear-gradient(90deg, @has-text-danger 45%, @popper 55%);
-        }
-        .grad-from-left-warn {
-            background-image: linear-gradient(90deg, @has-text-alert 45%, @has-text-danger 55%);
-        }
-        .grad-from-right {
-            background-image: linear-gradient(90deg, @popper 45%, @has-text-danger 55%);
-        }
-    }
-
-    .modal .buttonList .is-selected {
-        border-color: @enabled;
-    }
-    .modal .buttonList .is-focused {
-        color: @primary-color;
-    }
-}
-
-// Night theme
-html.night {
-    #lib.themes.night(); // Highest priority
-    #lib.themes.dark(); // Lowest priority
-    #lib.mainTemplate();
-
-    // Theme specific
-    .modal .action {
-        #lib.mainTemplate.main.content.action();
-    }
-
-    .popper {
-        .grad-from-left {
-            background-image: linear-gradient(90deg, @has-text-danger 45%, @popper 55%);
-        }
-        .grad-from-left-warn {
-            background-image: linear-gradient(90deg, @has-text-alert 45%, @has-text-danger 55%);
-        }
-        .grad-from-right {
-            background-image: linear-gradient(90deg, @popper 45%, @has-text-danger 55%);
-        }
-    }
-
-    .modal .buttonList .is-selected {
-        border-color: @enabled;
-    }
-}
-
-// Red Green CB theme
-html.redgreen {
-    #lib.themes.redgreen(); // Highest priority
-    #lib.themes.night();
-    #lib.themes.dark(); // Lowest priority
-    #lib.mainTemplate();
-
-    // Theme specific
-    .modal .action {
-        #lib.mainTemplate.main.content.action();
-    }
-
-    .main>div.popper,
-    body .modal>div.popper {
-        .has-text-danger {
-            color: #aa00aa;
-        }
-    }
-
-    #powerStatus .has-text-warning {
-        color: #9900cc;
-    }
-
-    // Trade
-    .trade {
-        .has-text-danger {
-            color: #167df0;
-            color: #aa00ff;
-        }
-
-        .has-text-warning {
-            color: #fff;
-        }
-    }
-
-    // UI Bars
-    .topBar {
-        .calendar {
-            .wi-thermometer-exterior {
-                color: #00e6d2;
-            }
-
-            .wi-thermometer {
-                color: #fffb00;
-            }
-        }
-    }
-
-    .mad {
-        background: repeating-linear-gradient(45deg,
-                #8a8b49,
-                #8a8b49 10px,
-                #000000 10px,
-                #000000 20px);
-    }
-
-    .armed .mad {
-        background: repeating-linear-gradient(45deg,
-                #fbfd84,
-                #fbfd84 10px,
-                #000000 10px,
-                #000000 20px);
-    }
-
-    .popper {
-        .grad-from-left {
-            background-image: linear-gradient(90deg, @has-text-danger 45%, @popper 55%);
-        }
-        .grad-from-left-warn {
-            background-image: linear-gradient(90deg, @has-text-alert 45%, @has-text-danger 55%);
-        }
-        .grad-from-right {
-            background-image: linear-gradient(90deg, @popper 45%, @has-text-danger 55%);
-        }
-    }
-
-    .modal .buttonList .is-selected {
-        border-color: @enabled;
-    }
-}
-
-// Dark Night theme
-html.darkNight {
-    #lib.themes.darkNight(); // Highest priority
-    #lib.themes.night();
-    #lib.themes.dark(); // Lowest priority
-    #lib.mainTemplate();
-
-    // Theme specific
-    .has-text-warning {
-        color: #d6b220;
-    }
-
-    input,
-    select,
-    textarea {
-        background: @primary-color;
-    }
-
-    .popper {
-        .grad-from-left {
-            background-image: linear-gradient(90deg, @has-text-danger 45%, @popper 55%);
-        }
-        .grad-from-left-warn {
-            background-image: linear-gradient(90deg, @has-text-alert 45%, @has-text-danger 55%);
-        }
-        .grad-from-right {
-            background-image: linear-gradient(90deg, @popper 45%, @has-text-danger 55%);
-        }
-    }
-
-    .modal .buttonList .is-selected {
-        border-color: @enabled;
-    }
-}
-
-// GruvBox Light theme
-html.gruvboxLight {
-    #lib.themes.gruvboxLight(); // Highest priority
-    #lib.themes.light(); // Lowest priority
-    #lib.mainTemplate();
-
-    input,
-    select,
-    textarea,
-    .notification {
-        background: @secondary-color;
-    }
-
-    .popper {
-        .grad-from-left {
-            background-image: linear-gradient(90deg, @has-text-danger 45%, @popper 55%);
-        }
-        .grad-from-left-warn {
-            background-image: linear-gradient(90deg, @has-text-alert 45%, @has-text-danger 55%);
-        }
-        .grad-from-right {
-            background-image: linear-gradient(90deg, @popper 45%, @has-text-danger 55%);
-        }
-    }
-
-    .modal .buttonList .is-selected {
-        border-color: @enabled;
-    }
-}
-
-// GruvBox Dark theme
-html.gruvboxDark {
-    #lib.themes.gruvboxDark(); // Highest priority
-    #lib.themes.dark(); // Lowest priority
-    #lib.mainTemplate();
-
-    input,
-    select,
-    textarea,
-    .notification {
-        background: @primary-color;
-    }
-
-    .add,
-    .sub {
-        border: @secondary-border solid .0625rem;
-    }
-
-    .current {
-        border-top: @secondary-border solid .0625rem;
-        border-bottom: @secondary-border solid .0625rem;
-    }
-    .current.infoOnly {
-        border: @secondary-border solid .0625rem;
-    }
-
-    .popper {
-        .grad-from-left {
-            background-image: linear-gradient(90deg, @has-text-danger 45%, @popper 55%);
-        }
-        .grad-from-left-warn {
-            background-image: linear-gradient(90deg, @has-text-alert 45%, @has-text-danger 55%);
-        }
-        .grad-from-right {
-            background-image: linear-gradient(90deg, @popper 45%, @has-text-danger 55%);
-        }
-    }
-
-    .modal .buttonList .is-selected {
-        border-color: @enabled;
-    }
-}
-
-// GruvBox Dark Red Green theme
-html.gruvboxDarkRG {
-    #lib.themes.gruvboxDarkRG(); // Highest priority
-    #lib.themes.gruvboxDark(); // Higher priority
-    #lib.themes.dark(); // Lowest priority
-    #lib.mainTemplate();
-
-    input,
-    select,
-    textarea,
-    .notification {
-        background: @primary-color;
-    }
-
-    .add,
-    .sub {
-        border: @secondary-border solid .0625rem;
-    }
-
-    .current {
-        border-top: @secondary-border solid .0625rem;
-        border-bottom: @secondary-border solid .0625rem;
-    }
-    .current.infoOnly {
-        border: @secondary-border solid .0625rem;
-    }
-
-    .popper {
-        .grad-from-left {
-            background-image: linear-gradient(90deg, @has-text-danger 45%, @popper 55%);
-        }
-        .grad-from-left-warn {
-            background-image: linear-gradient(90deg, @has-text-alert 45%, @has-text-danger 55%);
-        }
-        .grad-from-right {
-            background-image: linear-gradient(90deg, @popper 45%, @has-text-danger 55%);
-        }
-    }
-
-    .modal .buttonList .is-selected {
-        border-color: @enabled;
-    }
-}
-
-// Orange Soda theme
-html.orangeSoda {
-    #lib.themes.orangeSoda(); // Highest priority
-    #lib.mainTemplate();
-
-    // Theme specific
-    .modal .action {
-        #lib.mainTemplate.main.content.action();
-    }
-
-    .has-text-info {
-        color: #F09D51;
-    }
-
-    .pop-desc {
-        .has-text-caution {
-            color: @has-text-danger;
-        }
-    }
-
-    input,
-    select,
-    textarea,
-    .notification {
-        background: @primary-color;
-    }
-
-    .popper {
-        .grad-from-left {
-            background-image: linear-gradient(90deg, @has-text-danger 45%, @popper 55%);
-        }
-        .grad-from-left-warn {
-            background-image: linear-gradient(90deg, @has-text-alert 45%, @has-text-danger 55%);
-        }
-        .grad-from-right {
-            background-image: linear-gradient(90deg, @popper 45%, @has-text-danger 55%);
-        }
-    }
-
-    .modal .buttonList .is-selected {
-        border-color: @enabled;
-    }
-}
-
-// Dracula theme
-html.dracula {
-    #lib.themes.dracula(); // Highest priority
-    #lib.themes.dark(); // Lowest priority
-    #lib.mainTemplate();
-
-    input,
-    select,
-    textarea,
-    .notification {
-        background: @primary-color;
-    }
-
-    .add,
-    .sub {
-        border: @secondary-border solid .0625rem;
-    }
-
-    .current {
-        border-top: @secondary-border solid .0625rem;
-        border-bottom: @secondary-border solid .0625rem;
-    }
-    .current.infoOnly {
-        border: @secondary-border solid .0625rem;
-    }
-
-    .popper {
-        .grad-from-left {
-            background-image: linear-gradient(90deg, @has-text-danger 45%, @popper 55%);
-        }
-        .grad-from-left-warn {
-            background-image: linear-gradient(90deg, @has-text-alert 45%, @has-text-danger 55%);
-        }
-        .grad-from-right {
-            background-image: linear-gradient(90deg, @popper 45%, @has-text-danger 55%);
-        }
-    }
-
-    .modal .buttonList .is-selected {
-        border-color: @enabled;
-    }
-}
 
 // Base CSS
 html {
     overflow-y: hidden;
     box-sizing: border-box;
     font-size: 16px;
+
+    // adding the themes all in
+    &.theme{
+        #lib.theme();
+        #lib.mainTemplate();
+
+        &.dark {
+            .pop-desc .has-text-caution {
+                color: #a30500;
+            }
+
+        }
+
+        // Light theme
+        &.light {
+
+            body {
+                font-weight: 500;
+            }
+
+            // .button
+            .button,
+            .button:hover {
+                border: solid .0625rem @black;
+            }
+
+            // UI Bars
+            .topBar {
+                .calendar {
+                    .wi-thermometer-exterior {
+                        color: #00d6b2;
+                    }
+
+                    .wi-day-sunny,
+                    .wi-day-windy {
+                        color: #fffb00;
+                    }
+
+                    .wi-cloud,
+                    .wi-cloudy-gusts {
+                        color: #dfe2d3;
+                    }
+
+                    .wi-rain,
+                    .wi-storm-showers {
+                        color: #00b0e6;
+                    }
+
+                    .wi-snow,
+                    .wi-snow-wind {
+                        color: #fff;
+                    }
+                }
+            }
+
+            // .main
+            .main {
+                .content {
+                    .action {
+                        a.button {
+                            span.count {
+                                border-bottom: .0625rem solid #000;
+                                border-left: .0625rem solid #000;
+                            }
+                        }
+                    }
+
+                    .action.cna:not(.cnam) {
+                        span.aTitle {
+                            color: #282828;
+                        }
+                    }
+                }
+            }
+
+            // .industry
+            .industry {
+                background: none;
+
+                .smelting {
+                    border-top: 0;
+                }
+
+                .header {
+                    border-bottom: #4e4e4e solid .0625rem;
+                }
+            }
+
+            .progress::-webkit-progress-value,
+            .progress::-moz-progress-bar {
+                background-color: #898989;
+            }
+        }
+
+        // Custom / Night / None theme
+        //for if the theme has no theme specific items
+        &.none{
+            @worthless-var:#fff;
+        }
+
+        // Red Green CB theme
+        &.redgreen {
+            #lib.theme();
+            #lib.mainTemplate();
+
+            .main>div.popper,
+            body .modal>div.popper {
+                .has-text-danger {
+                    color: #aa00aa;
+                }
+            }
+
+            #powerStatus .has-text-warning {
+                color: #9900cc;
+            }
+
+            // Trade
+            .trade {
+                .has-text-danger {
+                    color: #167df0;
+                    color: #aa00ff;
+                }
+
+                .has-text-warning {
+                    color: #fff;
+                }
+            }
+
+            // UI Bars
+            .topBar {
+                .calendar {
+                    .wi-thermometer-exterior {
+                        color: #00e6d2;
+                    }
+
+                    .wi-thermometer {
+                        color: #fffb00;
+                    }
+                }
+            }
+
+            .mad {
+                background: repeating-linear-gradient(45deg,
+                        #8a8b49,
+                        #8a8b49 10px,
+                        #000000 10px,
+                        #000000 20px);
+            }
+
+            .armed .mad {
+                background: repeating-linear-gradient(45deg,
+                        #fbfd84,
+                        #fbfd84 10px,
+                        #000000 10px,
+                        #000000 20px);
+            }
+
+        }
+
+        // Dark Night theme
+        &.darkNight {
+
+            // Theme specific
+            input,
+            select,
+            textarea {
+                background: @primary-color;
+            }
+        }
+
+        // GruvBox Light theme
+        &.gruvboxLight {
+
+            input,
+            select,
+            textarea,
+            .notification {
+                background: @secondary-color;
+            }
+        }
+
+        // GruvBox Dark theme
+        &.gruvboxDark {
+
+            input,
+            select,
+            textarea,
+            .notification {
+                background: @primary-color;
+            }
+
+            .add,
+            .sub {
+                border: @secondary-border solid .0625rem;
+            }
+
+            .current {
+                border-top: @secondary-border solid .0625rem;
+                border-bottom: @secondary-border solid .0625rem;
+            }
+            .current.infoOnly {
+                border: @secondary-border solid .0625rem;
+            }
+
+        }
+
+        // GruvBox Dark Red Green theme
+        &.gruvboxDarkRG {
+            #lib.theme();
+            #lib.mainTemplate();
+
+            input,
+            select,
+            textarea,
+            .notification {
+                background: @primary-color;
+            }
+
+            .add,
+            .sub {
+                border: @secondary-border solid .0625rem;
+            }
+
+            .current {
+                border-top: @secondary-border solid .0625rem;
+                border-bottom: @secondary-border solid .0625rem;
+            }
+            .current.infoOnly {
+                border: @secondary-border solid .0625rem;
+            }
+        }
+
+        // Orange Soda theme
+        &.orangeSoda {
+
+            // Theme specific
+            .modal .action {
+                #lib.mainTemplate.main.content.action();
+            }
+
+            .has-text-info {
+                color: #F09D51;
+            }
+
+            .pop-desc {
+                .has-text-caution {
+                    color: @has-text-danger;
+                }
+            }
+
+            input,
+            select,
+            textarea,
+            .notification {
+                background: @primary-color;
+            }
+        }
+        // Dracula theme
+        &.dracula {
+
+            input,
+            select,
+            textarea,
+            .notification {
+                background: @primary-color;
+            }
+
+            .add,
+            .sub {
+                border: @secondary-border solid .0625rem;
+            }
+
+            .current {
+                border-top: @secondary-border solid .0625rem;
+                border-bottom: @secondary-border solid .0625rem;
+            }
+            .current.infoOnly {
+                border: @secondary-border solid .0625rem;
+            }
+        }
+    }
+    .themeColorPicker{
+        position: absolute;
+        z-index: 999;
+        cursor: move;
+        user-select: none;
+        padding-top:0.5rem;
+        border:.06225rem solid;
+        border-radius:.375rem;
+        background:var(--theme-html-background);
+        display:flex;
+        align-items:center;
+        flex-direction:column;
+    }
+    .theme_color{
+        width:100%;
+    }
+    .themeWarning{
+        padding-left:.375rem;
+        align-items:center;
+        display:flex;
+        flex-direction:column;
+    }
+    .colorPicker{
+        display:flex;
+        width:100%;
+        justify-content:center;
+    }
+    .themeEditor .importExport{
+        padding:.375rem;
+        border:1px solid var(--theme-primary-border);
+        border-radius:.375rem;
+    }
 }
 
 body,

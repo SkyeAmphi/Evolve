@@ -11639,5 +11639,253 @@
   "wiki_achievements_incomplete": "Incomplete",
   "wiki_achievements_completed": "Completed",
   "wiki_search_placeholder": "No results found.",
-  "wiki_search_regex_support": "RegEx Supported"
+  "wiki_search_regex_support": "RegEx Supported",
+  
+  "open_theme_editor":"Enable Theme Editor",
+  "theme_custom":"Custom %0",
+  "theme_custom_count":"Number of Customs",
+  "theme_none":"No Theme",
+  "import_export_theme":"Import/Export Custom Theme",
+  "import_theme":"Import Theme",
+  "export_theme":"Export Theme",
+
+
+  "theme_var_black":"Black",
+  "theme_var_white":"White",
+  "theme_var_bulma-success":"Bulma Success",
+  "theme_var_bulma-danger":"Bulma Danger",
+  "theme_var_bulma-info":"Bulma Info",
+  "theme_var_bulma-dark":"Bulma Dark",
+  "theme_var_bulma-warning":"Bulma Warning",
+  "theme_var_bulma-link":"Bulma Link",
+  "theme_var_bulma-link-active":"Bulma Link (Active)",
+  "theme_var_bulma-link-hover":"Bulma Link (Hover)",
+  "theme_var_bulma-label":"Bulma Label",
+  "theme_var_bulma-checkbox-hover":"Bulma Checkbox (Hover)",
+
+  "theme_var_html-background":"Main Background Color",
+  "theme_var_primary-border":"Main Border Color",
+  "theme_var_secondary-border":"Secondary Border Color",
+  "theme_var_primary-color":"Primary Color",
+  "theme_var_secondary-color":"Secondary Color",
+
+  "theme_var_link":"Link Color",
+  "theme_var_link-hover":"Link Color (Hover)",
+  "theme_var_enabled":"Enabled Color",
+  "theme_var_disabled":"Disabled Color",
+  
+  "theme_var_has-text-advanced":"Advanced Text Color",
+  "theme_var_has-text-alert":"Alert Text Color",
+  "theme_var_has-text-caution":"Caution Text Color",
+  "theme_var_has-text-danger":"Danger Text Color",
+  "theme_var_has-text-fade":"Fade Text Color",
+  "theme_var_has-text-flair":"Flair / Category Text Color",
+  "theme_var_has-text-label":"Label Text Color",
+  "theme_var_has-text-special":"Special Text Color",
+  "theme_var_has-text-info":"Info Text Color",
+  "theme_var_has-text-success":"Success Text Color",
+  "theme_var_has-text-warning":"Warning Text Color",
+  
+  "theme_var_popper":"Popper Color",
+  "theme_var_popper-has-text-label":"Popper Label Text Color",
+  "theme_var_popper-has-text-success":"Popper Success Text Color",
+  "theme_var_popper-has-text-warning":"Popper Warning Text Color",
+  "theme_var_modal-child-popper-background":"Modal Popper Background",
+  "theme_var_modal-child-popper-border":"Modal Popper Border",
+
+  "theme_var_tabs-li-is-active-link-border":"Tab List Active Link Border Color",
+  "theme_var_tabs-li-is-active-link":"Tab List Active Link Color",
+
+  "theme_var_button-background":"Button Background Color",
+  "theme_var_button":"Button Color",
+  "theme_var_button-hover-background":"Button Background (Hover)",
+  "theme_var_button-hover":"Button Color (Hover)",
+  "theme_var_button-focus-border":"Button Border on Focus",
+
+  "theme_var_basic-button-border-hover-background":"Basic Button Background (Hover)",
+  "theme_var_basic-button-border-hover":"Basic Button Background (Hover)",
+
+  "theme_var_label":"Label Color",
+
+  "theme_var_checkbox-hover":"Checkbox Color (Hover)",
+
+  "theme_var_dropdown-content-background":"Dropdown Background",
+
+  "theme_var_b-tooltip-accent":"Tooltip Accent Color",
+  "theme_var_b-tooltip-is-primary-background":"Primary Tooltip Background Color",
+  "theme_var_b-tooltip-is-primary-border":"Primary Tooltip Border Color",
+  "theme_var_b-tooltip-is-primary":"Primary Tooltip Color",
+
+  "theme_var_bars-background":"Top / Bottom Bars Background",
+
+  "theme_var_meter-low":"Meter Low Color",
+  "theme_var_meter-neutral":"Meter Neutral Color",
+  "theme_var_meter-high":"Meter High Color",
+
+  "theme_var_div-special-border":"Gear Border Color",
+  "theme_var_div-special-gear-fill":"Gear Fill Color",
+  "theme_var_div-special-hover-border":"Gear Border Color (Hover)",
+  "theme_var_div-special-hover-gear-fill":"Gear Fill Color (Hover)",
+  "theme_var_special-on-off-border":"Gear On / Off Border Color",
+
+  "theme_var_span-on-border":"On Border Color",
+  "theme_var_span-on":"On Color",
+  "theme_var_span-on-warn":"On Warn Color",
+  "theme_var_span-off-border":"Off Border Color",
+  "theme_var_span-off":"Off Color",
+  "theme_var_span-on-off-hover-border":"On / Off Border Color (Hover)",
+
+  "theme_var_hl-button-border":"HL Button Border Color",
+  "theme_var_link-button-background":"Link Button Background Color",
+  "theme_var_oldTech":"Old Tech Color",
+  "theme_var_cnam-aTitle":"CNAM aTitle Color",
+  
+  "theme_var_fort-patrol-check-background":"Fortress Patrol Check Background Color",
+  
+  "theme_var_market-item-background":"Market Item Background Color",
+  "theme_var_market-item-order-hover-background":"Market Item Order Background Color (Hover)",
+  "theme_var_market-item-order-hover-border":"Market Item Order Border Color (Hover)",
+  
+  "theme_var_resource-overlay-color":"Resource Overlay Color",
+  "theme_var_resource-overlay-color-alt":"Alt. Resource Overlay Color",
+  
+  "theme_var_modalBox-background":"Modal Box Background Color",
+  
+  "theme_var_star-2-fill":"2 Star Level Color",
+  "theme_var_star-3-fill":"3 Star Level Color",
+  "theme_var_star-4-fill":"4 Star Level Color",
+  "theme_var_star-5-fill":"5 Star Level Color",
+  
+  "theme_var_webkit-scrollbar-background":"Scrollbar Background",
+  "theme_var_webkit-scrollbar-thumb-background":"Scrollbar Thumb Background",
+
+  
+  
+  "theme_var_includes":"Includes:",
+  "theme_var_html-background_wiki":"Main Background; Standard Icon Fill Color;; Gear, Build On / Off Container Color; String Pack Choose File Container Color;",
+  "theme_var_primary-border_wiki":"Small Buttons; Tooltip Border; Increase / Decrease Buttons; Current Values (Often between Inc. / Dec. Buttons);  Market Buy / Sell Cost; ",
+  "theme_var_secondary-border_wiki":"Divider in Jeff Tooltip above Farmer: #;\"Garrison\" and \"Foreign Powers\" Headers; Trade Tab Titles; Power Tab Section Headers; Modal Title; Crate / Container Modal; Smelter Tab / Modal; Industry Headers;",
+  "theme_var_primary-color_wiki":"Body Text; Headings Level 2 / 3; Tab Selector Text; Message Queue Filters; Selected Buttons Crate/Container Managment Background; Hell Patrol / Surveyor / Crew Reports Button Background (Light Theme Only); Input / Select / Text Area / Notification Background (Gruvbox Dark, Gruvbox Dark RG, Orange Soda, Dracula Themes Only); Input / Select / Text Area Background (Dark Night Theme Only)",
+  "theme_var_secondary-color_wiki":"I don't think this is used :shrug:",
+
+  "theme_var_link_wiki":"Link Text",
+  "theme_var_link-hover_wiki":"Tab Links; Message Queue Filters; Text Buttons;",
+  "theme_var_enabled_wiki":"Resource Affordability on Hover (Can Afford); Replicator / Psychic Boost Modal Selected Button",
+  "theme_var_disabled_wiki":"Resource Affordability on Hover (Cannot Afford);",
+  
+  "theme_var_has-text-advanced_wiki":"Hell Report Log Refresh / Gems Found Icon Fill; Hell Analysis Tab Section Toggles; Message Log Clear Buttons; Resources Gained Interstellar and Beyond; Andromeda Tab Ship Names; Second Species Name in Control of an Andromeda System; Security / Suppression / Supplies Text in Hell Tab; Job Names in Civics Tab; Section Titles in Industry Tab; Cancel Routes Button; Mastery Percent Text",
+  "theme_var_has-text-alert_wiki":"Ship Crew Job Title; Hell Analysis Run / Observe. Stats Started Time; Non-Limiting Insufficent Resources; Damaged Carport Count; ",
+  "theme_var_has-text-caution_wiki":"Acellerated Time; Events; Some Resources; Truepath Syndicate Threat / Region Intel / Excess Security Text; Ship Name and Other Info.; Trade Routes Text; Universe Names; This is THE most used 'has-text-***', so some are probably not labeled.;",
+  "theme_var_has-text-danger_wiki":"Negative Gains; Craftable Material Names; Count Decrease / Increase Button; Power Off Button; Ship Weapons / Fuels; Cannot Afford Text; Feat Title; Bad Events; Limiting Insufficient Resource; Demonic Creature Count; Final Species Name in Control of an Andromeda System; Andromeda System Threat '???'; Hell Observation Period Reset Button; Mech Lab Mech Cost / Weapons; Wish Counter; Sell Resource Text; Sold Resource Name;  ARPA Project Progress Percent; Negative Trait Effects Text; Remove Genetic Trait Button Text; Pause Button",
+  "theme_var_has-text-fade_wiki":"Cannot Afford Minor Traits",
+  "theme_var_has-text-flair_wiki":"Flair Text; Building Special Requirements; Wiki Acheive. / Feat Desc. (Bottom Text)",
+  "theme_var_has-text-label_wiki":"Acheive. / Feat Desc (Top Text); Planet Feature Effects",
+  "theme_var_has-text-special_wiki":"Prestige Resource Name; Game Warn Unwise; Building Requirements; Lot of Structure things;",
+  "theme_var_has-text-info_wiki":"Game Progress Events; Planetary Resource Names; Basic Jobs; JObs Close To Full; Power Grid Header; ",
+  "theme_var_has-text-success_wiki":"Good things!",
+  "theme_var_has-text-warning_wiki":"Some Bad Things, Also Good Things",
+  
+  "theme_var_popper_wiki":"Popper Text",
+  "theme_var_popper-has-text-label_wiki":"Label Text in Popper",
+  "theme_var_popper-has-text-success_wiki":"Success Text in Popper",
+  "theme_var_popper-has-text-warning_wiki":"Warning Text in Popper",
+  "theme_var_modal-child-popper-background_wiki":"Modal Popper Background",
+  "theme_var_modal-child-popper-border_wiki":"Modal Popper Border",
+
+  "theme_var_tabs-li-is-active-link-border_wiki":"Message Queue Filter Border",
+  "theme_var_tabs-li-is-active-link_wiki":"Message Queue Filter Text",
+
+  "theme_var_button-background_wiki":"Button Background",
+  "theme_var_button_wiki":"Button Text",
+  "theme_var_button-hover-background_wiki":"Button Background (Hover)",
+  "theme_var_button-hover_wiki":"Button Text (Hover)",
+  "theme_var_button-focus-border_wiki":"Button Border (Focus)",
+
+  "theme_var_basic-button-border-hover-background_wiki":"Small Button Background (Hover)",
+  "theme_var_basic-button-border-hover_wiki":"Small Button Border (Hover)",
+
+  "theme_var_label_wiki":"Label",
+
+  "theme_var_checkbox-hover_wiki":"Checkbox Background (Hover)",
+
+  "theme_var_dropdown-content-background_wiki":"Dropdown Content Background",
+
+  "theme_var_b-tooltip-accent_wiki":"Tooltip Accent",
+  "theme_var_b-tooltip-is-primary-background_wiki":"Tooltip Primary Background",
+  "theme_var_b-tooltip-is-primary-border_wiki":"Tooltip Primary Border",
+  "theme_var_b-tooltip-is-primary_wiki":"Tooltip Primary",
+
+  "theme_var_bars-background_wiki":"Top / Bottom Bars Background",
+
+  "theme_var_meter-low_wiki":"Meter Low",
+  "theme_var_meter-neutral_wiki":"Meter Neutral",
+  "theme_var_meter-high_wiki":"Meter Hgih",
+
+  "theme_var_div-special-border_wiki":"Icon Border",
+  "theme_var_div-special-gear-fill_wiki":"Gear Fill Color",
+  "theme_var_div-special-hover-border_wiki":"Icon Border (Hover)",
+  "theme_var_div-special-hover-gear-fill_wiki":"Gear Fill Color (Hover)",
+
+  "theme_var_span-on-border_wiki":"Building On Border",
+  "theme_var_span-on_wiki":"Building On",
+  "theme_var_span-on-warn_wiki":"Building On Warn",
+  "theme_var_span-off-border_wiki":"Building Off Border",
+  "theme_var_span-off_wiki":"Building Off",
+  "theme_var_span-on-off-hover-border_wiki":"Building On / Off Border (Hover)",
+
+  "theme_var_hl-button-border_wiki":"HL Button Border",
+  "theme_var_link-button-background_wiki":"Link Button Background",
+  "theme_var_special-on-off-border_wiki":"Special On / Off Border",
+  "theme_var_oldTech_wiki":"Old Tech",
+  "theme_var_cnam-aTitle_wiki":"CNAM aTitle",
+  
+  "theme_var_fort-patrol-check-background_wiki":"Fortress Patrol Check Background",
+  
+  "theme_var_market-item-background_wiki":"Market Item Background",
+  "theme_var_market-item-order-hover-background_wiki":"Market Item Order Background (Hover)",
+  "theme_var_market-item-order-hover-border_wiki":"Market Item Order Border (Hover)",
+  
+  "theme_var_resource-overlay-color_wiki":"Resource Overlay",
+  "theme_var_resource-overlay-color-alt_wiki":"Resource Overlay Alt",
+  
+  "theme_var_modalBox-background_wiki":"Modal Background",
+  
+  "theme_var_star-2-fill_wiki":"Level 2 Icon Fill",
+  "theme_var_star-3-fill_wiki":"Level 3 Icon Fill",
+  "theme_var_star-4-fill_wiki":"Level 4 Icon Fill",
+  "theme_var_star-5-fill_wiki":"Level 5 Icon Fill",
+  
+  "theme_var_webkit-scrollbar-background_wiki":"Scrollbar Background",
+  "theme_var_webkit-scrollbar-thumb-background_wiki":"Scrollbar Thumb Background",
+
+  "wiki_menu_custom_themes":"Custom Themes",
+  "theme_section_intro":"Intro",
+  "theme_section_button":"Buttons",
+  "theme_section_border":"Borders",
+  "theme_section_has-text":"Text Types",
+  "theme_section_popper":"Poppers",
+  "theme_section_hover":"(Hover)",
+  "theme_section_link":"Links",
+  "theme_section_background":"Backgrounds",
+  "theme_section_b-tooltip":"Tooltips",
+  "theme_section_meter":"Meters",
+  "theme_section_div":"Gears",
+  "theme_section_span":"On / Offs",
+  "theme_section_market":"Market",
+  "theme_section_star":"Stars",
+  "theme_section_scrollbar":"Scrollbars",
+  "theme_section_misc":"Misc.",
+
+  "enable_theme_reset":"Enable Reset Buttons",
+  "theme_reset_warn":"Are you sure you want to reset? You will lose ALL of you progress on this theme!",
+  "theme_reset":"Reset Current Theme",
+
+  "wiki_custom_theme_intro-intro_para1":"This section of the wiki is on the Custom Themes editor.",
+  "wiki_custom_theme_intro-intro_para2":"It's main purpose is to help explain what each section means and what each variable does!",
+  "wiki_custom_theme_intro-intro_para3":"Please note that currently, the sub-sections are determined by variable name. This may not accurately reflect what the variable actually effects.",
+  "wiki_custom_theme_intro-intro_para4":"Also note that variables can get their colors from other variables.",
+
+  "wiki_custom_theme_page_maintext":"This page will include any variables that involve %0!",
+
+  "wiki_custom_theme_border-include":"These will be borders around the items listed."
 }

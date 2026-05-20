@@ -1,4 +1,5 @@
 import { global, setGlobal, save } from './../vars.js';
+import { set_theme, loadAllThemes, themes, theme_variables, setThemeToHTML } from './../themes.js';
 import { loc } from './../locale.js';
 import {} from './init.js';
 import {} from './../achieve.js';
@@ -15,8 +16,12 @@ import { eventsPage } from './events.js';
 import { arpaPage } from './arpa.js';
 import { changeLog } from './change.js';
 import { cancelSearchIndexing, search } from './search.js';
+import { buildThemesPages } from './themes.js';
 
 $('body').empty();
+loadAllThemes();
+setThemeToHTML();
+set_theme(global.settings.theme);
 initPage();
 
 function initPage(){
@@ -143,6 +148,16 @@ function initPage(){
                 { key: 'list' },
                 { key: 'feats' }
             ]
+        },
+        {
+            key:'custom_themes',
+            submenu:[
+                {
+                    key:'custom_themes_intro',
+                    override_text:'theme_section_intro',
+                },
+                ...Object.keys(theme_variables).map(item=>{return {key:`custom_themes_${item}`,override_text:`theme_section_${item}`}})
+            ],
         },
         {
             key: 'changelog',
@@ -278,7 +293,10 @@ async function menuDispatch(main,sub,frag){
                 }
                 setWindowHash(main,sub,frag);
             break;
-
+        case 'custom_themes':
+            buildThemesPages(sub);
+            setWindowHash(main,sub,frag);
+            break;
         case 'changelog':
             changeLog();
             setWindowHash(main, sub, frag);
@@ -316,17 +334,17 @@ function buiildMenu(items,set,parent){
 
     let menu = ``;
     for (let i=0; i<items.length; i++){
-
+        let item_name=loc(items[i].hasOwnProperty('override_text') ? items[i].override_text : `wiki_menu_${items[i].key}`);
         if (items[i].hasOwnProperty('submenu')){
             let active = (!hash && set && i === 0) || (hash && hash.length > 1 && hash[1] === items[i].key) ? ` :active="true" expanded` : '';
-            menu = menu + `<b-menu-item${active}><template #label="props">${loc(`wiki_menu_${items[i].key}`)}</template>`;
+            menu = menu + `<b-menu-item${active}><template #label="props">${item_name}</template>`;
             menu = menu + buiildMenu(items[i].submenu,false,items[i].key);
             menu = menu + `</b-menu-item>`;
         }
         else {
             let active = (!hash && set && i === 0) || (hash && hash[0] === items[i].key) ? ` :active="true"` : '';
             let args = parent ? `'${parent}','${items[i].key}'` : `'${items[i].key}',false`;
-            menu = menu + `<b-menu-item${active} label="${loc(`wiki_menu_${items[i].key}`)}" @click="loadPage(${args})"></b-menu-item>`
+            menu = menu + `<b-menu-item${active} label="${item_name}" @click="loadPage(${args})"></b-menu-item>`
         }
     }
     return menu;

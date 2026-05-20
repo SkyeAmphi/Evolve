@@ -14,12 +14,14 @@ import { renderFortress, buildFortress, drawMechLab, clearMechDrag, drawHellObse
 import { renderEdenic } from './edenic.js';
 import { drawShipYard, clearShipDrag, renderTauCeti } from './truepath.js';
 import { arpa, clearGeneticsDrag } from './arpa.js';
+import { themes, set_theme, theme_settings, loadCustomThemeHTML, createAllThemeDropdowns, setThemeToHTML, loadThemeEditorDat, importTheme, getThemeSaveData, getThemeTitle } from './themes.js';
 
 export function mainVue(){
     vBind({
         el: '#mainColumn div.content',
         data: {
-            s: global.settings
+            s: global.settings,
+            t: theme_settings,
         },
         methods: {
             swapTab(tab) {
@@ -60,8 +62,9 @@ export function mainVue(){
                 return tab;
             },
             saveImport(){
-                if ($('#importExport textarea').val().length > 0){
-                    importGame($('#importExport textarea').val());
+                let impExp=$('#importExport textarea');
+                if (impExp.val().length > 0){
+                    importGame(impExp.val());
                 }
             },
             saveExport(){
@@ -170,12 +173,74 @@ export function mainVue(){
                 }
                 window.location.reload();
             },
-            setTheme(theme){
-                global.settings.theme = theme;
-                $('html').removeClass();
-                $('html').addClass(theme);
-                $('html').addClass(global.settings.font);
+            saveImportTheme(){
+                if ($('#importExportTheme textarea').val().length > 0){
+                    importTheme($('#importExportTheme textarea').val());
+                }
             },
+            saveExportTheme(){
+                $('#importExportTheme textarea').val(getThemeSaveData());
+                $('#importExportTheme textarea').select();
+                document.execCommand('copy');
+            },
+            saveExportThemeFile(){
+                const downloadToFile = (content, filename, contentType) => {
+                    const a = document.createElement('a');
+                    const file = new Blob([content], {type: contentType});
+                    a.href= URL.createObjectURL(file);
+                    a.download = filename;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                };
+                const date = new Date();
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toFixed(0).padStart(2, '0');
+                const day = date.getDate().toFixed(0).padStart(2, '0');
+                const hour = date.getHours().toFixed(0).padStart(2, '0');
+                const minute = date.getMinutes().toFixed(0).padStart(2, '0');
+                downloadToFile(getThemeSaveData(), `evolve_theme-${getThemeTitle(global.settings.theme)}-${year}-${month}-${day}-${hour}-${minute}.txt`, 'text/plain');
+            },
+            setTheme(theme,set_none){
+                set_theme(theme);
+                global.settings.theme = theme;
+                setThemeToHTML(theme,set_none);
+            },
+            openCloseThemeEditor(e){
+                // theme_settings.pos.x=e.clientX+20;
+                // theme_settings.pos.y=e.clientY-200;
+                loadThemeEditorDat();
+                // console.log(theme_settings)
+            },
+            getThemeTitle(name){
+                return getThemeTitle(name);
+            },
+            setCustomCount(num,t){
+                let past_count=t.custom_count;
+                t.custom_count=num;
+                global.custom_theme.custom_count=num;
+                if(past_count==num){
+                    return;
+                }
+                else if(past_count>num){
+                    console.log('too many',num+1,past_count)
+                    for(let i=num+1; i<=past_count; i++){
+                        let name=`custom-${i}`;
+                        delete themes[name];
+                        delete global.custom_theme[name];
+                    }
+                }
+                else{
+                    console.log('too little',past_count+1,num)
+                    for(let i=past_count+1; i<=num; i++){
+                        let name=`custom-${i}`;
+                        themes[name]={};
+                        global.custom_theme[name]=themes[name];
+                    }
+                }
+
+                console.log(themes);
+            },
+
             numNotation(notation){
                 global.settings.affix = notation;
             },
@@ -1237,18 +1302,9 @@ export function index(){
             <span>{{ label('theme') }} </span>
             <b-dropdown aria-role="list">
                 <template #trigger="{ active }">
-                    <b-button :label="label('theme_' + s.theme)" type="is-info"/>
+                    <b-button :label="getThemeTitle(s.theme)" type="is-info"/>
                 </template>
-                <b-dropdown-item v-on:click="setTheme('dark')">{{ label('theme_dark') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="setTheme('light')">{{ label('theme_light') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="setTheme('night')">{{ label('theme_night') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="setTheme('darkNight')">{{ label('theme_darkNight') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="setTheme('redgreen')">{{ label('theme_redgreen') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="setTheme('gruvboxLight')">{{ label('theme_gruvboxLight') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="setTheme('gruvboxDark')">{{ label('theme_gruvboxDark') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="setTheme('gruvboxDarkRG')">{{ label('theme_gruvboxDarkRG') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="setTheme('orangeSoda')">{{ label('theme_orangeSoda') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="setTheme('dracula')">{{ label('theme_dracula') }}</b-dropdown-item>
+                ${createAllThemeDropdowns('setTheme')}
                 ${hideEgg}
             </b-dropdown>
 
@@ -1389,6 +1445,17 @@ export function index(){
                 </div>
             </b-collapse>
         </div>
+        <div class="themeEditor">
+            <b-switch class="setting" v-model="t.themeEditorOpen" @click="openCloseThemeEditor"><span>{{ label('open_theme_editor')}}</span></b-switch>
+            <div v-if="t.themeEditorOpen" class="importExport">
+                <b-field label="${loc('import_export_theme')}">
+                    <b-input id="importExportTheme" type="textarea"></b-input>
+                </b-field>
+                <button class="button" @click="saveImportTheme">{{ label('import_theme') }}</button>
+                <button class="button" @click="saveExportTheme">{{ label('export_theme') }}</button>
+                <button class="button" @click="saveExportThemeFile">{{ label('export_file') }}</button>
+            </div>
+        </div>
         </div>
     </b-tab-item>`);
 
@@ -1468,4 +1535,6 @@ export function index(){
             </span>
         </div>
     `);
+
+    loadCustomThemeHTML();
 }

@@ -21,7 +21,10 @@ import { vacuumCollapse } from './resets.js';
 import { index, mainVue, initTabs, loadTab } from './index.js';
 import { setWeather, seasonDesc, astrologySign, astroVal } from './seasons.js';
 import { getTopChange } from './wiki/change.js';
-import { enableDebug, updateDebugData } from './debug.js';
+import { set_theme, loadAllThemes, setThemeToHTML } from './themes.js';
+
+loadAllThemes();
+setThemeToHTML();
 
 {
     $(document).ready(function() {
@@ -211,6 +214,8 @@ if (global.r_queue.display){
     calcRQueueMax();
 }
 
+loadAllThemes();
+set_theme(global.settings.theme);
 mainVue();
 
 if (global['new']){
@@ -11261,7 +11266,7 @@ function midLoop(){
             else {
                 if (checkAffordable(t_action,true,t_action['doNotAdjustCost'] ? true : false,true)){
                     struct.cna = false;
-                    let t_time = timeCheck(t_action, spent);
+                    let t_time = timeCheck(t_action, spent, true);
                     struct['bres'] = false;
                     if (t_time >= 0){
                         if (!stop && checkAffordable(t_action,false,t_action['doNotAdjustCost'] ? true : false)){
@@ -11273,7 +11278,7 @@ function midLoop(){
                             }
                         }
                         else {
-                            time += t_time;
+                            time += t_time.t;
                         }
                         if (!global.settings.qAny){
                             stop = true;
@@ -11281,15 +11286,14 @@ function midLoop(){
                         struct['time'] = time;
                         let br = false;
                         for (let j=1; j<struct.q; j++){
-                            let tc = timeCheck(t_action, spent, true);
-                            time += tc.t;
-                            br = tc.r;
+                            time += t_time.t;
+                            br = t_time.r;
                         }
                         struct['t_max'] = time;
                         struct['bres'] = br;
                     }
                     else {
-                        struct['time'] = t_time;
+                        struct['time'] = t_time.t;
                     }
                 }
                 else {
@@ -11433,8 +11437,12 @@ function midLoop(){
                                 elm.addClass('has-text-danger');
                             }
                         }
-                        else if (elm.hasClass('has-text-danger') || elm.hasClass('has-text-alert')){
+                        else if (elm.hasClass('has-text-danger')){
                             elm.removeClass('has-text-danger');
+                            elm.addClass(avail);
+                        }
+                        else if(elm.hasClass('has-text-alert')){
+                            elm.removeClass('has-text-alert');
                             elm.addClass(avail);
                         }
                     }
