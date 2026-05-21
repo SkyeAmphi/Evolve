@@ -102413,7 +102413,7 @@ ${effect}`);
     }
   }
   if (window.Worker) {
-    webWorker.w = new Worker("/evolve/evolve.js");
+    webWorker.w = new Worker("evolve/evolve.js");
     webWorker.w.addEventListener("message", function(e) {
       const data = e.data;
       switch (data.loop) {
