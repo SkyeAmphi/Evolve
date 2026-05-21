@@ -18657,7 +18657,7 @@ ${effect}`);
                 /* NEED_HYDRATION */
               )
             ]),
-            createCommentVNode(" Filter buttons \u2014 data-driven from TRAIT_FILTERS, grouped by filter.group "),
+            createCommentVNode(" Filter buttons: data-driven from TRAIT_FILTERS, grouped by filter.group "),
             (openBlock(true), createElementBlock(
               Fragment,
               null,
