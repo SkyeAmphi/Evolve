@@ -1314,7 +1314,6 @@ function jobStressCalc(info){
     
     variables.append(/*html*/ `
         <div>
-            <div class="calcInput"><b-checkbox class="patrol" v-model="i.mellow.val">${loc('planet_mellow')}</b-checkbox></div>
             <div class="calcInput" v-show="i.content.vis">
                 <span>${loc('wiki_calc_job_stress_content')}</span> 
                 <b-numberinput :input="val('content')" min="0" v-model="i.content.val" :controls="false"></b-numberinput>
