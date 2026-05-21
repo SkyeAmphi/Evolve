@@ -15,6 +15,8 @@ import { eventsPage } from './events.js';
 import { arpaPage } from './arpa.js';
 import { changeLog } from './change.js';
 import { cancelSearchIndexing, search } from './search.js';
+import '../evolve.less';
+import './wiki.less';
 
 $('body').empty();
 initPage();

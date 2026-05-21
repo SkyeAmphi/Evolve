@@ -3,19 +3,28 @@
   "version": "1.4.9",
   "description": "Evolve Idle",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
+    "dev": "vite",
+    "preview": "vite preview",
+    "build-vite": "vite build",
+    "deploy-vite": "vite build && gh-pages -d dist",
     "build": "npm run evolve && npm run evolve-less && npm run wiki && npm run wiki-less",
-    "build-debug": "npm run evolve-debug && npm run evolve-less && npm run wiki-debug && npm run wiki-less",
+    "build-debug": "npm run evolve-debug && npm run evolve-less-debug && npm run wiki-debug && npm run wiki-less-debug",
     "build-win": "npm run evolve && npm run evolve-less-win && npm run wiki && npm run wiki-less-win",
-    "build-debug-win": "npm run evolve-debug && npm run evolve-less-win && npm run wiki-debug && npm run wiki-less-win",
+    "build-debug-win": "npm run evolve-debug && npm run evolve-less-debug && npm run wiki-debug && npm run wiki-less-debug",
     "evolve": "node buildEvolve.js",
     "evolve-debug": "node buildEvolveDebug.js",
     "evolve-less": "lessc src/evolve.less evolve/evolve-unminified.css && csso -i evolve/evolve-unminified.css -o evolve/evolve.css && rm evolve/evolve-unminified.css",
     "evolve-less-win": "lessc src/evolve.less evolve/evolve-unminified.css && csso -i evolve/evolve-unminified.css -o evolve/evolve.css && del evolve\\evolve-unminified.css",
+    "evolve-less-debug": "lessc src/evolve.less evolve/evolve.css",
     "wiki": "node buildWiki.js",
     "wiki-debug": "node buildWikiDebug.js",
     "wiki-less": "lessc src/wiki/wiki.less wiki/wiki-unminified.css && csso -i wiki/wiki-unminified.css -o wiki/wiki.css && rm wiki/wiki-unminified.css",
     "wiki-less-win": "lessc src/wiki/wiki.less wiki/wiki-unminified.css && csso -i wiki/wiki-unminified.css -o wiki/wiki.css && del wiki\\wiki-unminified.css",
+    "wiki-less-debug": "lessc src/wiki/wiki.less wiki/wiki.css",
     "serve": "servehere -c",
     "deploy": "rm -rf dist && mkdir dist && cp -r *.html *.ico LICENSE evolve lib font strings wiki dist && gh-pages -d dist",
     "deploy-win": "(rmdir /S /Q dist || echo recreating dist) && mkdir dist && xcopy /E /I evolve dist\\evolve && xcopy /E /I font dist\\font && xcopy /E /I lib dist\\lib && xcopy /E /I strings dist\\strings && xcopy /E /I wiki dist\\wiki && copy *.html dist && copy *.ico dist && copy LICENSE dist && gh-pages -d dist"
@@ -34,15 +43,20 @@
   },
   "homepage": "https://github.com/pmotschmann/Evolve#readme",
   "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.5",
     "csso-cli": "^4.0.2",
+    "esbuild-plugin-vue3": "^0.5.1",
+    "gh-pages": "^6.3.0",
     "ini": "^1.3.8",
-    "less": "^3.13.0",
-    "servehere": "^1.7.0",
-    "gh-pages": "^6.1.1"
+    "less": "~4.1.3",
+    "servehere": "^1.10.1",
+    "vite": "^8.0.3",
+    "vite-plugin-static-copy": "^4.0.0",
+    "node": "^20.11.1",
+    "npmcli": "^1.2.2"
   },
   "dependencies": {
-    "esbuild": "0.25.0",
-    "node": "^16.1.0",
-    "npmcli": "^1.2.2"
+    "esbuild": "^0.28.0",
+    "vue": "^3.5.31"
   }
 }
