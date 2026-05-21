@@ -12,6 +12,12 @@ import { astroVal, astrologySign } from './../seasons.js';
 import { shipAttackPower, sensorRange, shipCrewSize, shipPower } from './../truepath.js';
 import { sideMenu, infoBoxBuilder, createRevealSection, createCalcSection, getSolarName } from './functions.js';
 
+// vue3 basic UI component SFCs, not great but it's a start
+import CalcButtons from './components/CalcButtons.vue';
+import CalcDropdown from './components/CalcDropdown.vue';
+import CalcWrapper from './components/CalcWrapper.vue';
+import V from '../vue-cdn-shim.js';
+
 export function mechanicsPage(content){
     let mainContent = sideMenu('create',content);
 
@@ -1257,118 +1263,174 @@ function jobStressCalc(info){
             jobs.push(job);
         }
     });
-    let jobsDropdown = `
-        <div class="calcInput"><span>${loc('wiki_calc_job_stress_job')}</span> <b-dropdown hoverable scrollable>
-            <template #trigger>
-                <button class="button is-primary">
-                    <span>{{ jobLabel(i.job.val) }}</span>
-                    <i class="fas fa-sort-down"></i>
-                </button>
-            </template>`;
-    jobs.forEach(function (job){
-        jobsDropdown += `
-            <b-dropdown-item v-on:click="pickJob('${job}')">{{ jobLabel('${job}') }}</b-dropdown-item>`;
-    });
-    jobsDropdown += `
-        </b-dropdown></div>
-    `;
-    jobSelect.append(jobsDropdown);
+
+    jobSelect.append(/*html*/ `
+        <div class="calcInput">
+            <span>${loc('wiki_calc_job_stress_job')}</span>
+            <calc-dropdown 
+                :model-value="i.job.val" 
+                :options="jobOptions" 
+                :scrollable="true" 
+                @update:model-value="pickJob"
+            />
+        </div>
+    `);
     
-    formula.append(`
+    formula.append(/*html*/ `
         <div>
             <h2 class="has-text-caution">${loc('wiki_calc_job_stress_divisor')}</h2>
         </div>
         <div>
-            <span v-show="i.freespirit.vis && i.freespirit.val">(</span><span>{{ stressDiv(i.job.val) }}</span><span v-show="i.content.vis"> + ({{ generic(i.content.val, 'content') }} * {{ contentVal(i.job.val) }})</span><span v-show="i.mellow.val"> {{ mellowOp(i.job.val) }}</span><span v-show="i.dense.vis && i.dense.val"> - 1</span><span v-show="i.freespirit.vis && i.freespirit.val">) / {{ traitVal(i.freespirit.val, 'freespirit', 0) }}</span><span v-show="s.result.vis"> = {{ calc() }}</span>
+            <span v-show="i.freespirit.vis && i.freespirit.val">
+                (
+            </span>
+            <span>
+                {{ stressDiv(i.job.val) }}
+            </span>
+            <span v-show="i.content.vis"> + ({{ generic(i.content.val, 'content') }} * {{ contentVal(i.job.val) }})</span>
+            <span v-show="i.mellow.val">
+                {{ mellowOp(i.job.val) }}
+            </span>
+            <span v-show="i.dense.vis && i.dense.val"> - 1</span>
+            <span v-show="i.freespirit.vis && i.freespirit.val">
+                ) / {{ traitVal(i.freespirit.val, 'freespirit', 0) }}
+            </span>
+            <span v-show="s.result.vis"> = {{ calc() }}</span>
         </div>
         <div>
             <h2 class="has-text-caution">${loc('wiki_calc_job_stress_generated')}</h2>
         </div>
         <div>
-            <span v-show="i.playful.vis && i.playful.val">0 * </span><span>{{ generic(i.workers.val, 'workers') }}<span v-show="i.high_pop.val"> / {{ traitVal(i.high_pop.val, 'high_pop', 0) }}</span> / {{ generic(s.result.val, 'divisor') }}<span v-show="i.emotionless.val"> * {{ traitVal(i.emotionless.val, 'emotionless', 1) }}</span><span> * {{ govVal(i.government.val, i.electricity.val, i.virtual_reality.val) }}</span><span v-show="i.annexed.vis"> * {{ anxVal(i.annexed.val) }}</span><span v-show="s.total.vis"> = -{{ calcTotal() }}%</span>
+            <span v-show="i.playful.vis && i.playful.val">0 * </span>
+            <span>{{ generic(i.workers.val, 'workers') }}
+                <span v-show="i.high_pop.val"> / {{ traitVal(i.high_pop.val, 'high_pop', 0) }}</span>
+                 / {{ generic(s.result.val, 'divisor') }}
+                <span v-show="i.emotionless.val"> * {{ traitVal(i.emotionless.val, 'emotionless', 1) }}</span>
+                <span> * {{ govVal(i.government.val, i.electricity.val, i.virtual_reality.val) }}</span>
+                <span v-show="i.annexed.vis"> * {{ anxVal(i.annexed.val) }}</span>
+                <span v-show="s.total.vis"> = -{{ calcTotal() }}%</span>
         </div>
-    `);
+    `); // missing a closing tag?
     
-    variables.append(`
+    variables.append(/*html*/ `
         <div>
-            <div class="calcInput" v-show="i.content.vis"><span>${loc('wiki_calc_job_stress_content')}</span> <b-numberinput :input="val('content')" min="0" v-model="i.content.val" :controls="false"></b-numberinput></div>
             <div class="calcInput"><b-checkbox class="patrol" v-model="i.mellow.val">${loc('planet_mellow')}</b-checkbox></div>
-            <div class="calcInput" v-show="i.dense.vis"><b-checkbox class="patrol" v-model="i.dense.val">${loc('planet_dense')}</b-checkbox></div>
-            <div class="calcInput" v-show="i.freespirit.vis"><span>${loc('trait_freespirit_name')}</span> <b-dropdown hoverable>
-                <template #trigger>
-                    <button class="button is-primary">
-                        <span>{{ traitLabel(i.freespirit.val) }}</span>
-                        <i class="fas fa-sort-down"></i>
-                    </button>
-                </template>
-                <b-dropdown-item v-on:click="pickTrait(0, 'freespirit')">{{ traitLabel(0) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(0.25, 'freespirit')">{{ traitLabel(0.25) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(0.5, 'freespirit')">{{ traitLabel(0.5) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(1, 'freespirit')">{{ traitLabel(1) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(2, 'freespirit')">{{ traitLabel(2) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(3, 'freespirit')">{{ traitLabel(3) }}</b-dropdown-item>
-            </b-dropdown></div>
+            <div class="calcInput" v-show="i.content.vis">
+                <span>${loc('wiki_calc_job_stress_content')}</span> 
+                <b-numberinput :input="val('content')" min="0" v-model="i.content.val" :controls="false"></b-numberinput>
+            </div>
+            <div class="calcInput">
+                <b-checkbox class="patrol" v-model="i.mellow.val">${loc('planet_mellow')}</b-checkbox>
+            </div>
+            <div class="calcInput" v-show="i.dense.vis">
+                <b-checkbox class="patrol" v-model="i.dense.val">${loc('planet_dense')}</b-checkbox>
+            </div>
+            <div class="calcInput" v-show="i.freespirit.vis">
+                <span>${loc('trait_freespirit_name')}</span> 
+                <calc-dropdown 
+                    v-model="i.freespirit.val" 
+                    :options="traitOptions"
+                    :placeholder="'${loc('wiki_calc_trait_undefined')}'">
+                </calc-dropdown>
+            </div>
         </div>
+
         <div>
-            <div class="calcInput"><span>{{ workersLabel(i.job.val) }}</span> <b-numberinput :input="val('workers')" min="0" v-model="i.workers.val" :controls="false"></b-numberinput></div>
-            <div class="calcInput" v-show="i.annexed.vis"><span>${loc('wiki_calc_job_stress_annexed')}</span> <b-numberinput :input="val('annexed')" min="0" v-model="i.annexed.val" :controls="false"></b-numberinput></div>
-            <div class="calcInput"><span>${loc('civics_government')}</span> <b-dropdown hoverable>
-                <template #trigger>
-                    <button class="button is-primary">
-                        <span>{{ govLabel(i.government.val) }}</span>
-                        <i class="fas fa-sort-down"></i>
-                    </button>
-                </template>
-                <b-dropdown-item v-on:click="pickGov('anarchy')">{{ govLabel('anarchy') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickGov('autocracy')">{{ govLabel('autocracy') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickGov('federation')">{{ govLabel('federation') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickGov('socialist')">{{ govLabel('socialist') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickGov('other')">{{ govLabel('other') }}</b-dropdown-item>
-            </b-dropdown></div>
-            <div class="calcInput" v-show="i.electricity.vis"><b-checkbox class="patrol" v-model="i.electricity.val">${loc('tech_electricity')}</b-checkbox></div>
-            <div class="calcInput" v-show="i.electricity.vis && i.electricity.val"><b-checkbox class="patrol" v-model="i.virtual_reality.val">${loc('tech_virtual_reality')}</b-checkbox></div>
-            <div class="calcInput" v-show="i.playful.vis"><b-checkbox class="patrol" v-model="i.playful.val">${loc('trait_playful_name')}</b-checkbox></div>
-            <div class="calcInput"><span>${loc('trait_high_pop_name')}</span> <b-dropdown hoverable>
-                <template #trigger>
-                    <button class="button is-primary">
-                        <span>{{ traitLabel(i.high_pop.val) }}</span>
-                        <i class="fas fa-sort-down"></i>
-                    </button>
-                </template>
-                <b-dropdown-item v-on:click="pickTrait(0, 'high_pop')">{{ traitLabel(0) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(0.25, 'high_pop')">{{ traitLabel(0.25) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(0.5, 'high_pop')">{{ traitLabel(0.5) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(1, 'high_pop')">{{ traitLabel(1) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(2, 'high_pop')">{{ traitLabel(2) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(3, 'high_pop')">{{ traitLabel(3) }}</b-dropdown-item>
-            </b-dropdown></div>
-            <div class="calcInput"><span>${loc('trait_emotionless_name')}</span> <b-dropdown hoverable>
-                <template #trigger>
-                    <button class="button is-primary">
-                        <span>{{ traitLabel(i.emotionless.val) }}</span>
-                        <i class="fas fa-sort-down"></i>
-                    </button>
-                </template>
-                <b-dropdown-item v-on:click="pickTrait(0, 'emotionless')">{{ traitLabel(0) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(0.25, 'emotionless')">{{ traitLabel(0.25) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(0.5, 'emotionless')">{{ traitLabel(0.5) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(1, 'emotionless')">{{ traitLabel(1) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(2, 'emotionless')">{{ traitLabel(2) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickTrait(3, 'emotionless')">{{ traitLabel(3) }}</b-dropdown-item>
-            </b-dropdown></div>
+            <div class="calcInput">
+                <span>{{ workersLabel(i.job.val) }}</span> 
+                <b-numberinput :input="val('workers')" min="0" v-model="i.workers.val" :controls="false"></b-numberinput>
+            </div>
+            <div class="calcInput" v-show="i.annexed.vis">
+                <span>${loc("wiki_calc_job_stress_annexed")}</span> 
+                <b-numberinput :input="val('annexed')" min="0" v-model="i.annexed.val" :controls="false"></b-numberinput>
+            </div>
+            <div class="calcInput">
+                <span>${loc("civics_government")}</span> 
+                <calc-dropdown 
+                    :model-value="i.government.val" 
+                    :options="govOptions" 
+                    :placeholder="'${loc("civics_government")}'" 
+                    @update:model-value="pickGov">
+                </calc-dropdown>
+            </div>
+            <div class="calcInput" v-show="i.electricity.vis">
+                <b-checkbox class="patrol" v-model="i.electricity.val">${loc("tech_electricity")}</b-checkbox>
+            </div>
+            <div class="calcInput" v-show="i.electricity.vis && i.electricity.val">
+                <b-checkbox class="patrol" v-model="i.virtual_reality.val">${loc("tech_virtual_reality")}</b-checkbox>
+            </div>
+            <div class="calcInput" v-show="i.playful.vis">
+                <b-checkbox class="patrol" v-model="i.playful.val">${loc("trait_playful_name")}</b-checkbox>
+            </div>
+
+            <div class="calcInput">
+                <span>${loc("trait_high_pop_name")}</span> 
+                <calc-dropdown 
+                    v-model="i.high_pop.val" 
+                    :options="traitOptions"
+                    :placeholder="'${loc('wiki_calc_trait_undefined')}'">
+                </calc-dropdown>
+            </div>
+
+            <div class="calcInput">
+                <span>
+                    ${loc("trait_emotionless_name")}
+                </span>
+                <calc-dropdown 
+                    v-model="i.emotionless.val" 
+                    :options="traitOptions"
+                    :placeholder="'${loc('wiki_calc_trait_undefined')}'">
+                </calc-dropdown>
+            </div>
         </div>
-        <div class="calcButton">
-            <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
-            <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
-        </div>
+
+        <calc-buttons 
+            show-import reset-label="${loc('wiki_calc_reset')}" 
+            import-label="${loc('wiki_calc_import')}" 
+            @reset="resetInputs()" 
+            @import="importInputs()">
+        </calc-buttons>
     `);
+
+    const jobOptions = [
+        { value: undefined, 
+        label: loc("wiki_calc_job_stress_job") }, // placeholder
+        ...jobs.map((job) =>
+            job === "soldier"
+                ? { value: job, label: loc("governor_soldier") }
+                : job === "titan_colonist"
+                  ? { value: job, label: loc("job_colonist_tp", [getSolarName("titan")]) }
+                  : { value: job, label: loc("job_" + job) },
+        ),
+    ];
+
+    const traitOptions = [0, 0.1, 0.25, 0.5, 1, 2, 3, 4].map((r) => ({
+        value: r,
+        label: r === 0 ? loc("wiki_calc_trait_unowned") : String(r),
+    }));
+
+    const govOptions = [
+        { value: "anarchy", label: loc("govern_anarchy") },
+        { value: "autocracy", label: loc("govern_autocracy") },
+        { value: "federation", label: loc("govern_federation") },
+        { value: "socialist", label: loc("govern_socialist") },
+        { value: "other", label: loc("wiki_calc_job_stress_government_other") },
+    ];
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
     
     vBind({
         el: `#jobStressCalc`,
         data: {
             i: inputs,
-            s: show
+            s: show,
+            jobOptions,
+            govOptions,
+            traitOptions,
         },
+        components: { CalcDropdown, CalcButtons },
         methods: {
             val(type){
                 if (inputs[type].val && inputs[type].val < 0){
@@ -1389,9 +1451,6 @@ function jobStressCalc(info){
                 inputs.government.val = gov;
                 inputs.annexed.vis = gov !== 'federation';
                 inputs.electricity.vis = gov === 'autocracy';
-            },
-            pickTrait(rank, trait){
-                inputs[trait].val = rank;
             },
             resetInputs(){
                 inputs.job.val = undefined;
@@ -1457,18 +1516,6 @@ function jobStressCalc(info){
                 }
                 return num !== undefined ? num : loc('wiki_calc_job_stress_' + type);
             },
-            jobLabel(job){
-                if (!job){
-                    return loc('wiki_calc_job_stress_job');
-                }
-                if (job === 'soldier'){
-                    return loc('governor_soldier');
-                }
-                else if (job === 'titan_colonist'){
-                    return loc('job_colonist_tp',[getSolarName('titan')]);
-                }
-                return loc('job_'+job);
-            },
             workersLabel(job){
                 if (job === 'soldier'){
                     return loc('wiki_calc_job_stress_soldiers');
@@ -1476,18 +1523,6 @@ function jobStressCalc(info){
                 else {
                     return loc('wiki_calc_job_stress_workers');
                 }
-            },
-            govLabel(gov){
-                if (!gov){
-                    return loc('civics_government');
-                }
-                if (gov === 'other'){
-                    return loc('wiki_calc_job_stress_government_other');
-                }
-                return loc('govern_'+gov);
-            },
-            traitLabel(rank){
-                return rank === undefined ? loc('wiki_calc_trait_undefined') : rank === 0 ? loc('wiki_calc_trait_unowned') : rank;
             },
             stressDiv(job){
                 if (!job){
@@ -1661,7 +1696,11 @@ function warmongerCalc(info){
             <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
         </div>
     `);
-    
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
+
     vBind({
         el: `#warmongerCalc`,
         data: {
@@ -1753,7 +1792,11 @@ function spyCostCalc(info){
             <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
         </div>
     `);
-    
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
+
     vBind({
         el: `#spyCostCalc`,
         data: {
@@ -1869,6 +1912,10 @@ function occupationCalc(info){
         </div>
     `);
     
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
+
     vBind({
         el: `#occupationCalc`,
         data: {
@@ -1959,7 +2006,11 @@ function genomeDecayCalc(info){
             <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
         </div>
     `);
-    
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
+
     vBind({
         el: `#genomeDecayCalc`,
         data: {
@@ -2065,6 +2116,10 @@ function quantumLevelCalc(info){
             <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
         </div>
     `);
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
     
     vBind({
         el: `#quantumLevelCalc`,
@@ -2262,6 +2317,10 @@ export function massCalc(info){
             <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
         </div>
     `);
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
     
     vBind({
         el: `#massCalc`,
@@ -2501,6 +2560,10 @@ function untappedCalc(info){
             <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
         </div>
     `);
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
     
     vBind({
         el: `#untappedPotentialCalc`,
@@ -2577,6 +2640,9 @@ function syndicateCapCalc(info){
             <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
         </div>
     `);
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
     
     vBind({
         el: `#syndicateCapCalc`,
@@ -2728,6 +2794,10 @@ function syndicatePenaltyCalc(info){
                 return 500;
         }
     };
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
     
     vBind({
         el: `#syndicatePenaltyCalc`,
@@ -3021,7 +3091,7 @@ function tpShipsCostsCalc(info){
         creep: { val: undefined }
     }
     
-    formulaBase.append(`
+    formulaBase.append(/*html*/ `
         <div>
             <div>
                 <h2 class="has-text-caution">${loc('wiki_calc_tp_ships_costs_base_costs')}</h2>
@@ -3030,10 +3100,10 @@ function tpShipsCostsCalc(info){
                 <h3 class="has-text-info">${loc('resource_Money_name')}:</h3><span> {{ getBase(i['class'].val, 'class', 'Money') }}</span><span v-show="i['class'].val !== 'explorer'">^{{ getExponent(i.sensor.val, 'sensor', 'Money') }}</span><span v-show="r.Money.preVis"> = {{ calcPre('Money') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Aluminium_name')}:</h3><span> {{ calcPre(getBase(i['class'].val, 'class', 'Aluminium')) }}</span><span v-show="r.Aluminium.preVis"> = {{ calcPre('Aluminium') }}</span>
+                <h3 class="has-text-info">${loc('resource_Aluminium_name')}:</h3><span> {{ getBase(i['class'].val, 'class', 'Aluminium') }}</span><span v-show="r.Aluminium.preVis"> = {{ calcPre('Aluminium') }}</span>
             </div>
             <div>
-                <h3 class="has-text-info">${loc('resource_Adamantite_name')}:</h3><span> {{ calcPre(getBase(i['class'].val, 'class', 'Adamantite')) }}</span><span v-show="r.Adamantite.preVis"> = {{ calcPre('Adamantite') }}</span>
+                <h3 class="has-text-info">${loc('resource_Adamantite_name')}:</h3><span> {{ getBase(i['class'].val, 'class', 'Adamantite') }}</span><span v-show="r.Adamantite.preVis"> = {{ calcPre('Adamantite') }}</span>
             </div>
             <div>
                 <h3 class="has-text-info">${loc('resource_Steel_name')}:</h3><span> {{ getBase(i.armor.val, 'armor', 'Steel') }}^{{ generic(s.exp1.val, 'exp1') }}</span><span v-show="r.Steel.preVis"> = {{ calcPre('Steel') }}</span>
@@ -3084,29 +3154,23 @@ function tpShipsCostsCalc(info){
     finalForms += `</div>`;
     formulaCreep.append(finalForms);
     
-    variables.append(`
+    variables.append(/*html*/ `
         <div>
-            <div class="calcInput"><span>${loc('wiki_calc_tp_ships_costs_owned')}</span> <b-numberinput :input="val('owned')" min="0" v-model="i.owned.val" :controls="false"></b-numberinput></div>
+            <div class="calcInput">
+                <span>${loc("wiki_calc_tp_ships_costs_owned")}</span> 
+                <b-numberinput :input="val('owned')" min="0" v-model="i.owned.val" :controls="false"></b-numberinput>
+            </div>
             <div class="calcInput">
                 <div>
                     <span>${loc('outer_shipyard_class')}</span>
                 </div>
                 <div>
-                    <b-dropdown hoverable>
-                        <template #trigger>
-                            <button class="button is-primary">
-                                <span>{{ genericLabel('class', i['class'].val) }}</span>
-                                <i class="fas fa-sort-down"></i>
-                            </button>
-                        </template>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'corvette')">{{ genericLabel('class', 'corvette') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'frigate')">{{ genericLabel('class', 'frigate') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'destroyer')">{{ genericLabel('class', 'destroyer') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'cruiser')">{{ genericLabel('class', 'cruiser') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'battlecruiser')">{{ genericLabel('class', 'battlecruiser') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'dreadnought')">{{ genericLabel('class', 'dreadnought') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('class', 'explorer')">{{ genericLabel('class', 'explorer') }}</b-dropdown-item>
-                    </b-dropdown>
+                    <calc-dropdown 
+                        :model-value="i['class'].val" 
+                        :options="classOptions" 
+                        :placeholder="'${loc("outer_shipyard_class")}'"   
+                        @update:model-value="pickGeneric('class', $event)">
+                    </calc-dropdown>
                 </div>
             </div>
             <div class="calcInput">
@@ -3114,19 +3178,11 @@ function tpShipsCostsCalc(info){
                     <span>${loc('outer_shipyard_power')}</span>
                 </div>
                 <div>
-                    <b-dropdown hoverable>
-                        <template #trigger>
-                            <button class="button is-primary">
-                                <span>{{ genericLabel('power', i.power.val) }}</span>
-                                <i class="fas fa-sort-down"></i>
-                            </button>
-                        </template>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'solar')">{{ genericLabel('power', 'solar') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'diesel')">{{ genericLabel('power', 'diesel') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'fission')">{{ genericLabel('power', 'fission') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'fusion')">{{ genericLabel('power', 'fusion') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('power', 'elerium')">{{ genericLabel('power', 'elerium') }}</b-dropdown-item>
-                    </b-dropdown>
+                    <calc-dropdown 
+                        v-model="i.power.val" 
+                        :options="powerOptions" 
+                        :placeholder="'${loc("outer_shipyard_power")}'">
+                    </calc-dropdown>
                 </div>
             </div>
             <div class="calcInput">
@@ -3134,20 +3190,11 @@ function tpShipsCostsCalc(info){
                     <span>${loc('outer_shipyard_weapon')}</span>
                 </div>
                 <div>
-                    <b-dropdown hoverable>
-                        <template #trigger>
-                            <button class="button is-primary">
-                                <span>{{ genericLabel('weapon', i.weapon.val) }}</span>
-                                <i class="fas fa-sort-down"></i>
-                            </button>
-                        </template>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'railgun')">{{ genericLabel('weapon', 'railgun') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'laser')">{{ genericLabel('weapon', 'laser') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'p_laser')">{{ genericLabel('weapon', 'p_laser') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'plasma')">{{ genericLabel('weapon', 'plasma') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'phaser')">{{ genericLabel('weapon', 'phaser') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('weapon', 'disruptor')">{{ genericLabel('weapon', 'disruptor') }}</b-dropdown-item>
-                    </b-dropdown>
+                    <calc-dropdown 
+                        v-model="i.weapon.val" 
+                        :options="weaponOptions" 
+                        :placeholder="'${loc("outer_shipyard_weapon")}'">
+                    </calc-dropdown>
                 </div>
             </div>
             <div class="calcInput">
@@ -3155,17 +3202,11 @@ function tpShipsCostsCalc(info){
                     <span>${loc('outer_shipyard_armor')}</span>
                 </div>
                 <div>
-                    <b-dropdown hoverable>
-                        <template #trigger>
-                            <button class="button is-primary">
-                                <span>{{ genericLabel('armor', i.armor.val) }}</span>
-                                <i class="fas fa-sort-down"></i>
-                            </button>
-                        </template>
-                        <b-dropdown-item v-on:click="pickGeneric('armor', 'steel')">{{ genericLabel('armor', 'steel') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('armor', 'alloy')">{{ genericLabel('armor', 'alloy') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('armor', 'neutronium')">{{ genericLabel('armor', 'neutronium') }}</b-dropdown-item>
-                    </b-dropdown>
+                    <calc-dropdown 
+                        v-model="i.armor.val" 
+                        :options="armorOptions" 
+                        :placeholder="'${loc("outer_shipyard_armor")}'">
+                    </calc-dropdown>
                 </div>
             </div>
             <div class="calcInput">
@@ -3173,20 +3214,11 @@ function tpShipsCostsCalc(info){
                     <span>${loc('outer_shipyard_engine')}</span>
                 </div>
                 <div>
-                    <b-dropdown hoverable>
-                        <template #trigger>
-                            <button class="button is-primary">
-                                <span>{{ genericLabel('engine', i.engine.val) }}</span>
-                                <i class="fas fa-sort-down"></i>
-                            </button>
-                        </template>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'ion')">{{ genericLabel('engine', 'ion') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'tie')">{{ genericLabel('engine', 'tie') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'pulse')">{{ genericLabel('engine', 'pulse') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'photon')">{{ genericLabel('engine', 'photon') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'vacuum')">{{ genericLabel('engine', 'vacuum') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('engine', 'emdrive')">{{ genericLabel('engine', 'emdrive') }}</b-dropdown-item>
-                    </b-dropdown>
+                    <calc-dropdown 
+                        v-model="i.engine.val" 
+                        :options="engineOptions" 
+                        :placeholder="'${loc("outer_shipyard_engine")}'">
+                    </calc-dropdown>
                 </div>
             </div>
             <div class="calcInput">
@@ -3194,25 +3226,21 @@ function tpShipsCostsCalc(info){
                     <span>${loc('outer_shipyard_sensor')}</span>
                 </div>
                 <div>
-                    <b-dropdown hoverable>
-                        <template #trigger>
-                            <button class="button is-primary">
-                                <span>{{ genericLabel('sensor', i.sensor.val) }}</span>
-                                <i class="fas fa-sort-down"></i>
-                            </button>
-                        </template>
-                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'visual')">{{ genericLabel('sensor', 'visual') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'radar')">{{ genericLabel('sensor', 'radar') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'lidar')">{{ genericLabel('sensor', 'lidar') }}</b-dropdown-item>
-                        <b-dropdown-item v-on:click="pickGeneric('sensor', 'quantum')">{{ genericLabel('sensor', 'quantum') }}</b-dropdown-item>
-                    </b-dropdown>
+                    <calc-dropdown 
+                        v-model="i.sensor.val" 
+                        :options="sensorOptions" 
+                        :placeholder="'${loc("outer_shipyard_sensor")}'">
+                    </calc-dropdown>
                 </div>
             </div>
         </div>
-        <div class="calcButton">
-            <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
-            <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
-        </div>
+        <calc-buttons 
+            show-import 
+            reset-label="${loc("wiki_calc_reset")}" 
+            import-label="${loc("wiki_calc_import")}" 
+            @reset="resetInputs()" 
+            @import="importInputs()">
+        </calc-buttons>
     `);
     
     let getExp = function(val, type){
@@ -3246,14 +3274,61 @@ function tpShipsCostsCalc(info){
 
         }
     }
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
+    res = Vue.reactive(res);
+
+    const classOptions = [
+        "corvette",
+        "frigate",
+        "destroyer",
+        "cruiser",
+        "battlecruiser",
+        "dreadnought",
+        "explorer",
+    ].map((v) => ({
+        value: v,
+        label: loc(`outer_shipyard_class_${v}`),
+    }));
+    const powerOptions = ["solar", "diesel", "fission", "fusion", "elerium"].map((v) => ({
+        value: v,
+        label: loc(`outer_shipyard_power_${v}`),
+    }));
+    const weaponOptions = ["railgun", "laser", "p_laser", "plasma", "phaser", "disruptor"].map(
+        (v) => ({
+            value: v,
+            label: loc(`outer_shipyard_weapon_${v}`),
+        }),
+    );
+    const armorOptions = ["steel", "alloy", "neutronium"].map((v) => ({
+        value: v,
+        label: loc(`outer_shipyard_armor_${v}`),
+    }));
+    const engineOptions = ["ion", "tie", "pulse", "photon", "vacuum", "emdrive"].map((v) => ({
+        value: v,
+        label: loc(`outer_shipyard_engine_${v}`),
+    }));
+    const sensorOptions = ["visual", "radar", "lidar", "quantum"].map((v) => ({
+        value: v,
+        label: loc(`outer_shipyard_sensor_${v}`),
+    }));
     
     vBind({
         el: `#tpShipsCostsCalc`,
         data: {
             i: inputs,
             r: res,
-            s: show
+            s: show,
+            classOptions,
+            powerOptions,
+            weaponOptions,
+            armorOptions,
+            engineOptions,
+            sensorOptions,
         },
+        components: { CalcDropdown, CalcButtons },
         methods: {
             val(type){
                 if (inputs[type].val && inputs[type].val < 0){
@@ -3351,9 +3426,6 @@ function tpShipsCostsCalc(info){
             },
             generic(num, type){
                 return num !== undefined ? num : loc('wiki_calc_tp_ships_costs_' + type);
-            },
-            genericLabel(type, val){
-                return val ? loc(`outer_shipyard_${type}_${val}`) : loc(`outer_shipyard_${type}`);
             },
             getBase(val, type, resource){
                 if (!val){
@@ -3472,6 +3544,7 @@ function tpShipsCostsCalc(info){
                 return getExp(val, type);
             },
             calcPre(resource){
+                if (!res[resource]) return;
                 if (res[resource]?.base !== undefined){
                     let exponent = 0;
                     let resVal = res[resource].base;
@@ -3740,6 +3813,10 @@ function tpShipsPowerCalc(info){
             <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
         </div>
     `);
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
     
     vBind({
         el: `#tpShipsPowerCalc`,
@@ -3959,6 +4036,10 @@ function tpShipsFirepowerCalc(info){
             <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
         </div>
     `);
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
     
     vBind({
         el: `#tpShipsFirepowerCalc`,
@@ -4087,6 +4168,10 @@ function tpShipsHullCalc(info){
             <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
         </div>
     `);
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
     
     vBind({
         el: `#tpShipsHullCalc`,
@@ -4208,6 +4293,10 @@ function tpShipsScanCalc(info){
             <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
         </div>
     `);
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
     
     vBind({
         el: `#tpShipsScanCalc`,
@@ -4336,6 +4425,10 @@ function tpShipsIntelCalc(info){
             <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
         </div>
     `);
+
+    // make fields reactive while hopefully minimizing git conflicts
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
     
     vBind({
         el: `#tpShipsIntelCalc`,
