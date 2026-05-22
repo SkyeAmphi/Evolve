@@ -67,7 +67,7 @@ export default defineConfig(({ mode }) => {
             // copy over static assets that Vite doesn't bundle
             viteStaticCopy({
                 targets: [
-                    { src: 'evolve/evolve.js', dest: 'evolve' }, // copy over the web worker for production builds
+                    { src: 'evolve/evolve.js', dest: '.' }, // copy over the web worker for production builds
                     { src: 'lib', dest: '.' },
                     { src: 'font', dest: '.' },
                     { src: 'strings', dest: '.' },
