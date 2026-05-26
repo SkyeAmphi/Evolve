@@ -3170,79 +3170,43 @@ function tpShipsCostsCalc(info){
                 <span>${loc("wiki_calc_tp_ships_costs_owned")}</span> 
                 <b-numberinput :input="val('owned')" min="0" v-model="i.owned.val" :controls="false"></b-numberinput>
             </div>
-            <div class="calcInput">
-                <div>
-                    <span>${loc('outer_shipyard_class')}</span>
-                </div>
-                <div>
-                    <calc-dropdown 
-                        :model-value="i['class'].val" 
-                        :options="classOptions" 
-                        :placeholder="'${loc("outer_shipyard_class")}'"   
-                        @update:model-value="pickGeneric('class', $event)">
-                    </calc-dropdown>
-                </div>
-            </div>
-            <div class="calcInput">
-                <div>
-                    <span>${loc('outer_shipyard_power')}</span>
-                </div>
-                <div>
-                    <calc-dropdown 
-                        v-model="i.power.val" 
-                        :options="powerOptions" 
-                        :placeholder="'${loc("outer_shipyard_power")}'">
-                    </calc-dropdown>
-                </div>
-            </div>
-            <div class="calcInput">
-                <div>
-                    <span>${loc('outer_shipyard_weapon')}</span>
-                </div>
-                <div>
-                    <calc-dropdown 
-                        v-model="i.weapon.val" 
-                        :options="weaponOptions" 
-                        :placeholder="'${loc("outer_shipyard_weapon")}'">
-                    </calc-dropdown>
-                </div>
-            </div>
-            <div class="calcInput">
-                <div>
-                    <span>${loc('outer_shipyard_armor')}</span>
-                </div>
-                <div>
-                    <calc-dropdown 
-                        v-model="i.armor.val" 
-                        :options="armorOptions" 
-                        :placeholder="'${loc("outer_shipyard_armor")}'">
-                    </calc-dropdown>
-                </div>
-            </div>
-            <div class="calcInput">
-                <div>
-                    <span>${loc('outer_shipyard_engine')}</span>
-                </div>
-                <div>
-                    <calc-dropdown 
-                        v-model="i.engine.val" 
-                        :options="engineOptions" 
-                        :placeholder="'${loc("outer_shipyard_engine")}'">
-                    </calc-dropdown>
-                </div>
-            </div>
-            <div class="calcInput">
-                <div>
-                    <span>${loc('outer_shipyard_sensor')}</span>
-                </div>
-                <div>
-                    <calc-dropdown 
-                        v-model="i.sensor.val" 
-                        :options="sensorOptions" 
-                        :placeholder="'${loc("outer_shipyard_sensor")}'">
-                    </calc-dropdown>
-                </div>
-            </div>
+            <calc-dropdown
+                :label="'${loc('outer_shipyard_class')}'"
+                :model-value="i['class'].val"
+                :options="classOptions"
+                :placeholder="'${loc("outer_shipyard_class")}'"
+                @update:model-value="pickGeneric('class', $event)"
+            ></calc-dropdown>
+            <calc-dropdown
+                :label="'${loc('outer_shipyard_power')}'"
+                v-model="i.power.val"
+                :options="powerOptions"
+                :placeholder="'${loc("outer_shipyard_power")}'"
+            ></calc-dropdown>
+            <calc-dropdown
+                :label="'${loc('outer_shipyard_weapon')}'"
+                v-model="i.weapon.val"
+                :options="weaponOptions"
+                :placeholder="'${loc("outer_shipyard_weapon")}'"
+            ></calc-dropdown>
+            <calc-dropdown
+                :label="'${loc('outer_shipyard_armor')}'"
+                v-model="i.armor.val"
+                :options="armorOptions"
+                :placeholder="'${loc("outer_shipyard_armor")}'"
+            ></calc-dropdown>
+            <calc-dropdown
+                :label="'${loc('outer_shipyard_engine')}'"
+                v-model="i.engine.val"
+                :options="engineOptions"
+                :placeholder="'${loc("outer_shipyard_engine")}'"
+            ></calc-dropdown>
+            <calc-dropdown
+                :label="'${loc('outer_shipyard_sensor')}'"
+                v-model="i.sensor.val"
+                :options="sensorOptions"
+                :placeholder="'${loc("outer_shipyard_sensor")}'"
+            ></calc-dropdown>
         </div>
         <calc-buttons 
             show-import 
