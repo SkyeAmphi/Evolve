@@ -3213,8 +3213,8 @@ function tpShipsCostsCalc(info){
             reset-label="${loc("wiki_calc_reset")}" 
             import-label="${loc("wiki_calc_import")}" 
             @reset="resetInputs()" 
-            @import="importInputs()">
-        </calc-buttons>
+            @import="importInputs()"
+        ></calc-buttons>
     `);
     
     let getExp = function(val, type){
