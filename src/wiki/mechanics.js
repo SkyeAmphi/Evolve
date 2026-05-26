@@ -2674,7 +2674,8 @@ function syndicatePenaltyCalc(info){
         sam: { val: undefined, vis: false },
         fob: { val: false, vis: false },
         intel: { val: undefined },
-        syndicate: { val: undefined }
+        syndicate: { val: undefined },
+        chicken: { val: false },
     };
     
     let show = {
@@ -2701,7 +2702,21 @@ function syndicatePenaltyCalc(info){
             <h2 class="has-text-caution">${loc('wiki_calc_syndicate_penalty_residual')}</h2>
         </div>
         <div>
-            <span>{{ generic(i.syndicate.val, 'syndicate') }} - {{ generic(s.region_security.val, 'region_security') }}</span><span v-show="s.residual.vis"> = {{ calcResidual() }}</span>
+            <span v-show="i.chicken.val">
+                (</span
+            >
+            <span>
+                {{ generic(i.syndicate.val, 'syndicate') }}
+            </span>
+            <span v-show="i.chicken.val">
+                * {{ chickenMultiplier() }})</span
+            >
+            <span>
+                - {{ generic(s.region_security.val, 'region_security') }}
+            </span>
+            <span v-show="s.residual.vis">
+                = {{ calcResidual() }}
+            </span>
         </div>
         <div>
             <h2 class="has-text-caution">${loc('wiki_mechanics_syndicate_penalty')}</h2>
@@ -2738,6 +2753,12 @@ function syndicatePenaltyCalc(info){
                     </b-dropdown>
                 </div>
             </div>
+
+            <calc-dropdown 
+                v-model="i.chicken.val" 
+                trait="chicken"
+            ></calc-dropdown>
+            
             <div class="calcInput"><span>${loc('wiki_calc_syndicate_penalty_rival_relations')}</span> <b-numberinput :input="val('relations')" min="0" max="100" v-model="i.relations.val" :controls="false"></b-numberinput></div>
             <div class="calcInput" v-show="i.triton1.vis"><div><span>${loc(`space_mission_title`,[getSolarName('triton')])}</span></div><div><b-checkbox class="patrol" v-model="i.triton1.val"></b-checkbox></div></div>
             <div class="calcInput" v-show="i.triton1.val && i.triton1.vis"><div><span>${loc('tech_data_analysis')}</span></div><div><b-checkbox class="patrol" v-model="i.outer4.val"></b-checkbox></div></div>
@@ -2748,10 +2769,13 @@ function syndicatePenaltyCalc(info){
             <div class="calcInput"><span>${loc('space_scan_effectiveness')}</span> <b-numberinput :input="val('intel')" min="0" v-model="i.intel.val" :controls="false"></b-numberinput></div>
             <div class="calcInput"><span>${loc('space_syndicate')}</span> <b-numberinput :input="val('syndicate')" min="0" v-model="i.syndicate.val" :controls="false"></b-numberinput></div>
         </div>
-        <div class="calcButton">
-            <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
-            <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
-        </div>
+        <calc-buttons
+            show-import
+            :reset-label="'${loc('wiki_calc_reset')}'"
+            :import-label="'${loc('wiki_calc_import')}'"
+            @reset="resetInputs()"
+            @import="importInputs()"
+        ></calc-buttons>
     `);
     
     let calcSyndicateCap = function (region){
@@ -2779,7 +2803,11 @@ function syndicatePenaltyCalc(info){
         el: `#syndicatePenaltyCalc`,
         data: {
             i: inputs,
-            s: show
+            s: show,
+        },
+        components: { 
+            CalcDropdown,
+            CalcButtons
         },
         methods: {
             val(type){
@@ -2817,6 +2845,7 @@ function syndicatePenaltyCalc(info){
                 inputs.fob = { val: false, vis: false };
                 inputs.intel = { val: undefined };
                 inputs.syndicate = { val: undefined };
+                inputs.chicken = { val: false };
             },
             importInputs(){
                 if (global.civic['foreign'] && global.civic.foreign['gov3']){
@@ -2856,6 +2885,8 @@ function syndicatePenaltyCalc(info){
                 
                 inputs.fob.val = global.space['fob'] && global.space.fob.on > 0;
                 inputs.fob.vis = inputs.region.val && inputs.region.val === 'triton';
+
+                inputs.chicken.val = global.race['chicken'] || 0;
             },
             generic(num, type){
                 if (num !== undefined){
@@ -2988,16 +3019,14 @@ function syndicatePenaltyCalc(info){
                 
                 return show.region_security.val;
             },
-            calcResidual(){
-                if (inputs.syndicate.val !== undefined && show.region_security.val !== undefined){
-                    let residual = inputs.syndicate.val - show.region_security.val;
-                    if (residual < 0) {
-                        residual = 0;
-                    }
+            calcResidual() {
+                if (inputs.syndicate.val !== undefined && show.region_security.val !== undefined) {
+                    const effectiveSyndicate = Math.round(inputs.syndicate.val * this.chickenMultiplier());
+                    let residual = effectiveSyndicate - show.region_security.val;
+                    if (residual < 0) residual = 0;
                     show.residual.val = residual;
                     show.residual.vis = true;
-                }
-                else {
+                } else {
                     show.residual.val = undefined;
                     show.residual.vis = false;
                 }
@@ -3006,7 +3035,7 @@ function syndicatePenaltyCalc(info){
             },
             calcPenalty(percent){
                 if (percent){
-                    return (show.penalty.val * 100).toFixed(2);
+                    return Math.min(100, show.penalty.val * 100).toFixed(2);
                 }
                 show.penalty.vis = show.residual.val !== undefined && show.divisor.val !== undefined;
                 
@@ -3018,7 +3047,12 @@ function syndicatePenaltyCalc(info){
                 }
                 
                 return show.penalty.val;
-            }
+            },
+
+            chickenMultiplier() {
+                if (!inputs.chicken.val) return 1;
+                return 1 + (traits.chicken.vars(inputs.chicken.val)[1] / 100);
+            },
         }
     });
 }
