@@ -1265,15 +1265,13 @@ function jobStressCalc(info){
     });
 
     jobSelect.append(/*html*/ `
-        <div class="calcInput">
-            <span>${loc('wiki_calc_job_stress_job')}</span>
-            <calc-dropdown 
-                :model-value="i.job.val" 
-                :options="jobOptions" 
-                :scrollable="true" 
-                @update:model-value="pickJob"
-            />
-        </div>
+        <calc-dropdown
+            :label="'${loc('wiki_calc_job_stress_job')}'"
+            :model-value="i.job.val"
+            :options="jobOptions"
+            :scrollable="true"
+            @update:model-value="pickJob"
+        ></calc-dropdown>
     `);
     
     formula.append(/*html*/ `
@@ -1324,14 +1322,12 @@ function jobStressCalc(info){
             <div class="calcInput" v-show="i.dense.vis">
                 <b-checkbox class="patrol" v-model="i.dense.val">${loc('planet_dense')}</b-checkbox>
             </div>
-            <div class="calcInput" v-show="i.freespirit.vis">
-                <span>${loc('trait_freespirit_name')}</span> 
-                <calc-dropdown 
-                    v-model="i.freespirit.val" 
-                    :options="traitOptions"
-                    :placeholder="'${loc('wiki_calc_trait_undefined')}'">
-                </calc-dropdown>
-            </div>
+
+            <calc-dropdown 
+                v-show="i.freespirit.vis" 
+                v-model="i.freespirit.val" 
+                trait="freespirit"
+            ></calc-dropdown>
         </div>
 
         <div>
@@ -1343,15 +1339,12 @@ function jobStressCalc(info){
                 <span>${loc("wiki_calc_job_stress_annexed")}</span> 
                 <b-numberinput :input="val('annexed')" min="0" v-model="i.annexed.val" :controls="false"></b-numberinput>
             </div>
-            <div class="calcInput">
-                <span>${loc("civics_government")}</span> 
-                <calc-dropdown 
-                    :model-value="i.government.val" 
-                    :options="govOptions" 
-                    :placeholder="'${loc("civics_government")}'" 
-                    @update:model-value="pickGov">
-                </calc-dropdown>
-            </div>
+            <calc-dropdown
+                :label="'${loc("civics_government")}'"
+                :model-value="i.government.val"
+                :options="govOptions"
+                @update:model-value="pickGov"
+            ></calc-dropdown>
             <div class="calcInput" v-show="i.electricity.vis">
                 <b-checkbox class="patrol" v-model="i.electricity.val">${loc("tech_electricity")}</b-checkbox>
             </div>
@@ -1362,33 +1355,23 @@ function jobStressCalc(info){
                 <b-checkbox class="patrol" v-model="i.playful.val">${loc("trait_playful_name")}</b-checkbox>
             </div>
 
-            <div class="calcInput">
-                <span>${loc("trait_high_pop_name")}</span> 
-                <calc-dropdown 
-                    v-model="i.high_pop.val" 
-                    :options="traitOptions"
-                    :placeholder="'${loc('wiki_calc_trait_undefined')}'">
-                </calc-dropdown>
-            </div>
+            <calc-dropdown 
+                v-model="i.high_pop.val" 
+                trait="high_pop" 
+            ></calc-dropdown>
 
-            <div class="calcInput">
-                <span>
-                    ${loc("trait_emotionless_name")}
-                </span>
-                <calc-dropdown 
-                    v-model="i.emotionless.val" 
-                    :options="traitOptions"
-                    :placeholder="'${loc('wiki_calc_trait_undefined')}'">
-                </calc-dropdown>
-            </div>
+            <calc-dropdown 
+                v-model="i.emotionless.val" 
+                trait="emotionless" 
+            ></calc-dropdown>
         </div>
 
         <calc-buttons 
             show-import reset-label="${loc('wiki_calc_reset')}" 
             import-label="${loc('wiki_calc_import')}" 
             @reset="resetInputs()" 
-            @import="importInputs()">
-        </calc-buttons>
+            @import="importInputs()"
+        ></calc-buttons>
     `);
 
     const jobOptions = [
@@ -1402,11 +1385,6 @@ function jobStressCalc(info){
                   : { value: job, label: loc("job_" + job) },
         ),
     ];
-
-    const traitOptions = [0, 0.1, 0.25, 0.5, 1, 2, 3, 4].map((r) => ({
-        value: r,
-        label: r === 0 ? loc("wiki_calc_trait_unowned") : String(r),
-    }));
 
     const govOptions = [
         { value: "anarchy", label: loc("govern_anarchy") },
@@ -1427,7 +1405,6 @@ function jobStressCalc(info){
             s: show,
             jobOptions,
             govOptions,
-            traitOptions,
         },
         components: { CalcDropdown, CalcButtons },
         methods: {
