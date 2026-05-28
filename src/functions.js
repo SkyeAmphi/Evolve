@@ -453,6 +453,9 @@ export function calcRQueueMax(){
 }
 
 export function buildQueue(){
+    // avoid rebuilding mid-drag; buildQueue will be called again once the drag is done anyway
+    if (Sortable.active) return;
+
     clearDragQueue();
     clearElement($('#buildQueue'));
     $('#buildQueue').append($(`
