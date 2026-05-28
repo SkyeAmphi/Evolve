@@ -878,7 +878,7 @@ function decayCalc(info){
     `;
     Object.keys(tradeRatio).forEach(function (res){
         dropdown += `
-            <b-dropdown-item v-on:click="pickRes('${res}')">{{ '${res}' | resLabel }}</b-dropdown-item>
+            <b-dropdown-item v-on:click="pickRes('${res}')">{{ resLabel('${res}') }}</b-dropdown-item>
         `;
     });
     dropdown += `</b-dropdown></div>`;
@@ -892,6 +892,9 @@ function decayCalc(info){
             <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
         </div>
     `);
+    
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
     
     vBind({
         el: `#decayCalc`,
@@ -995,6 +998,9 @@ function inflationCalc(info){
             <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
         </div>
     `);
+    
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
     
     vBind({
         el: `#inflationCalc`,

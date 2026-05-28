@@ -116,6 +116,9 @@ function addCalcInputs(parent,key){
         </div>
     `));
     
+    inputs = Vue.reactive(inputs);
+    resources = Vue.reactive(resources);
+
     vBind({
         el: `#${key}`,
         data: {

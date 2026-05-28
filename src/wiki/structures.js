@@ -347,6 +347,9 @@ function addCalcInputs(parent,key,section,region,path){
         `));
     }
     
+    inputs = Vue.reactive(inputs);
+    resources = Vue.reactive(resources);
+    
     vBind({
         el: `#${key}`,
         data: {

@@ -145,7 +145,7 @@ function addCosts(parent,key){
         `;
     }
     calcInputs += `
-                <div class="calcInput"><b-checkbox class="patrol" :input="update()" v-model="i.extra.creative">${loc('trait_creative_name')}</b-checkbox></div>
+                <div class="calcInput"><b-checkbox class="patrol" @change="update()" v-model="i.extra.creative">${loc('trait_creative_name')}</b-checkbox></div>
             </div>
             <div class="calcButton">
                 <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
@@ -153,6 +153,9 @@ function addCosts(parent,key){
         </div>
     `;
     parent.append($(calcInputs));
+
+    inputs = Vue.reactive(inputs);
+    resources = Vue.reactive(resources);
     
     vBind({
         el: `#${key}`,
