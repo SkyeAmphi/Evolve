@@ -6,6 +6,11 @@ import { jobScale } from './../jobs.js';
 import { races, traits } from './../races.js';
 import { infoBoxBuilder, sideMenu, createCalcSection } from './functions.js';
 
+// SFCs
+import CalcButtons from './components/CalcButtons.vue';
+import CalcDropdown from './components/CalcDropdown.vue';
+import CalcWrapper from './components/CalcWrapper.vue';
+
 export function pResPage(content){
     let mainContent = sideMenu('create',content);
 
@@ -367,13 +372,17 @@ export function prestigeCalc(info,resource,extraType,resetType){
     if (resource === 'plasmid'){
         equation += `
             <div>
-                <h3 class="has-text-caution">${loc('wiki_calc_plasmid_cap_total',[prestigeType === 'anti' ? loc('resource_AntiPlasmid_name') : loc('resource_Plasmid_name')])}</h2>
+                <h3 class="has-text-caution">
+                    ${loc('wiki_calc_plasmid_cap_total',[prestigeType === 'anti' ? loc('resource_AntiPlasmid_name') : loc('resource_Plasmid_name')])}
+                </h3>
             </div>
             <div>
                 <span>{{ plasmidCap(i.reset.val, i.synth.val) }} * (1 + (({{ generic(i.genes.val, 'genes') }}</span><span v-show="i.tp.val"> + 1</span><span>) / 8))</span><span v-show="pe.capVis"> = {{ plasmidCapCalc() }} = {{ pe.capVal }}</span>
             </div>
             <div>
-                <h3 class="has-text-caution">${loc('wiki_calc_plasmid_gains_raw',[prestigeType === 'anti' ? loc('resource_AntiPlasmid_name') : loc('resource_Plasmid_name')])}</h2>
+                <h3 class="has-text-caution">
+                    ${loc('wiki_calc_plasmid_gains_raw',[prestigeType === 'anti' ? loc('resource_AntiPlasmid_name') : loc('resource_Plasmid_name')])}
+                </h3>
             </div>
             <div>
         `;
@@ -391,13 +400,17 @@ export function prestigeCalc(info,resource,extraType,resetType){
                 <span v-show="s.vis"> = {{ calc() }}</span>
             </div>
             <div>
-                <h3 class="has-text-caution">${loc('wiki_calc_overflow')} </h2>
+                <h3 class="has-text-caution">
+                    ${loc('wiki_calc_overflow')}
+                </h3>
             </div>
             <div>
                 <span>{{ generic(pe.rawGains, 'plasmid_gains_raw') }} - {{ generic(pe.capVal, 'plasmid_cap_total') }}</span><span v-show="pe.overflowVis"> = {{ generic(pe.overflow, 'no_overflow') }}</span>
             </div>
             <div>
-                <h3 class="has-text-caution">${loc('wiki_calc_plasmid_gains_total',[prestigeType === 'anti' ? loc('resource_AntiPlasmid_name') : loc('resource_Plasmid_name')])}</h2>
+                <h3 class="has-text-caution">
+                    ${loc('wiki_calc_plasmid_gains_total',[prestigeType === 'anti' ? loc('resource_AntiPlasmid_name') : loc('resource_Plasmid_name')])}
+                </h3>
             </div>
             <div>
                 <span>{{ generic(pe.capVal, 'plasmid_cap_total') }} + ({{ generic(pe.overflow, 'overflow') }} / ({{ generic(pe.overflow, 'overflow') }} + {{ generic(pe.capVal, 'plasmid_cap_total') }}) * {{ generic(pe.capVal, 'plasmid_cap_total') }})</span><span v-show="pe.totalVis"> = {{ plasmidTotalCalc() }}</span>
@@ -454,32 +467,36 @@ export function prestigeCalc(info,resource,extraType,resetType){
                 <b-dropdown-item v-show="u.heavy.use" v-on:click="pickUniverse('heavy')">{{ uniLabel('heavy') }}</b-dropdown-item>
                 <b-dropdown-item v-show="u.magic.use" v-on:click="pickUniverse('magic')">{{ uniLabel('magic') }}</b-dropdown-item>
             </b-dropdown></div>
-            <div class="calcInput" v-show="i.high_pop.use"><span>${loc('trait_high_pop_name')}</span> <b-dropdown hoverable>
-                <template #trigger>
-                    <button class="button is-primary">
-                        <span>{{ highPopLabel(i.high_pop.val) }}</span>
-                        <i class="fas fa-sort-down"></i>
-                    </button>
-                </template>
-                <b-dropdown-item v-on:click="pickHighPop(0)">{{ highPopLabel(0) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickHighPop(0.25)">{{ highPopLabel(0.25) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickHighPop(0.5)">{{ highPopLabel(0.5) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickHighPop(1)">{{ highPopLabel(1) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickHighPop(2)">{{ highPopLabel(2) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickHighPop(3)">{{ highPopLabel(3) }}</b-dropdown-item>
-            </b-dropdown></div>
+
+            <calc-dropdown 
+                v-model="i.high_pop.val" 
+                trait="high_pop" 
+                v-show="i.high_pop.use"
+            ></calc-dropdown>
+
             <div class="calcInput" v-show="i.micro.use"><b-checkbox class="patrol" v-model="i.micro.val">${loc('universe_micro')}</b-checkbox></div>
             <div class="calcInput" v-show="i.synth.use"><b-checkbox class="patrol" v-model="i.synth.val">${loc('wiki_calc_synth')}</b-checkbox></div>
             <div class="calcInput" v-show="i.tp.use"><b-checkbox class="patrol" v-model="i.tp.val" :disabled="!i.tp.enabled">${loc('wiki_calc_tp')}</b-checkbox></div>
         </div>
-        <div class="calcButton">
-            <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
-            <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
-        </div>
+
+        <calc-buttons
+            show-import
+            reset-label="${loc('wiki_calc_reset')}"
+            import-label="${loc('wiki_calc_import')}"
+            @reset="resetInputs()"
+            @import="importInputs()"
+        ></calc-buttons>
     `);
     
+    inputs = Vue.reactive(inputs);
+    universes = Vue.reactive(universes);
+    resets = Vue.reactive(resets);
+    showEval = Vue.reactive(showEval);
+    plasExtra = Vue.reactive(plasExtra);
+
     vBind({
         el: '#' + prefix + 'Calc',
+        components: { CalcButtons, CalcDropdown },
         data: {
             i: inputs,
             u: universes,
@@ -535,7 +552,7 @@ export function prestigeCalc(info,resource,extraType,resetType){
                 inputs.synth.use = reset === 'mad';
                 if (!['mad','bioseed','terraform'].includes(reset)){
                     inputs.tp.enabled = false;
-                    inputs.tp.val = reset === 'ai';
+                    inputs.tp.val = ['ai', 'matrix', 'retired', 'eden'].includes(reset);
                 }
                 else {
                     inputs.tp.enabled = true;
@@ -557,9 +574,6 @@ export function prestigeCalc(info,resource,extraType,resetType){
                 else {
                     inputs.micro.val = false;
                 }
-            },
-            pickHighPop(rank){
-                inputs.high_pop.val = rank;
             },
             resetInputs(){
                 Object.keys(inputs).forEach(function(type){
@@ -776,9 +790,6 @@ export function prestigeCalc(info,resource,extraType,resetType){
             },
             uniLabel(lbl){
                 return lbl ? loc('universe_' + lbl) : loc('wiki_calc_universe');
-            },
-            highPopLabel(lbl){
-                return lbl === undefined ? loc('wiki_calc_trait_undefined') : lbl === 0 ? loc('wiki_calc_trait_unowned') : lbl;
             }
         }
     });
@@ -828,20 +839,50 @@ function plasProdCalc(info,type){
         </div>
     `);
     
-    variables.append(`
-        <div>
-            <div class="calcInput"><span>${type === 'plasmid' ? loc('resource_Plasmid_plural_name') : loc('resource_AntiPlasmid_plural_name')}</span> <b-numberinput :input="val('plas')" min="0" v-model="i.plas.val" :controls="false"></b-numberinput></div>
-            <div class="calcInput"><span>${loc(`resource_Phage_name`)}</span> <b-numberinput :input="val('phage')" min="0" v-model="i.phage.val" :controls="false"></b-numberinput></div>
-            <div class="calcInput"><b-checkbox class="patrol" :input="bleed()" v-model="i.antimatter.val">${loc('universe_antimatter')}</b-checkbox></div>
+    variables.append(/*html*/ `
+    <div>
+        <div class="calcInput">
+            <span>
+                ${type === 'plasmid' ? loc('resource_Plasmid_plural_name') : loc('resource_AntiPlasmid_plural_name')}
+            </span> 
+            <b-numberinput 
+                :input="val('plas')" 
+                min="0" 
+                v-model="i.plas.val" 
+                :controls="false">
+            </b-numberinput>
         </div>
-        <div class="calcButton">
-            <button class="button" @click="resetInputs()" :click="bleed()">${loc('wiki_calc_reset')}</button>
-            <button class="button" @click="importInputs()" :click="bleed()">${loc('wiki_calc_import')}</button>
+        <div class="calcInput">
+            <span>
+                ${loc(`resource_Phage_name`)}
+            </span> 
+            <b-numberinput 
+                :input="val('phage')"
+                min="0"
+                v-model="i.phage.val"
+                :controls="false">
+            </b-numberinput>
         </div>
+        <div class="calcInput">
+            <b-checkbox class="patrol" :input="bleed()" v-model="i.antimatter.val">
+                ${loc('universe_antimatter')}
+            </b-checkbox>
+        </div>
+        <calc-buttons
+            show-import
+            reset-label="${loc('wiki_calc_reset')}"
+            import-label="${loc('wiki_calc_import')}"
+            @reset="resetInputs()"
+            @import="importInputs()"
+        ></calc-buttons>
     `);
+    
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
     
     vBind({
         el: `#${type}ProdCalc`,
+        components: { CalcButtons },
         data: {
             i: inputs,
             s: show,
@@ -865,11 +906,13 @@ function plasProdCalc(info,type){
                 inputs.plas.val = undefined;
                 inputs.phage.val = undefined;
                 inputs.antimatter.val = false;
+                this.bleed();
             },
             importInputs(){
                 inputs.plas.val = type === 'plasmid' ? global.prestige.Plasmid.count : global.prestige.AntiPlasmid.count;
                 inputs.phage.val = global.prestige.Phage.count;
                 inputs.antimatter.val = global.race.universe === 'antimatter';
+                this.bleed();
             },
             generic(num, type){
                 if (num !== undefined){
@@ -987,46 +1030,51 @@ function storeBonusCalc(info,type){
         </div>
     `;
     formula.append(equation);
-    
-    variables.append(`
+
+    const storeHeaderLabel = loc('wiki_tech_special_crispr', [loc('wiki_arpa_crispr_store')]);
+    const storeOptions = [
+        { value: 0, label: loc('wiki_calc_not_owned') },
+        ...[1, 2, 3, 4].map((n) => ({ value: n, label: `${loc('wiki_arpa_crispr_store')}: ${n}` })),
+    ];
+
+    variables.append(/*html*/ `
         <div>
             <div class="calcInput"><span>${titlePlural}</span> <b-numberinput :input="val()" min="0" v-model="i.res.val" :controls="false"></b-numberinput></div>
-            <div class="calcInput"><span>${loc('wiki_tech_special_crispr',[loc('wiki_arpa_crispr_store')])}</span> <b-dropdown hoverable>
-                <template #trigger>
-                    <button class="button is-primary">
-                        <span>{{ storeLabel(i.store.val) }}</span>
-                        <i class="fas fa-sort-down"></i>
-                    </button>
-                </template>
-                <b-dropdown-item v-on:click="pickStore(0)">{{ storeLabel(0) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickStore(1)">{{ storeLabel(1) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickStore(2)">{{ storeLabel(2) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickStore(3)">{{ storeLabel(3) }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickStore(4)">{{ storeLabel(4) }}</b-dropdown-item>
-            </b-dropdown></div>
+
+            <calc-dropdown 
+                v-model="i.store.val" 
+                label="${storeHeaderLabel}" 
+                :options="storeOptions"
+            ></calc-dropdown>
+
             <div class="calcInput" v-show="i.antimatter.use"><b-checkbox class="patrol" :input="bleed()" v-model="i.antimatter.val">${loc('universe_antimatter')}</b-checkbox></div>
         </div>
-        <div class="calcButton">
-            <button class="button" @click="resetInputs()" :click="bleed()">${loc('wiki_calc_reset')}</button>
-            <button class="button" @click="importInputs()" :click="bleed()">${loc('wiki_calc_import')}</button>
-        </div>
+        <calc-buttons
+            show-import
+            reset-label="${loc('wiki_calc_reset')}"
+            import-label="${loc('wiki_calc_import')}"
+            @reset="resetInputs()"
+            @import="importInputs()"
+        ></calc-buttons>
     `);
     
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
+
     vBind({
         el: `#${type}StoreCalc`,
+        components: { CalcButtons, CalcDropdown },
         data: {
             i: inputs,
             s: show,
-            t: type
+            t: type,
+            storeOptions
         },
         methods: {
             val(){
                 if (inputs.res.val && inputs.res.val < 0){
                     inputs.res.val = 0;
                 }
-            },
-            pickStore(num){
-                inputs.store.val = num;
             },
             bleed(){
                 if (type !== 'phage'){
@@ -1042,11 +1090,13 @@ function storeBonusCalc(info,type){
                 inputs.res.val = undefined;
                 inputs.store.val = undefined;
                 inputs.antimatter.val = false;
+                this.bleed();
             },
             importInputs(){
                 inputs.res.val = type === 'phage' ? global.prestige.Phage.count : type === 'plasmid' ? global.prestige.Plasmid.count : global.prestige.AntiPlasmid.count;
                 inputs.store.val = global.genes.store || 0;
                 inputs.antimatter.val = global.race.universe === 'antimatter';
+                this.bleed();
             },
             generic(num, type){
                 if (num !== undefined){
@@ -1079,15 +1129,6 @@ function storeBonusCalc(info,type){
             },
             effective(num){
                 return num === undefined ? 0 : show.bleed.vis ? num / (type === 'plasmid' ? 40 : 4) : num;
-            },
-            storeLabel(num){
-                if (num === undefined){
-                    return loc('wiki_tech_special_crispr',[loc('wiki_arpa_crispr_store')]);
-                }
-                if (!num){
-                    return loc('wiki_calc_not_owned');
-                }
-                return loc(`wiki_arpa_crispr_store`) + ': ' + num;
             },
             bleedDiv(){
                 return type === 'plasmid' ? 5 : 10;
@@ -1157,21 +1198,18 @@ function darkBonusCalc(info){
         magic: { vis: false, result: false, val: 0 }
     }
 
+    const uniOptions = ['standard', 'evil', 'antimatter', 'micro', 'heavy', 'magic'].map((u) => ({
+        value: u,
+        label: loc('universe_' + u),
+    }));
+
     universe.append(`
-            <div class="calcInput"><span>${loc('wiki_calc_universe')}</span> <b-dropdown hoverable>
-                <template #trigger>
-                    <button class="button is-primary">
-                        <span>{{ uniLabel(i.uni.val) }}</span>
-                        <i class="fas fa-sort-down"></i>
-                    </button>
-                </template>
-                <b-dropdown-item v-on:click="pickUniverse('standard')">{{ uniLabel('standard') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickUniverse('evil')">{{ uniLabel('evil') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickUniverse('antimatter')">{{ uniLabel('antimatter') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickUniverse('micro')">{{ uniLabel('micro') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickUniverse('heavy')">{{ uniLabel('heavy') }}</b-dropdown-item>
-                <b-dropdown-item v-on:click="pickUniverse('magic')">{{ uniLabel('magic') }}</b-dropdown-item>
-            </b-dropdown></div>
+        <calc-dropdown
+            :model-value="i.uni.val"
+            label="${loc('wiki_calc_universe')}"
+            :options="uniOptions"
+            @update:model-value="pickUniverse($event)"
+        ></calc-dropdown>
     `);
     
     formula.append(`
@@ -1243,17 +1281,25 @@ function darkBonusCalc(info){
             <div class="calcInput"><span>${loc('wiki_p_res_harmony')}</span> <b-numberinput :input="val('harmony')" min="0" v-model="i.harmony.val" :controls="false"></b-numberinput></div>
             <div class="calcInput"><span>${loc('wiki_calc_sludge_level')}</span> <b-numberinput :input="val('sludge')" min="0" max="5" v-model="i.sludge.val" :controls="false"></b-numberinput></div>
         </div>
-        <div class="calcButton">
-            <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
-            <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
-        </div>
+        <calc-buttons
+            show-import
+            reset-label="${loc('wiki_calc_reset')}"
+            import-label="${loc('wiki_calc_import')}"
+            @reset="resetInputs()"
+            @import="importInputs()"
+        ></calc-buttons>
     `);
     
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
+
     vBind({
         el: `#darkBonusCalc`,
+        components: { CalcButtons, CalcDropdown },
         data: {
             i: inputs,
-            s: show
+            s: show,
+            uniOptions
         },
         methods: {
             val(type){
@@ -1294,9 +1340,6 @@ function darkBonusCalc(info){
             },
             sludgeLabel(num){
                 return num !== undefined ? num : loc('wiki_calc_sludge_level');
-            },
-            uniLabel(lbl){
-                return lbl ? loc('universe_' + lbl) : loc('wiki_calc_universe');
             },
             calc(uni, percent, valNum){
                 if (uni !== inputs.uni.val){
@@ -1339,46 +1382,47 @@ function darkBonusCalc(info){
 }
 
 function harmonyCreepCalc(info){
-    let calc = $(`<div class="calc" id="harmonyCreepCalc"></div>`);
-    info.append(calc);
-    
-    calc.append(`<h2 class="has-text-caution">${loc('wiki_calc_creep_reduction',[loc('resource_Harmony_name')])}</h2>`);
-    
-    let formula = $(`<div></div>`);
-    let variables = $(`<div></div>`);
-    
-    calc.append(formula);
-    calc.append(variables);
-    
+    let mount = $(`<div id="harmonyCreepCalcMount"></div>`);
+    info.append(mount);
+
     let inputs = {
         harmony: { val: undefined },
-        ascended: { val: undefined },
-        uni: { val: 'undefined' }
+        ascended: { val: undefined }
     }
-    
+
     let show = {
         result: { vis: false, val: 0 }
     }
-    
-    formula.append(`
-        <div>
-            <span>(ln(50 + ({{ generic(i.harmony.val, 'harmony') }} * {{ ascendedLabel(i.ascended.val) }})) - 3.912023005428146) * 0.01</span><span v-show="s.result.vis"> = {{ calc() }}</span>
-        </div>
+
+    mount.append(`
+        <calc-wrapper calc-id="harmonyCreepCalc" title="${loc('wiki_calc_creep_reduction',[loc('resource_Harmony_name')])}">
+            <template v-slot:formula>
+                <div>
+                    <span>(ln(50 + ({{ generic(i.harmony.val, 'harmony') }} * {{ ascendedLabel(i.ascended.val) }})) - 3.912023005428146) * 0.01</span><span v-show="s.result.vis"> = {{ calc() }}</span>
+                </div>
+            </template>
+            <template v-slot:variables>
+                <div>
+                    <div class="calcInput"><span>${loc('wiki_p_res_harmony')}</span> <b-numberinput :input="val('harmony')" min="0" v-model="i.harmony.val" :controls="false"></b-numberinput></div>
+                    <div class="calcInput"><span>${loc('wiki_calc_ascended_level')}</span> <b-numberinput :input="val('ascended')" min="0" max="5" v-model="i.ascended.val" :controls="false"></b-numberinput></div>
+                </div>
+                <calc-buttons
+                    show-import
+                    reset-label="${loc('wiki_calc_reset')}"
+                    import-label="${loc('wiki_calc_import')}"
+                    @reset="resetInputs()"
+                    @import="importInputs()"
+                ></calc-buttons>
+            </template>
+        </calc-wrapper>
     `);
-    
-    variables.append(`
-        <div>
-            <div class="calcInput"><span>${loc('wiki_p_res_harmony')}</span> <b-numberinput :input="val('harmony')" min="0" v-model="i.harmony.val" :controls="false"></b-numberinput></div>
-            <div class="calcInput"><span>${loc('wiki_calc_ascended_level')}</span> <b-numberinput :input="val('ascended')" min="0" max="5" v-model="i.ascended.val" :controls="false"></b-numberinput></div>
-        </div>
-        <div class="calcButton">
-            <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
-            <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
-        </div>
-    `);
-    
+
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
+
     vBind({
-        el: `#harmonyCreepCalc`,
+        el: '#harmonyCreepCalcMount',
+        components: { CalcWrapper, CalcButtons },
         data: {
             i: inputs,
             s: show
@@ -1423,16 +1467,8 @@ function harmonyCreepCalc(info){
 
 
 function coresQuantumCalc(info){
-    let calc = $(`<div class="calc" id="coresQuantumCalc"></div>`);
-    info.append(calc);
-    
-    calc.append(`<h2 class="has-text-caution">${loc('wiki_calc_core_quantum')}</h2>`);
-    
-    let formula = $(`<div></div>`);
-    let variables = $(`<div></div>`);
-    
-    calc.append(formula);
-    calc.append(variables);
+    let mount = $(`<div id="coresQuantumCalcMount"></div>`);
+    info.append(mount);
     
     let inputs = {
         cores: { val: undefined }
@@ -1441,24 +1477,52 @@ function coresQuantumCalc(info){
     let show = {
         result: { vis: false, val: 0 }
     }
-    formula.append(`
-        <div>
-            <span>1 - (0.99^{{ calc(generic(i.cores.val, 'cores') }})</span><span v-show="s.result.vis"> = {{ false) }} = +{{ calc(true) }}%</span>
-        </div>
+
+    mount.append(/*html*/ `
+        <calc-wrapper 
+            calc-id="coresQuantumCalc" 
+            title="${loc('wiki_calc_core_quantum')}"
+        >
+            <template v-slot:formula>
+                <div>
+                    <span>
+                        1 - (0.99^{{ generic(i.cores.val, 'cores') }})
+                    </span>
+                    <span v-show="s.result.vis">
+                        = {{ calc(false) }} = +{{ calc(true) }}%
+                    </span>
+                </div>
+            </template>
+            <template v-slot:variables>
+                <div>
+                    <div class="calcInput">
+                        <span>
+                            ${loc('wiki_calc_cores')}
+                        </span> 
+                        <b-numberinput 
+                            :input="val('cores')" 
+                            min="0" 
+                            v-model="i.cores.val" 
+                            :controls="false"
+                        ></b-numberinput>
+                    </div>
+                </div>
+                <calc-buttons
+                    show-import
+                    reset-label="${loc('wiki_calc_reset')}"
+                    import-label="${loc('wiki_calc_import')}"
+                    @reset="resetInputs()"
+                    @import="importInputs()"
+                ></calc-buttons>
+            </template>
+        </calc-wrapper>
     `);
-    
-    variables.append(`
-        <div>
-            <div class="calcInput"><span>${loc('wiki_calc_cores')}</span> <b-numberinput :input="val('cores')" min="0" v-model="i.cores.val" :controls="false"></b-numberinput></div>
-        </div>
-        <div class="calcButton">
-            <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
-            <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
-        </div>
-    `);
-    
+
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
     vBind({
-        el: `#coresQuantumCalc`,
+        el: '#coresQuantumCalcMount',
+        components: { CalcWrapper, CalcButtons },
         data: {
             i: inputs,
             s: show
@@ -1496,17 +1560,9 @@ function coresQuantumCalc(info){
 
 
 function supercoiledCalc(info){
-    let calc = $(`<div class="calc" id="supercoiledBonusCalc"></div>`);
-    info.append(calc);
-    
-    calc.append(`<h2 class="has-text-caution">${loc('wiki_calc_bonuses',[loc('wiki_calc_prod',[loc('resource_Supercoiled_name')])])}</h2>`);
-    
-    let formula = $(`<div></div>`);
-    let variables = $(`<div></div>`);
-    
-    calc.append(formula);
-    calc.append(variables);
-    
+    let mount = $(`<div id="supercoiledBonusCalcMount"></div>`);
+    info.append(mount);
+
     let inputs = {
         supercoiled: { val: undefined }
     }
@@ -1514,25 +1570,53 @@ function supercoiledCalc(info){
     let show = {
         result: { vis: false, val: 0 }
     }
-    formula.append(`
-        <div>
-            <span>{{ calc(generic(i.supercoiled.val, 'supercoiled')) }} / ({{ generic(i.supercoiled.val, 'supercoiled') }} + 5000)</span>
-            <span v-show="s.result.vis"> = {{ calc(false) }} = +{{ calc(true) }}%</span>
-        </div>
+
+    mount.append(/*html*/ `
+        <calc-wrapper 
+            calc-id="supercoiledBonusCalc" 
+            title="${loc('wiki_calc_bonuses', [loc('wiki_calc_prod', [loc('resource_Supercoiled_name')])])}"
+        >
+            <template v-slot:formula>
+                <div>
+                    <span>
+                        {{ calc(generic(i.supercoiled.val, 'supercoiled')) }} / ({{ generic(i.supercoiled.val, 'supercoiled') }} + 5000)
+                    </span>
+                    <span v-show="s.result.vis">
+                        = {{ calc(false) }} = +{{ calc(true) }}%
+                    </span>
+                </div>
+            </template>
+            <template v-slot:variables>
+                <div>
+                    <div class="calcInput">
+                        <span>
+                            ${loc('resource_Supercoiled_plural_name')}
+                        </span> 
+                        <b-numberinput 
+                            :input="val('supercoiled')" 
+                            min="0" 
+                            v-model="i.supercoiled.val" 
+                            :controls="false"
+                        ></b-numberinput>
+                    </div>
+                </div>
+                <calc-buttons
+                    show-import
+                    reset-label="${loc('wiki_calc_reset')}"
+                    import-label="${loc('wiki_calc_import')}"
+                    @reset="resetInputs()"
+                    @import="importInputs()"
+                ></calc-buttons>
+            </template>
+        </calc-wrapper>
     `);
-    
-    variables.append(`
-        <div>
-            <div class="calcInput"><span>${loc('resource_Supercoiled_plural_name')}</span> <b-numberinput :input="val('supercoiled')" min="0" v-model="i.supercoiled.val" :controls="false"></b-numberinput></div>
-        </div>
-        <div class="calcButton">
-            <button class="button" @click="resetInputs()">${loc('wiki_calc_reset')}</button>
-            <button class="button" @click="importInputs()">${loc('wiki_calc_import')}</button>
-        </div>
-    `);
-    
+
+    inputs = Vue.reactive(inputs);
+    show = Vue.reactive(show);
+
     vBind({
-        el: `#supercoiledBonusCalc`,
+        el: '#supercoiledBonusCalcMount',
+        components: { CalcWrapper, CalcButtons },
         data: {
             i: inputs,
             s: show
