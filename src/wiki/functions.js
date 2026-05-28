@@ -284,7 +284,7 @@ export function createRevealSection(info,id,type,insert){
     reveal.append(section);
     
     let modSection = document.getElementById(id + type + 'Section');
-    let modDisplay = { vis: false };
+    let modDisplay = Vue.reactive({ vis: false });
     
     vBind({
         el: `#${id}${type}Button`,
@@ -318,7 +318,7 @@ export function createCalcSection(info,id,type,insert){
     calc.append(section);
     
     let modSection = document.getElementById(id + type + 'Section');
-    let modDisplay = { vis: false };
+    let modDisplay = Vue.reactive({ vis: false });
     
     vBind({
         el: `#${id}${type}Button`,
