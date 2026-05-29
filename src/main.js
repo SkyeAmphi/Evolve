@@ -10713,36 +10713,6 @@ function midLoop(){
             }
         });
 
-        Object.keys(actions.tech).forEach(function (action){
-            if (actions.tech[action] && actions.tech[action].cost){
-                let c_action = actions.tech[action];
-                let element = $('#'+c_action.id);
-                if (element.length > 0){
-                    if (checkAffordable(c_action,true)){
-                        if (element.hasClass('cnam')){
-                            element.removeClass('cnam');
-                        }
-                        if (checkAffordable(c_action)){
-                            if (element.hasClass('cna')){
-                                element.removeClass('cna');
-                            }
-                        }
-                        else if (!element.hasClass('cna')){
-                            element.addClass('cna');
-                        }
-                    }
-                    else {
-                        if (!element.hasClass('cnam')){
-                            element.addClass('cnam');
-                        }
-                        if (!element.hasClass('cna')){
-                            element.addClass('cna');
-                        }
-                    }
-                }
-            }
-        });
-
         let spc_locations = ['space','interstellar','galaxy','portal','tauceti','eden'];
         for (let i=0; i<spc_locations.length; i++){
             let location = spc_locations[i];
