@@ -705,6 +705,8 @@ export function initResourceTabs(tab) {
                 break;
             case 'storage':
                 loadContainerCounter();
+                // re-append to guarantee footer is always last, even after item rebuilds
+                $('#crateTotal').appendTo('#resStorage');
                 break;
         }
     });
@@ -760,7 +762,10 @@ export function defineResources(wiki){
     }
     
     loadResource('Money',wiki,1000,1,false,false,'success');
-    loadResource(global.race.species,wiki,0,0,false,false,'warning');
+    // skip the species resource during evolution, no locale string exists for protoplasm
+    if (global.race.species !== 'protoplasm') {
+        loadResource(global.race.species,wiki,0,0,false,false,'warning');
+    }
     loadResource('Slave',wiki,0,0,false,false,'warning');
     loadResource('Authority',wiki,0,0,false,false,'warning');
     loadResource('Mana',wiki,0,1,false,false,'warning');
@@ -1506,7 +1511,12 @@ export function marketItem(container, name, color, full) {
 
     // create container element for this market item
     const elementId = `market-${name}`;
-    $(`<div id="${elementId}"></div>`).appendTo(container);
+    let footers = $(container).children('#tradeTotal, #galaxyTrade').first();
+    if (footers.length > 0) {
+        $(`<div id="${elementId}"></div>`).insertBefore(footers);
+    } else {
+        $(`<div id="${elementId}"></div>`).appendTo(container);
+    }
 
     // build template string for Vue to manage
     let template = '<div class="market-item" v-show="isDisplayed" :class="zebraClass">';
@@ -2524,7 +2534,12 @@ function loadRouteCounter(){
     let no_market = global.race['no_trade'] ? ' nt' : '';
 
     // create a simple container div that Vue will manage
-    $('#market').append(`<div id="tradeTotal"></div>`);
+    let galaxyTrade = $('#galaxyTrade');
+    if (galaxyTrade.length > 0) {
+        $(`<div id="tradeTotal"></div>`).insertBefore(galaxyTrade);
+    } else {
+        $('#market').append(`<div id="tradeTotal"></div>`);
+    }
 
     vBind({
         el: '#tradeTotal',
