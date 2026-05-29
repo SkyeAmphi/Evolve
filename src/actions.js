@@ -8937,9 +8937,9 @@ function sentience(){
         buildGarrison($('#c_garrison'),false);
         foreignGov();
         defineIndustry();
-        initResourceTabs('market');
-        initResourceTabs('storage');
-        tradeSummary();
+        clearElement($('#market'));
+        clearElement($('#resStorage'));
+        initResourceTabs();
 
         arpa('Genetics');
         arpa('Crispr');
