@@ -13,7 +13,7 @@ import { edenicTech, renderEdenic } from './edenic.js';
 import { tauCetiTech, renderTauCeti, loneSurvivor } from './truepath.js';
 import { arpa, gainGene, gainBlood } from './arpa.js';
 import { production, highPopAdjust } from './prod.js';
-import { techList, techPath } from './tech.js';
+import { techList, techPath, TechDB } from './tech.js';
 import { defineGovernor, govActive, removeTask, gov_tasks } from './governor.js';
 import { bioseed } from './resets.js';
 import { loadTab } from './index.js';
@@ -5857,14 +5857,6 @@ export function checkCityRequirements(action){
         }
     });
     return isMet;
-}
-
-function checkTechPath(tech){
-    let path = global.race['truepath'] ? 'truepath' : 'standard';
-    if ((!techPath[path].includes(actions.tech[tech].era) && !actions.tech[tech].hasOwnProperty('path')) || (actions.tech[tech].hasOwnProperty('path') && !actions.tech[tech].path.includes(path))){
-        return false;
-    }
-    return true;
 }
 
 export function skipRequirement(req,rank){

@@ -2,7 +2,7 @@ import { global } from './../vars.js';
 import { loc } from './../locale.js';
 import { universeAffix } from './../achieve.js';
 import { actions, housingLabel } from './../actions.js';
-import { techList } from './../tech.js';
+import { techList, TechDB } from './../tech.js';
 import { checkControlling } from './../civics.js';
 import { races, traits } from './../races.js';
 import { getHalloween, svgIcons, svgViewBox } from './../functions.js';
@@ -4561,13 +4561,6 @@ function addRequirements(parent,key,keyName,path){
     }
 }
 
-const alt_era = {
-    solar: 'interstellar'
-};
-const alt_era_r = {
-    interstellar: 'solar'
-};
-
 export function renderTechPage(era,path){
     let content = sideMenu('create');;
     let techListing = [];
@@ -4577,7 +4570,7 @@ export function renderTechPage(era,path){
 
     Object.keys(techs).forEach(function (actionName){
         let action = techs[actionName];
-        if (action.hasOwnProperty('era') && (action.era === era || action.era === alt_era[era]) && (!action.hasOwnProperty('wiki') || action.wiki)){
+        if (action.hasOwnProperty('era') && (action.era === era || action.era === TechDB.eraRemapReverse[path]?.[era]) && (!action.hasOwnProperty('wiki') || action.wiki)){
             let id = techs[actionName].id.split('-');
             let info = $(`<div id="${id[1]}" class="infoBox"></div>`);
             actionDesc(info, action);
@@ -4627,7 +4620,7 @@ export function renderTechPage(era,path){
         }
     }
     for (let i=0; i<techListing.length; i++) {
-        let era = path === 'truepath' && alt_era_r[techListing[i][0].era] ? alt_era_r[techListing[i][0].era] : techListing[i][0].era;
+        let era = TechDB.eraRemap[path]?.[techListing[i][0].era] ?? techListing[i][0].era;
         content.append(techListing[i][1]);
         let id = techListing[i][0].id.split('-');
         sideMenu('add',`${era}-${prefix}`,id[1],typeof techListing[i][0].title === 'function' ? techListing[i][0].title() : techListing[i][0].title);

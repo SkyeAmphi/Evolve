@@ -15696,8 +15696,30 @@ export function swissKnife(cheeseOnly,cheeseList){
 }
 
 export const techPath = {
-    standard: ['primitive', 'discovery', 'civilized', 'industrialized', 'globalized', 'early_space', 'deep_space', 'interstellar', 'intergalactic', 'dimensional','existential'],
-    truepath: ['primitive', 'discovery', 'civilized', 'industrialized', 'globalized', 'early_space', 'deep_space', 'solar', 'tauceti'],
+	standard: [
+		'primitive',
+		'civilized',
+		'discovery',
+		'industrialized',
+		'globalized',
+		'early_space',
+		'deep_space',
+		'interstellar',
+		'intergalactic',
+		'dimensional',
+		'existential',
+	],
+	truepath: [
+		'primitive',
+		'civilized',
+		'discovery',
+		'industrialized',
+		'globalized',
+		'early_space',
+		'deep_space',
+		'solar',
+		'tauceti',
+	],
 };
 
 export function techList(path){
@@ -15714,6 +15736,69 @@ export function techList(path){
     }
     return techs;
 }
+
+// pre-computed path-membership sets (built once at module load for fast lookups later)
+const techKeysByPath = {
+    standard: new Set(Object.keys(techList('standard'))),
+    truepath: new Set(Object.keys(techList('truepath'))),
+};
+
+// per-path era name remapping: standard era name -> the display era used on the given path
+// if ever adding a new path with remapped eras, just add a new key here
+// IE; warpath: { globalized: 'dystopia' }
+const eraRemap = {
+    truepath: { interstellar: 'solar' },
+};
+
+// reverse maps: display era -> standard era name (auto-computed, no need to edit for new paths)
+const eraRemapReverse = Object.fromEntries(
+    Object.entries(eraRemap).map(([path, map]) => [
+        path,
+        Object.fromEntries(Object.entries(map).map(([k, v]) => [v, k]))
+    ])
+);
+
+function buildEraOrder() {
+    const result = [...techPath.standard];
+    for (const [path, eras] of Object.entries(techPath)) {
+        if (path === 'standard') continue;
+        const pathRemap = eraRemap[path] ?? {};
+        let lastInsertedIdx = -1;
+        for (const era of eras) {
+            if (result.includes(era)) continue;
+            // if this path remaps a standard era to this era, insert after the standard equivalent
+            const stdEquiv = Object.keys(pathRemap).find(k => pathRemap[k] === era);
+            const insertAfterIdx = stdEquiv ? result.indexOf(stdEquiv) : lastInsertedIdx;
+            result.splice(insertAfterIdx + 1, 0, era);
+            lastInsertedIdx = result.indexOf(era);
+        }
+    }
+    return result;
+}
+
+// unified database for retrieving information about techs/eras/paths
+export const TechDB = {
+    // merged display order of all eras across all paths
+    eraOrder: buildEraOrder(),
+
+    // era name remapping; converts a standard era name into a corresponding era for alternative paths
+    // IE; TechDB.eraRemap.truepath.interstellar === 'solar'
+    eraRemap,
+
+    // reverse of eraRemap; converts per-path name into standard era name
+    // IE; TechDB.eraRemapReverse.truepath.solar === 'interstellar'
+    eraRemapReverse,
+
+    // returns the display-era for a tech on the given path, accounting for era remapping
+    getDisplayEra(era, path) {
+        return eraRemap[path]?.[era] ?? era;
+    },
+
+    // returns true if the given tech belongs to the given path; fast set lookup instead of scanning the array each call
+    isOnPath(techKey, path) {
+        return techKeysByPath[path]?.has(techKey) ?? false;
+    },
+};
 
 export function stabilize_blackhole(){
     if (global.interstellar['stellar_engine'] && global.interstellar.stellar_engine.exotic >= 0.025 && global.tech['whitehole']){
