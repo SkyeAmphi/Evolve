@@ -3812,6 +3812,20 @@ a {
         }
     }
 
+    #mechLab {
+        display: flex;
+        flex-direction: column;
+        overflow-y: hidden;
+
+        #mechList {
+            flex: 1 1 0;
+            min-height: 0;
+            height: auto;   // override height: 100vh from .sticky
+            padding-bottom: 0.5rem;
+            padding-top: 0.5rem;
+        }
+    }
+
     .gFort {
         padding-top: .5rem;
         border-bottom: 0;
@@ -4982,6 +4996,9 @@ span.inline {
 
 .ShipYardTab {
     margin-left: 1rem;
+    display: flex;
+    flex-direction: column;
+    overflow-y: hidden;
 
     .button {
         height: 2rem;
@@ -5019,6 +5036,11 @@ span.inline {
 
     #shipList {
         margin-top: .25rem;
+        flex: 1 1 0;
+        min-height: 0;
+        height: auto;   // override height: 100vh from .sticky
+        padding-bottom: 0.5rem;
+
         .shipRow {
             display: grid;
             padding-top: .25rem;

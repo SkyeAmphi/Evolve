@@ -11494,13 +11494,6 @@ function midLoop(){
         global.settings.msgQueueHeight = msgHeight;
         global.settings.buildQueueHeight = buildHeight;
     }
-
-    if ($(`#mechList`).length > 0){
-        $(`#mechList`).css('height',`calc(100vh - 11.5rem - ${$(`#mechAssembly`).height()}px)`);
-    }
-    if ($(`#shipList`).length > 0){
-        $(`#shipList`).css('height',`calc(100vh - 11.5rem - ${$(`#shipPlans`).height()}px)`);
-    }
 }
 
 let sythMap = {
