@@ -23,37 +23,7 @@ export function mainVue(){
         },
         methods: {
             swapTab(tab) {
-                let contents = document.querySelectorAll('.b-tabs .tab-content');
-                if (contents.length > 0) {
-                    contents.forEach((content) => {
-                        let activeItem = content.querySelector(
-                            '.tab-item:not([style*="display: none"])',
-                        );
-                        if (activeItem && content.getBoundingClientRect().width > 0) {
-                            let rect = content.getBoundingClientRect();
-                            content.style.minHeight = rect.height + "px";
-                            if (content.closest(".resTabs")) {
-                                if (content.scrollHeight > content.clientHeight) {
-                                    content.style.overflowY = "scroll";
-                                } else {
-                                    content.style.overflowY = "hidden";
-                                }
-                            }
-                        }
-                    });
-
-                    if (global.tabAnimationTimeout) clearTimeout(global.tabAnimationTimeout);
-
-                    global.tabAnimationTimeout = setTimeout(() => {
-                        contents.forEach((content) => {
-                            content.style.minHeight = "";
-                            if (content.closest(".resTabs")) {
-                                content.style.overflowY = "";
-                            }
-                        });
-                    }, 225);
-                }
-
+                // CSS grid stacking handles tab height automatically
                 if (!global.settings.tabLoad){
                     loadTab(tab);
                 }
