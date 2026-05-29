@@ -2407,6 +2407,7 @@ div {
 
 .button.right {
     float: right;
+    margin-right: 0.1rem;
 }
 
 a {
@@ -2703,7 +2704,7 @@ a {
     overflow-y: hidden;
 
     .leftColumn {
-        height: ~"calc(100vh - 2.45rem)";
+        height: ~"calc(100vh - 2.25rem)";
 
         .colHeader {
             display: flex;
@@ -3138,7 +3139,7 @@ a {
         }
 
         .mtab {
-            height: ~"calc(100vh - 10rem)";
+            height: ~"calc(100vh - 10rem)"; // NOTE: this is safe to change to auto
         }
 
         .action {
@@ -3414,8 +3415,7 @@ a {
     }
 
     .civics {
-        padding-top: 0;
-        padding-bottom: 0;
+        padding: 0;
 
         .revolution {
             margin-left: .375rem;
@@ -3823,7 +3823,6 @@ a {
     
     .mechAssembly {
         padding-bottom: .5rem;
-        margin-bottom: .5rem;
         border-bottom: .0625rem solid;
 
         .button {
@@ -3978,6 +3977,7 @@ a {
     .importExport,
     .stringPack {
         margin-top: 1rem;
+        padding-right: 0.3rem;
     }
     
     #customFile,
@@ -4736,6 +4736,9 @@ span.inline {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    // prevent flex rows from stretching to fill a taller-than-content container
+    align-content: flex-start;
+    align-items: flex-start;
 }
 
 .industry {
@@ -5606,9 +5609,9 @@ div.bigbang {
     }
 }
 
-#evolution {
-    height: ~"calc(100vh - 6rem)";
-}
+//* #evolution {
+    //* height: ~"calc(100vh - 6rem)";
+//*}
 
 .resTabs>section,
 .resTabs>.tabs,
