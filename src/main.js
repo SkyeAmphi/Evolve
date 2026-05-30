@@ -7,7 +7,7 @@ import { defineResources, resource_values, spatialReasoning, craftCost, plasmidB
 import { defineJobs, job_desc, loadFoundry, farmerValue, jobName, jobScale, workerScale, limitCraftsmen, loadServants} from './jobs.js';
 import { defineIndustry, f_rate, manaCost, setPowerGrid, gridEnabled, gridDefs, nf_resources, replicator, luxGoodPrice, smelterUnlocked, smelterFuelConfig, setupRituals, maxRitualNum, ritual_types } from './industry.js';
 import { checkControlling, garrisonSize, armyRating, govTitle, taxCap, govEffect, weaponTechModifer } from './civics.js';
-import { actions, updateDesc, checkTechRequirements, drawEvolution, BHStorageMulti, storageMultipler, checkAffordable, checkPowerRequirements, drawCity, drawTech, gainTech, housingLabel, updateQueueNames, wardenLabel, planetGeology, resQueue, bank_vault, start_cataclysm, orbitDecayed, postBuild, skipRequirement, structName, templeCount, initStruct, casino_vault, casinoEarn, doCallbacks, cLabels } from './actions.js';
+import { actions, updateDesc, checkTechRequirements, drawEvolution, BHStorageMulti, storageMultipler, checkAffordable, checkPowerRequirements, drawCity, drawTech, gainTech, housingLabel, updateQueueNames, wardenLabel, planetGeology, bank_vault, start_cataclysm, orbitDecayed, postBuild, skipRequirement, structName, templeCount, initStruct, casino_vault, casinoEarn, doCallbacks, cLabels } from './actions.js';
 import { renderSpace, convertSpaceSector, fuel_adjust, int_fuel_adjust, zigguratBonus, planetName, genPlanets, setUniverse, universe_types, gatewayStorage, piracy, spaceTech, universe_affixes, galaxyRegions, gatewayArmada, galaxy_ship_types } from './space.js';
 import { renderFortress, bloodwar, soulForgeSoldiers, hellSupression, genSpireFloor, mechRating, mechCollect, updateMechbay, hellguard, buildMechQueue, mechCost } from './portal.js';
 import { asphodelResist, mechStationEffect, renderEdenic } from './edenic.js';
@@ -8131,6 +8131,126 @@ function fastLoop(){
         }
     }
 
+    // research queue processing moved from midLoop
+    // TODO: investigate researching techs with the queue failing to trigger intended visual updates with preload off,
+    // leading to things like the civics > governor tab not drawing it's intended contents 
+    // TODO2: make it so governor replicator scheduler task "focus queue blocking resource" can support research queue too
+    if (global.tech['r_queue'] && global.r_queue.display) {
+        let idx = -1;
+        let c_action = false;
+        let stop = false;
+        let time = 0;
+        let untime = 0;
+        let spent = {
+            t: {
+                t: 0,
+                rt: 0,
+            },
+            r: {},
+            rr: {},
+            id: {},
+        };
+
+        for (let i = 0; i < global.r_queue.queue.length; i++) {
+            let struct = global.r_queue.queue[i];
+            let t_action = actions[struct.action][struct.type];
+            time = global.settings.qAny_res ? 0 : time;
+            untime = global.settings.qAny_res ? 0 : untime;
+
+            if (
+                t_action['grant'] &&
+                global.tech[t_action.grant[0]] &&
+                global.tech[t_action.grant[0]] >= t_action.grant[1]
+            ) {
+                global.r_queue.queue.splice(i, 1);
+                clearPopper(`rq${t_action.id}`);
+                break;
+            } else {
+                if (checkAffordable(t_action, true)) {
+                    global.r_queue.queue[i].cna = false;
+                    let reqMet = checkTechRequirements(struct.type, false);
+                    let t_time = global.settings.qAny_res
+                        ? timeCheck(t_action)
+                        : timeCheck(t_action, spent, false, reqMet);
+                    if (t_time >= 0) {
+                        if (!stop && checkAffordable(t_action) && reqMet) {
+                            c_action = t_action;
+                            idx = i;
+                            if (global.settings.qAny_res) {
+                                stop = true;
+                            }
+                        } else {
+                            if (reqMet) {
+                                time += t_time;
+                            }
+                            untime += t_time;
+                        }
+                        if (!global.settings.qAny_res && reqMet) {
+                            stop = true;
+                        }
+                        global.r_queue.queue[i]['time'] = reqMet ? time : untime;
+                    } else {
+                        global.r_queue.queue[i]['time'] = t_time;
+                    }
+                    global.r_queue.queue[i]['req'] = reqMet ? true : false;
+                } else {
+                    global.r_queue.queue[i].cna = true;
+                    global.r_queue.queue[i]['time'] = -1;
+                }
+            }
+            global.r_queue.queue[i].qa = global.settings.qAny_res ? true : false;
+        }
+
+        if (idx >= 0 && c_action && !global.r_queue.pause) {
+            if (
+                c_action.action({
+                    isQueue: true,
+                })
+            ) {
+                messageQueue(
+                    loc('research_success', [global.r_queue.queue[idx].label]),
+                    'success',
+                    false,
+                    ['queue', 'research_queue'],
+                );
+                gainTech(global.r_queue.queue[idx].type);
+                if (c_action['post']) {
+                    c_action.post();
+                }
+                global.r_queue.queue.splice(idx, 1);
+                clearPopper(`rq${c_action.id}`);
+                // updates queue UI reactively
+            }
+        }
+        if (global.r_queue.queue.length > global.r_queue.max) {
+            global.r_queue.queue.splice(global.r_queue.max);
+        }
+
+        const q_techs = {};
+        checkTechRequirements('club', q_techs);
+        // Use a Set to deduplicate indices: a tech with multiple unmet requirements would push
+        // the same index N times, causing N items to be removed instead of 1.
+        const removeSet = new Set();
+        for (let i = 0; i < global.r_queue.queue.length; i++) {
+            Object.keys(actions.tech[global.r_queue.queue[i].type].reqs).forEach(function (req) {
+                if (skipRequirement(req, global.tech[req] || 0)) {
+                    return;
+                }
+                if (
+                    (!global.tech[req] ||
+                        global.tech[req] < actions.tech[global.r_queue.queue[i].type].reqs[req]) &&
+                    (!q_techs[req] ||
+                        q_techs[req].v < actions.tech[global.r_queue.queue[i].type].reqs[req])
+                ) {
+                    removeSet.add(i);
+                }
+            });
+        }
+        if (removeSet.size > 0) {
+            [...removeSet].sort((a, b) => b - a).forEach((i) => global.r_queue.queue.splice(i, 1));
+        }
+    }
+
     firstRun = false;
 }
 
@@ -11043,99 +11163,6 @@ function midLoop(){
         }
 
         let blockGeneBuffer = false;
-        if (global.tech['r_queue'] && global.r_queue.display){
-            let idx = -1;
-            let c_action = false;
-            let stop = false;
-            let time = 0; let untime = 0;
-            let spent = { t: {t:0,rt:0}, r: {}, rr: {}, id: {}};
-            for (let i=0; i<global.r_queue.queue.length; i++){
-                let struct = global.r_queue.queue[i];
-                let t_action = actions[struct.action][struct.type];
-                time = global.settings.qAny_res ? 0 : time;
-                untime = global.settings.qAny_res ? 0 : untime;
-
-                if (t_action['grant'] && global.tech[t_action.grant[0]] && global.tech[t_action.grant[0]] >= t_action.grant[1]){
-                    global.r_queue.queue.splice(i,1);
-                    clearPopper(`rq${c_action.id}`);
-                    break;
-                }
-                else {
-                    if (checkAffordable(t_action,true)){
-                        global.r_queue.queue[i].cna = false;
-                        let reqMet = checkTechRequirements(struct.type,false);
-                        let t_time = global.settings.qAny_res ? timeCheck(t_action) : timeCheck(t_action, spent, false, reqMet);
-                        if (t_time >= 0){
-                            if (!stop && checkAffordable(t_action) && reqMet){
-                                c_action = t_action;
-                                idx = i;
-                                if (global.settings.qAny_res){
-                                    stop = true;
-                                }
-                            }
-                            else {
-                                if (reqMet){
-                                    if (!stop && t_time <= 1){
-                                        blockGeneBuffer = true;
-                                    }
-                                    time += t_time;
-                                }
-                                untime += t_time;
-                            }
-                            if (!global.settings.qAny_res && reqMet){
-                                stop = true;
-                            }
-                            global.r_queue.queue[i]['time'] = reqMet ? time : untime;
-                        }
-                        else {
-                            global.r_queue.queue[i]['time'] = t_time;
-                        }
-                        global.r_queue.queue[i]['req'] = reqMet ? true : false;
-                    }
-                    else {
-                        global.r_queue.queue[i].cna = true;
-                        global.r_queue.queue[i]['time'] = -1;
-                    }
-                }
-                global.r_queue.queue[i].qa = global.settings.qAny_res ? true : false;
-            }
-            if (idx >= 0 && c_action && !global.r_queue.pause){
-                if (c_action.action({isQueue: true})){
-                    messageQueue(loc('research_success',[global.r_queue.queue[idx].label]),'success',false,['queue','research_queue']);
-                    gainTech(global.r_queue.queue[idx].type);
-                    if (c_action['post']) {
-                        c_action.post();
-                    }
-                    global.r_queue.queue.splice(idx,1);
-                    clearPopper(`rq${c_action.id}`);
-                    resQueue();
-                }
-            }
-            if (global.r_queue.queue.length > global.r_queue.max){
-                global.r_queue.queue.splice(global.r_queue.max);
-            }
-
-            let q_techs = {}; let remove = [];
-            checkTechRequirements('club',q_techs);
-            for (let i=0; i<global.r_queue.queue.length; i++){
-                Object.keys(actions.tech[global.r_queue.queue[i].type].reqs).forEach(function(req){
-                    if (skipRequirement(req, global.tech[req] || 0)){ return; }
-                    if (
-                        (!global.tech[req] || global.tech[req] < actions.tech[global.r_queue.queue[i].type].reqs[req])
-                        &&
-                        (!q_techs[req] || (q_techs[req] && q_techs[req].v < actions.tech[global.r_queue.queue[i].type].reqs[req]))
-                        ){
-                        remove.push(i);
-                    }
-                });
-            }
-            if (remove.length > 0){
-                for (let i=remove.length - 1; i>=0; i--){
-                    global.r_queue.queue.splice(remove[i],1);
-                }
-            }
-        }
-
         if (global.arpa.sequence && global.arpa.sequence['auto'] && global.tech['genetics'] && global.tech['genetics'] >= 8){
             buildGene(blockGeneBuffer);
         }

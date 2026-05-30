@@ -8,7 +8,7 @@ import { clearSpyopDrag } from './governor.js';
 import { defineIndustry, setPowerGrid, gridDefs, clearGrids } from './industry.js';
 import { defineGovernment, defineGarrison, buildGarrison, commisionGarrison, foreignGov } from './civics.js';
 import { races, shapeShift, renderPsychicPowers, renderSupernatural } from './races.js';
-import { drawEvolution, drawCity, drawTech, resQueue, clearResDrag, closeModalAnim } from './actions.js';
+import { drawEvolution, drawCity, initTechWatchers, clearTechWatchers, unmountResearchQueue, clearResearchTab, initResearchQueue, closeModalAnim } from './actions.js';
 import { renderSpace, ascendLab, terraformLab } from './space.js';
 import { renderFortress, buildFortress, drawMechLab, clearMechDrag, drawHellObservations } from './portal.js';
 import { renderEdenic } from './edenic.js';
@@ -183,7 +183,7 @@ export function mainVue(){
                     initTabs();
                 } else {
                     // Disabling preload, clear all tabs
-                    clearResDrag();
+                    clearResearchTab();
                     clearGrids();
                     clearMechDrag();
                     clearGeneticsDrag();
@@ -346,7 +346,6 @@ export function initTabs() {
 
 export function loadTab(tab){
     if (!global.settings.tabLoad) {
-        clearResDrag();
         clearGrids();
         clearMechDrag();
         clearGeneticsDrag();
@@ -395,9 +394,17 @@ export function loadTab(tab){
         }
 
         // clear incoming tab immediately so old Vue apps don't block re-mount
+        if (incoming === 'mTabResearch') {
+            clearResearchTab(); // stops watchers before DOM clears
+        }
         clearElement($(`#${incoming}`));
         tabsToClear.splice(tabsToClear.indexOf(incoming), 1);
         global.tabClearTimeout = setTimeout(() => {
+            if (incoming !== 'mTabResearch') {
+                clearResearchTab(); // covers leaving the research tab
+                // TODO I don't like this architecture but for now it will work until further SFC integration
+                // (or we abandon preload-off)
+            }
             tabsToClear.forEach((t) => clearElement($(`#${t}`)));
         }, 350);
     } else {
@@ -666,28 +673,48 @@ export function loadTab(tab){
                 if (!global.settings.tabLoad){
                     tagEvent('page_view',{ page_title: `Evolve - Research` });
                 }
-                let queue = $(`<div id="resQueue" class="resQueue" v-show="rq.display"></div>`);
-                $(`#mTabResearch`).append(queue);
-                let tabs = $(`<div id="resContent"><b-tabs class="resTabs" v-model="s.resTabs" :animated="s.animated">
-                    <b-tab-item id="tech" :label="label_f('new')"></b-tab-item>
-                    <b-tab-item id="oldTech" :label="label_f('old')"></b-tab-item>
-                </b-tabs></div>`);
-                $(`#mTabResearch`).append(tabs);
-                vBind({
-                    el: `#resContent`,
-                    data: {
-                        s: global.settings,
-                        rq: global.r_queue
-                    },
-                    methods: {
-                        label_f(lbl){
-                            return tabLabel(lbl);
-                        }
-                    }
-                });
-                resQueue();
-                if (global.race.species !== 'protoplasm'){
-                    drawTech();
+                // with preload on this case runs on every tab click, but the research
+                // tab is never cleared, so guard against duplicate appends
+                if (!document.getElementById('resContent')) {
+                    let queue = $(/*html*/ `
+                        <div 
+                            id="resQueue" 
+                            class="resQueue" 
+                            v-show="rq.display"
+                        ></div>
+                    `);
+                    $(`#mTabResearch`).append(queue);
+                    let tabs = $( /*html*/ `
+                        <div id="resContent">
+                            <b-tabs class="resTabs" v-model="s.resTabs" :animated="s.animated">
+                                <b-tab-item 
+                                    id="tech" :label="label_f('new')">
+                                </b-tab-item>
+                                <b-tab-item 
+                                    id="oldTech" :label="label_f('old')">
+                                </b-tab-item>
+                            </b-tabs>
+                        </div>
+                    `,
+                    );
+                    $(`#mTabResearch`).append(tabs);
+                    vBind({
+                        el: `#resContent`,
+                        data: {
+                            s: global.settings,
+                            rq: global.r_queue,
+                        },
+                        methods: {
+                            label_f(lbl) {
+                                return tabLabel(lbl);
+                            },
+                        },
+                    });
+                    initResearchQueue();
+                }
+                // always (re)start the tech watcher
+                if (global.race.species !== 'protoplasm') {
+                    initTechWatchers();
                 }
             }
             break;
