@@ -2891,6 +2891,54 @@ a {
         }
     }
 
+    // flex column: the queue sits above #resContent and takes its natural height,
+    // leaving the rest for the tech list tabs to fill dynamically
+    #mTabResearch {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #resContent {
+        flex: 1;
+        min-height: 0;
+        // must be a flex container itself so .resTabs is a flex item (not a block child
+        // trying to use height: 100%, which is unreliable on flex items)
+        display: flex;
+        flex-direction: column;
+
+        .resTabs {
+            // override global margin-top: -0.75rem; in this flex context
+            // #mTabResearch's padding-top already provides the right clearance
+            margin-top: 0;
+            // flex item instead of height: 100% — more robust cross-browser
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+
+            > .tabs {
+                flex-shrink: 0;
+            }
+
+            > .tab-content {
+                flex: 1;
+                min-height: 0;
+                // constrain the CSS grid row to the flex-allocated height so tab-items
+                // fill the remaining space rather than auto-sizing to their content
+                grid-template-rows: 1fr;
+
+                > .tab-item {
+                    // override height: calc(100vh - 8rem) from the global .resTabs rule;
+                    // height: 100% here references the 1fr grid row (= the flex-allocated height)
+                    // align-self: stretch overrides align-self: start from the global grid rule;
+                    // both tab-items in the grid stack get the same height — no snapping on switch
+                    height: 100%;
+                    align-self: stretch;
+                }
+            }
+        }
+    }
+
     .govTabs2 .tab-content > .tab-item {
         // same fixed-height technique as .resTabs above, just a bit further down
         // might be sensitive to future layout changes- obvious symptom is if civics tab becomes
@@ -2952,7 +3000,8 @@ a {
 
     // doesn't need to be pulled up anymore
     .resTabs > .tab-content {
-        margin-top: 0.5rem;
+        margin-top: 0.15rem;
+        padding-top: 0.35rem !important;
     }
 
     /* Firefox specifically suffers from sub-pixel rendering shimmies during transform animations
@@ -3037,7 +3086,7 @@ a {
     /* govTabs2 .tab-content > .tab-item is handled above in the resTabs block instead */
 
     #tech.tab-item {
-        padding-bottom: 2rem !important;
+        padding-bottom: 2.8rem !important;
     }
 
     .resources {
@@ -3135,7 +3184,7 @@ a {
 
         #oldTech {
             margin-bottom: 4rem;
-            padding-bottom: 2rem !important;
+            padding-bottom: 2.8rem !important;
         }
 
         .mtab {
