@@ -31,7 +31,7 @@ export function mainVue(){
             },
             saveImport(){
                 if ($('#importExport textarea').val().length > 0){
-                    importGame($('#importExport textarea').val());
+                    window.importGame($('#importExport textarea').val());
                 }
             },
             saveExport(){
@@ -122,7 +122,7 @@ export function mainVue(){
                     confirmText: loc('restore'),
                     onConfirm() {
                         if (restore_data){
-                            importGame(restore_data,true);
+                            window.importGame(restore_data,true);
                         }
                     }
                 });
