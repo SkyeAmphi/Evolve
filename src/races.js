@@ -6459,44 +6459,46 @@ export function setJType(){
 
 function customRace(hybrid){
     let slot = hybrid ? 'race1' : 'race0';
+    const custom = global.custom[slot];
+    
     if (global.hasOwnProperty('custom') && global.custom.hasOwnProperty(slot)){
         let trait = {};
-        let ranks = global.custom[slot]?.ranks || {};
-        for (let i=0; i<global.custom[slot].traits.length; i++){
-            trait[global.custom[slot].traits[i]] = ranks[global.custom[slot].traits[i]] || 1;
+        let ranks = custom?.ranks || {};
+        for (let i=0; i<custom.traits.length; i++){
+            trait[custom.traits[i]] = ranks[custom.traits[i]] || 1;
         }
 
-        let fanatic = global.custom[slot].hasOwnProperty('fanaticism') && global.custom[slot].fanaticism ? global.custom[slot].fanaticism : false;
-        if (fanatic && !global.custom[slot].traits.includes(fanatic)){ fanatic = false; }
+        let fanatic = custom.hasOwnProperty('fanaticism') && custom.fanaticism ? custom.fanaticism : false;
+        if (fanatic && !custom.traits.includes(fanatic)){ fanatic = false; }
         if (!fanatic){
             fanatic = 'pathetic';
-            for (let i=0; i<global.custom[slot].traits.length; i++){
-                if (traits[global.custom[slot].traits[i]].val > traits[fanatic].val){
-                    fanatic = global.custom[slot].traits[i];
+            for (let i=0; i<custom.traits.length; i++){
+                if (traits[custom.traits[i]].val > traits[fanatic].val){
+                    fanatic = custom.traits[i];
                 }
             }
         }
 
         let def = {
-            name: global.custom[slot].name,
-            desc: global.custom[slot].desc,
-            type: global.custom[slot].genus,
-            home: global.custom[slot].home,
-            entity: global.custom[slot].entity,
+            name: custom.name,
+            desc: custom.desc,
+            type: custom.genus,
+            home: custom.home,
+            entity: custom.entity,
             traits: trait,
             solar: {
-                red: global.custom[slot].red,
-                hell: global.custom[slot].hell,
-                gas: global.custom[slot].gas,
-                gas_moon: global.custom[slot].gas_moon,
-                dwarf: global.custom[slot].dwarf,
+                red: custom.red,
+                hell: custom.hell,
+                gas: custom.gas,
+                gas_moon: custom.gas_moon,
+                dwarf: custom.dwarf,
             },
             fanaticism: fanatic,
             basic(){ return false; }
         };
 
         if (hybrid){
-            def['hybrid'] = global.custom[slot].hybrid;
+            def['hybrid'] = custom.hybrid;
         }
 
         return def;
@@ -8542,7 +8544,7 @@ function minorWish(parent){
                 return loc(`wish_${v}`);
             },
             know_f(){
-                return global.resource.Knowledge.name;
+                return global.resource?.Knowledge?.name;
             },
             money_f(){
                 return loc('resource_Money_name');

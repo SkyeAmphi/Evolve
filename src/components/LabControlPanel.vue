@@ -135,9 +135,9 @@
         </div>
 
         <!-- sort stack label -->
-        <div style="font-size:.8rem;margin-bottom:.15rem">
+        <h2 style="font-size:.9rem;margin-bottom:.15rem">
             {{ loc('genelab_sort_order') }}
-        </div>
+        </h2>
 
         <!-- active sort stack (priority based; drag to reorder) -->
         <ul
@@ -195,6 +195,12 @@
                 </option>
             </select>
         </div>
+
+        <!-- filters section header -->
+        <h2
+            style="font-size:.9rem;margin-bottom:.15rem">
+            {{ loc('genelab_filters_section') }}
+        </h2>
 
         <!-- filter buttons: data-driven from TRAIT_FILTERS, grouped by filter.group -->
         <div

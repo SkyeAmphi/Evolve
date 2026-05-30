@@ -5388,8 +5388,29 @@ div.bigbang {
 
 .celestialLab {
 
+    .b-tabs .tab-content > .tab-item {
+        height: auto;
+        overflow-y: visible;
+    }
+
+    // reduce spacing between trait groups in the All tab
+    #traitAll h3 {
+        margin-top: 0.2rem;
+        margin-bottom: 0.1rem;
+        display: block;
+    }
+
+    #traitAll h3:first-of-type {
+        margin-top: 0;
+    }
+
+    #traitAll .trait_selection {
+        margin-top: 0;
+        margin-bottom: 0.1rem;
+    }
+
     .fields {
-        margin-top: .5rem;
+        margin-top: .25rem;
 
         .name {
             display: inline-block;
@@ -5420,10 +5441,10 @@ div.bigbang {
         margin-top: .5rem;
 
         .genus_selection {
-            width: 10rem;
+            width: 12.3rem;
 
             section {
-                margin-top: .5rem;
+                margin-top: .1rem;
             }
 
             button {
@@ -5432,28 +5453,106 @@ div.bigbang {
         }
 
         .trait_selection {
-            margin-top: .5rem;
+            margin-top: .25rem;
             display: flex;
             flex-wrap: wrap;
+
             >div {
-                width: 11.5rem;
-            }
-        }
-        .trait_selection.summary {
-            >div {
-                width: 23rem;
+                width: 12rem;
             }
 
             .field {
+                min-height: 1.5rem;
+
+                .b-checkbox {
+                    min-height: 1.25rem;
+
+                    .control-label {
+                        white-space: nowrap;
+                        max-width: 12rem;
+                        padding-left: 0.25rem;
+                    }
+                }
+
+                .has-text-advanced,
+                .has-text-caution {
+                    display: inline-block;
+                }
+
+                &.available-rank {
+                    box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
+                    border: 0px solid rgba(0, 123, 255, 0.4);
+                    background-color: rgba(0, 123, 255, 0.1);
+                }
+
+                &.gene-positive {
+                    box-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+                    border: 0px solid rgba(0, 255, 0, 0.4);
+                    background-color: rgba(0, 255, 0, 0.1);
+                }
+
+                &.selected-trait {
+                    &.available-rank,
+                    &.unavailable-rank {
+                        box-shadow: none;
+                        border: none;
+                        background-color: transparent;
+                    }
+                }
+            }
+        }
+
+        .trait_selection.summary {
+
+
+            .field {
                 display: flex;
-                justify-content: space-between;
-                padding-right: .5rem;
+                align-items: center;
+                column-gap: 0.15rem;
+                padding-top: .1rem;
+                padding-bottom: .08rem;
+                padding-right: 0.15rem;
+                width: 17.5rem;
+
+                // trait name should target by exclusion to avoid check boxes
+                >span:not(.rc):not(.sub):not(.add) {
+                    flex: 1;
+                    min-width: 0;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
 
                 .rc {
                     display: inline-block;
-                    min-width: 7rem;
-                    text-align: center;
+                    white-space: nowrap;
+                    font-size: .85rem;
                 }
+            }
+        }
+
+        .targetRank {
+            transition: all 0.2s ease;
+        }
+
+        .sub,
+        .add {
+            -ms-user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+            cursor: pointer;
+            width: 1.4rem;
+            height: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.1);
             }
         }
 
@@ -5482,7 +5581,7 @@ div.bigbang {
         }
 
         >div {
-            .field:not(:last-child) {
+            .field {
                 margin-bottom: 0;
             }
         }
@@ -5521,6 +5620,26 @@ div.bigbang {
             padding-right: 0.75em;
         }
     }
+
+    // clip horizontal tab slide animations so sliding panels don't bleed outside the container
+    // x-axis-only clip lets tab panel content still scroll vertically
+    .b-tabs .tab-content {
+        overflow-x: clip;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
 // Hide left column and expand main content when the Custom Lab is open
@@ -5529,8 +5648,20 @@ div.bigbang {
         display: none !important;
     }
     > .columns > #mainColumn {
-        width: 78% !important;
+        flex: auto;
     }
+    > .columns > #queueColumn {
+        width: 20%;
+    }
+
+    .tab-content > .tab-item {
+        padding-right:0.45rem;
+    }
+
+    #city {
+        padding-left: 0;
+    }
+
 }
 
 // Genus/Fanaticism modal: options flow horizontally and wrap

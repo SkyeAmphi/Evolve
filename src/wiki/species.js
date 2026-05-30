@@ -23,14 +23,24 @@ export function speciesPage(zone){
         case 'custom':
             customPage(content);
             break;
+        case 'hybrid_custom':
+            hybridCustomPage(content);
+            break;
     }
 }
 
 export function customPage(content) {
-    customRaceMechanics(content,true);
-    let lab = $(`<div class="infoBox wide"></div>`);
+    customRaceMechanics(content, true);
+    let lab = $('<div class="infoBox wide"></div>');
     content.append(lab);
-    ascendLab(false,lab);
+    ascendLab(false, lab);
+}
+
+export function hybridCustomPage(content) {
+    customRaceMechanics(content, true);
+    let lab = $('<div class="infoBox wide"></div>');
+    content.append(lab);
+    ascendLab(true, lab);
 }
 
 const evolutionPath = {
