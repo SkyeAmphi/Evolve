@@ -379,7 +379,7 @@ export function messageQueue(msg,color,dnr,tags,reload){
     color = color || 'warning';
 
     if (tags.includes(message_logs.view)){
-        let new_message = $('<p class="has-text-'+color+'"></p>').text(msg);
+        let new_message = $(`<p class="has-text-${color}"></p>`).text(msg);
         $('#msgQueueLog').prepend(new_message);
         if ($('#msgQueueLog').children().length > global.settings.msgFilters[message_logs.view].max){
             $('#msgQueueLog').children().last().remove();
