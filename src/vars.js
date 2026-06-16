@@ -2062,7 +2062,7 @@ export function convertVersion(version){
 }
 
 export function resizeGame(){
-    if ($(window).width() >= 1400 && $('#msgQueue:not(.right)')){
+    if ($(window).width() >= 1400 && !$('#msgQueue')[0].classList.value.includes('right')){
         let build = $('#buildQueue').detach();
         build.addClass('right');
         build.removeClass('has-text-info');
@@ -2177,6 +2177,7 @@ export function sizeApproximation(value, precision = 1, precise = false, exact =
 
 $(window).resize(function(){
     resizeGame();
+    console.log($(window).width());
 });
 
 export function srSpeak(text, priority) {

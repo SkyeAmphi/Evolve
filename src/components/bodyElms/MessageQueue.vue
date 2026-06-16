@@ -1,28 +1,43 @@
 <script setup>
     import { ref } from "vue";
+    import { useModal } from 'buefy';
+    import MsgQueBtn from './MsgQueBtn.vue';
+    import MsgQueueModal from './MsgQueueModal.vue';
 
     import { global, message_logs, message_filters } from '../../vars.js';
     import { loc } from '../../locale.js';
+    import { initMessageQueue, clearElement } from '../../functions.js';
+    import { closeModalAnim } from '../../actions.js';
 
-    let s = ref(global.settings.msgFilters);
-    let m = ref(message_logs);
-    let queue = ref(global.queue);
-    console.log(s);
+
+    const s = ref(global.settings.msgFilters);
+    const m = ref(message_logs);
+    const queue = ref(global.queue);
+    const Modal = useModal();
+
+    function clearLog(filter){
+        filter = filter ? [filter] : filter;
+        initMessageQueue(filter);
+        clearElement($(`#msgQueueLog`));
+        if (filter){
+            global.lastMsg[filter] = [];
+        }
+        else {
+            Object.keys(global.lastMsg).forEach(function (tag){
+                global.lastMsg[tag] = [];
+            });
+        }
+    }
+    function initModal(){
+        Modal.open({
+            component: MsgQueueModal,
+            hasModalCard: false,
+            customClass: 'evolve-modal',
+            onCancel: () => closeModalAnim(),
+        });
+    }
 
     
-    function swapFilter(name){
-        console.log('swap to',name);
-    }
-
-    function msgQueueFilters(){
-        let filters='';
-        message_filters.forEach(function (filter){
-            filters+=`
-                <span id="msgQueueFilter-${filter}" class="${filter === 'all' ? 'is-active' : ''}" aria-disabled="${filter === 'all' ? 'true' : 'false'}" @click="swapFilter('${filter}')" v-show="s.${filter}.vis" role="button">${loc('message_log_' + filter)}</span>
-            `;
-        });
-        return filters;
-    }
 </script>
 <template>
     <div id="buildQueue" class="bldQueue standardqueuestyle has-text-info" v-show="queue.display"></div>
@@ -32,7 +47,8 @@
 
             <h2 class="has-text-success">{{ loc('message_log') }}</h2>
 
-            <span class="special" role="button" title="message queue options" @click="trigModal">
+            
+            <span class="special" role="button" title="message queue options" @click="initModal">
                 <svg version="1.1" x="0px" y="0px" width="12px" height="12px" viewBox="340 140 280 279.416" enable-background="new 340 140 280 279.416" xml:space="preserve">
                     <path class="gear" d="M620,305.666v-51.333l-31.5-5.25c-2.333-8.75-5.833-16.917-9.917-23.917L597.25,199.5l-36.167-36.75l-26.25,18.083
                     c-7.583-4.083-15.75-7.583-23.916-9.917L505.667,140h-51.334l-5.25,31.5c-8.75,2.333-16.333,5.833-23.916,9.916L399.5,163.333
@@ -52,18 +68,10 @@
 
         <h2 class="is-sr-only">{{ loc('message_filters') }}</h2>
         
-        <div id="msgQueueFilters" class="hscroll msgQueueFilters" v-html="msgQueueFilters()">
-            
+        <div id="msgQueueFilters" class="hscroll msgQueueFilters">
+            <msg-que-btn v-for="filter in message_filters" :filter="filter"></msg-que-btn>
         </div>
-        <!-- <span 
-                v-for="filter in message_filters"
-                :id="'msgQueueFilter-' + filter"
-                :class="(filter === 'all' ? 'is-active' : '')"
-                :aria-disabled="(filter === 'all' ? 'true' : 'false')"
-                @click="swapFilter(filter)"
-                v-show="s[filter].vis"
-                role="button"
-            >{{ loc('message_log_' + filter) }}</span> -->
+        
         
         <h2 class="is-sr-only">{{ loc('messages') }}</h2>
         
